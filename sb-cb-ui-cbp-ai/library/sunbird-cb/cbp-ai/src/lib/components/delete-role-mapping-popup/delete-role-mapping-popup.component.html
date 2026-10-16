@@ -1,5 +1,5 @@
 <!-- VIEW COURSE DELETE CONFIRMATION -->
- <ng-container [ngSwitch]="isViewCourse">
+ <ng-container [ngSwitch]="planData?.from">
   <ng-container *ngSwitchCase="'viewCourse'">
   <!-- 👇 PUT YOUR "Delete Course" HTML HERE -->
   <!-- Example structure only -->
@@ -42,15 +42,14 @@
 
 
 
-<!-- REGENERATE CBP -->
+<!-- ROLE MAPPING GENERATION FAILED -->
 <ng-template #failedCBP>
-  <!-- 👇 YOUR EXISTING HTML (you already shared this) -->
   <div class="view-cbp-plan">
     <div class="popup-container">
       <div class="popup-header">
         <div>
           <div class="heading">
-            <span>Generate Course Recommendations Failed</span>
+            <span>CBP Generation Failed</span>
           </div>
         </div>
         <div class="cursor-pointer" (click)="cancel('cross')">
@@ -63,17 +62,20 @@
           <img src="assets/icons/info.svg" style="scale: 2;margin: 10px;">
         </div>
 
-        <div class="mt-2" *ngIf="!isFromGenerateCourse">
-          Something went wrong while generating the Capacity Building Plan (CBP) , please try again.
-
-
+        <div class="mt-2 error" style="text-align: center;">
+          {{ planData?.message || 'Role mapping generation failed. Please try again later.' }}
+        </div>
+        <div class="mt-2" *ngIf="workAllocationOrderDocumentMissing">
+          <span style="text-align: center;" class="error">Please upload the
+            Work Allocation Order document to regenerate the Capacity Building Plan (CBP)</span>
         </div>
 
       </div>
 
       <div class="popup-footer mt-4">
-        <input class="btn-active-cancel" type="button" value="Cancel'" (click)="cancel('button')" />
-        <input class="btn-active" type="button" value="Retry" (click)="regenerateRoleMapping()" />
+        <input class="btn-active-cancel" type="button" value="Cancel" (click)="cancel('button')" />
+        <input [ngClass]="workAllocationOrderDocumentMissing ? 'btn-active-disable':'btn-active'"
+          [disabled]="workAllocationOrderDocumentMissing" type="button" value="Retry" (click)="regenerateRoleMapping()" />
       </div>
     </div>
   </div>

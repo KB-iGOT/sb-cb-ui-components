@@ -5,8 +5,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import html2pdf from 'html2pdf.js';
 import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/delete-role-mapping-popup.component';
 import { MatDialog } from '@angular/material/dialog';
-import { interval, of, concat, forkJoin, ReplaySubject, Subject } from 'rxjs';
-import { catchError, switchMap, takeWhile, tap } from 'rxjs/operators';
+import { interval, of, concat, ReplaySubject, Subject } from 'rxjs';
+import { switchMap, takeWhile, tap } from 'rxjs/operators';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatSelect } from '@angular/material/select';
 import { Router } from '@angular/router';
@@ -114,6 +114,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   showWorkAllocationOrderDocumentMissing = false
   private destroy$ = new Subject<void>();
   private immediateFailureHandled = false;
+  private retriedAfterFailure = false;
   constructor(
     private eventSvc: EventService,
     public sharedService: SharedService,
@@ -247,6 +248,7 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
         console.log('this.documents--', this.documents)
       } else {
         this.documents = []
+        this.workAllocationOrderDocumentMissing = true
         this.apiLoading = false
         this.disableUploadDocument = false
         this.disableUploadDocumentOriginal = false
@@ -408,6 +410,13 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   }
 
   onGenerateRoleMapping(): any {
+    // Generation must not start (and no existing record be deleted) without a Work Allocation Order.
+    // Only look up an existing CBP so the user can still view it.
+    if (this.workAllocationOrderDocumentMissing) {
+      this.showExistingRoleMappingWithoutWAO()
+      return
+    }
+    this.retriedAfterFailure = false
 
     const currentFormValues = this.roleMappingForm.getRawValue();
     const formData: any = new FormData();
@@ -727,13 +736,20 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
   }
 
   generateFinalRoleMapping() {
-    this.apiLoading = true;
-    this.immediateFailureHandled = false
-
     if (!this.roleMappingForm.valid) {
       this.roleMappingForm.markAllAsTouched();
       return;
     }
+
+    if (this.workAllocationOrderDocumentMissing) {
+      this.loading = false
+      this.apiLoading = false
+      this.showWorkAllocationOrderDocumentMissing = true
+      return;
+    }
+
+    this.apiLoading = true;
+    this.showWorkAllocationOrderDocumentMissing = false
 
     const currentFormValues = this.roleMappingForm.getRawValue();
     let formUploadData = new FormData();
@@ -804,6 +820,9 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
 
 
     // Polling API
+    // Reset per-run state so a previous run's first response is never reused
+    this.firstApiResponse = null
+    this.immediateFailureHandled = false
     concat(
       of(null),              // 🔥 immediate first emission
       interval(5000)         // ⏱ subsequent polling every 5s
@@ -815,13 +834,20 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
           if (!this.firstApiResponse) {
             this.firstApiResponse = data; // 👈 store first response
             console.log('First API response:', this.firstApiResponse);
-            if(data && data?.status === 'FAILED') {
-               this.apiLoading = false;
-               this.loading = false
-                this.immediateFailureHandled = true // takeWhile still forwards this same value to subscribe(); tell it to skip
-                this.destroy$.next();   // 🛑 stop polling
+            if(data && data?.status === 'FAILED' && !data?.is_existing) {
+              // A previous generation failed: delete it and start a fresh one (once).
+              // takeWhile still forwards this value to subscribe(); tell it to skip.
+              this.immediateFailureHandled = true
+              this.destroy$.next();   // 🛑 stop polling
+              if (!this.retriedAfterFailure) {
+                this.retriedAfterFailure = true
                 this.regenerateRoleMappingAfterFailedAndDelete()
-                return;
+              } else {
+                this.loading = false
+                this.apiLoading = false
+                this.showRoleMappingFailedPopup(data?.message)
+              }
+              return;
             }
           } else {
             
@@ -837,17 +863,16 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
       )
       .subscribe(data => {
         if (this.immediateFailureHandled) {
-          this.immediateFailureHandled = false // already handled in tap() above; avoid double-handling this same emission
+          this.immediateFailureHandled = false // already handled in tap() above
           return
         }
         console.log('role mapping data--', data)
         if (this.firstApiResponse?.is_existing) {
-          
-            
+
+
               this.showWorkAllocationOrderDocumentMissing = false
           this.apiLoading = false;
-          this.destroy$.next();   // 🛑 stop polling
-          this.destroy$.complete();
+          this.destroy$.next();   // 🛑 stop polling (not completed, so later runs can still be stopped)
           const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
             width: '400px',
             data: {documents: this.documents},
@@ -881,42 +906,16 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
                 }
               });
             } else if (result === 'button') {
-              this.loading = false
-              // this.generateFinalRoleMapping()
-              // this.router.navigate(['/']);
-              const currentUrl = this.router.url;
-
-              // this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-              //   this.router.navigateByUrl(currentUrl);
-              // });
-              this.sharedService.cbpPlanFinalObj['role_mapping_generation'] =
-                data?.role_mappings;
-              this.sharedService.roleMappingGenerationData = data?.role_mappings;
-              localStorage.setItem(
-                'cbpPlanFinalObj',
-                JSON.stringify(this.sharedService.cbpPlanFinalObj)
-              );
-
-              this.successRoleMapping.emit(this.roleMappingForm);
-              this.router.navigate(['/ai/list'], {
-                onSameUrlNavigation: 'reload'
-              });
-              // window.location.reload()
-
+              this.viewExistingRoleMapping(data?.role_mappings)
             } else {
               this.loading = false
             }
           });
             
           
-        } else if (this.workAllocationOrderDocumentMissing) {
-          this.destroy$.next();
-          this.loading = false
-          this.apiLoading = false
-          this.showWorkAllocationOrderDocumentMissing = true
-          return;
         }
         else if (data?.status === 'COMPLETED') {
+          this.retriedAfterFailure = false
           this.showWorkAllocationOrderDocumentMissing = false
           this.loading = false;
           this.apiLoading = false
@@ -938,16 +937,15 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
 
           this.router.navigate(['/ai/list']);
         } else if(data && data?.status === 'FAILED') {
+              // Failed after being in progress
               this.loading = false
                this.apiLoading = false;
                 this.destroy$.next();   // 🛑 stop polling
-                this.snackBar.open('Generation failed please try again later', 'X', {
-                  duration: 3000,
-                  panelClass: ['snackbar-error']
-                });
+                this.retriedAfterFailure = false
+                this.showRoleMappingFailedPopup(data?.message)
                 return;
             }
-
+          
       });
   }
 
@@ -1236,50 +1234,100 @@ export class RoleMappingGenerationComponent implements OnInit, OnChanges, OnDest
     
   }
 
-      regenerateRoleMappingAfterFailedAndDelete() {
-        const stateCenterId = this.roleMappingForm.value.ministry
-        const departmentId = this.roleMappingForm.value.departments
+  viewExistingRoleMapping(roleMappings) {
+    this.loading = false
+    this.sharedService.cbpPlanFinalObj['role_mapping_generation'] = roleMappings;
+    this.sharedService.roleMappingGenerationData = roleMappings;
+    localStorage.setItem(
+      'cbpPlanFinalObj',
+      JSON.stringify(this.sharedService.cbpPlanFinalObj)
+    );
 
-        this.sharedService.getRoleMappingByStateCenterAndDepartment(stateCenterId, departmentId).subscribe({
-          next: (existingRoleMappings: any) => {
-            const roleMappingIds = (Array.isArray(existingRoleMappings) ? existingRoleMappings : [])
-              .map((roleMapping: any) => roleMapping?.id)
-              .filter(Boolean)
+    this.successRoleMapping.emit(this.roleMappingForm);
+    this.router.navigate(['/ai/list'], {
+      onSameUrlNavigation: 'reload'
+    });
+  }
 
-            if (!roleMappingIds.length) {
-              this.loading = false
-              this.firstApiResponse = null
-              this.generateFinalRoleMapping()
-              return
-            }
-
-            forkJoin(
-              roleMappingIds.map((id: string) =>
-                this.sharedService.deleteCourseRecommendations(id).pipe(
-                  catchError((error) => {
-                    // A 404 just means this designation had no course recommendations yet.
-                    // Either way, one designation's delete failing shouldn't block the
-                    // regenerate retry for the rest.
-                    if (error?.status !== 404) {
-                      console.error(`Failed to delete course recommendations for role mapping ${id}`, error)
-                    }
-                    return of(null)
-                  })
-                )
-              )
-            ).subscribe(() => {
-                  this.loading = false
-                  this.firstApiResponse = null
-                  this.generateFinalRoleMapping()
+  // Work Allocation Order is missing: never call generate. If a CBP already exists, show the
+  // "CBP is already available" popup (Yes stays disabled there), otherwise show the upload note.
+  showExistingRoleMappingWithoutWAO() {
+    this.apiLoading = true
+    this.sharedService.getRoleMappingByStateCenterAndDepartment(this.roleMappingForm.value.ministry, this.roleMappingForm.value.departments).subscribe({
+      next: (res: any) => {
+        this.apiLoading = false
+        const roleMappings = Array.isArray(res) ? res : []
+        if (!roleMappings.length) {
+          this.showWorkAllocationOrderDocumentMissingMessage()
+          return
+        }
+        const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
+          width: '400px',
+          data: {documents: this.documents},
+          panelClass: 'view-cbp-plan-popup',
+          minHeight: '300px',
+          maxHeight: '80vh',
+          disableClose: true
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          if (result === 'button') {
+            this.viewExistingRoleMapping(roleMappings)
+          }
         })
+      },
+      error: () => {
+        this.apiLoading = false
+        this.showWorkAllocationOrderDocumentMissingMessage()
+      }
+    })
+  }
+
+  showWorkAllocationOrderDocumentMissingMessage() {
+    this.showWorkAllocationOrderDocumentMissing = true
+    this.snackBar.open('Please upload the Work Allocation Order document to generate the Capacity Building Plan (CBP)', 'X', {
+      duration: 3000,
+      panelClass: ['snackbar-error']
+    });
+  }
+
+  showRoleMappingFailedPopup(message?: string) {
+    const dialogRef = this.dialog.open(DeleteRoleMappingPopupComponent, {
+          width: '400px',
+          data: {documents: this.documents, from: 'roleMappingFailed', message},
+          panelClass: 'view-cbp-plan-popup',          
+          minHeight: '300px',          // Set minimum height
+          maxHeight: '80vh',           // Prevent it from going beyond viewport
+          disableClose: true // Optional: prevent closing with outside click
+        });
+    
+          dialogRef.afterClosed().subscribe(result => {
+            if (result === 'saved') {
+              // Retry: delete the failed record, then generate again
+              this.retriedAfterFailure = true
+              this.regenerateRoleMappingAfterFailedAndDelete()
+            } else {
+              this.loading = false
+            }
+          })
+  }
+
+  regenerateRoleMappingAfterFailedAndDelete() {
+    // keep the loader up between delete and the new generate call to avoid flicker
+    this.apiLoading = true
+     this.sharedService.deleteRoleMappingByStateAndDepartment(this.roleMappingForm.value.ministry, this.roleMappingForm.value.departments).subscribe({
+                next: (res) => {
+                  console.log('Deleted failed role mapping:', res);
+                  this.loading = false
+                  this.generateFinalRoleMapping()
                 },
                 error: (error) => {
-                  this.snackBar.open(error?.error?.detail, 'X', {
+                  this.snackBar.open(error?.error?.detail || 'Role mapping generation failed. Please try again later.', 'X', {
                     duration: 3000,
                     panelClass: ['snackbar-error']
                   });
                   this.loading = false
-                  this.firstApiResponse = null
+                  this.apiLoading = false
+                  this.retriedAfterFailure = false
                 }
               });
   }
