@@ -2447,7 +2447,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         {
           "displayButton": "Resume",
           "textBeforeIcon": "earn",
-          "points": "25",
+          "points": "10",
           "textAfterPoints": "karmaPoints",
           "textAfterIcon": "byCompletingLP",
           "toolTipText": "lpCompleteTip"
@@ -2677,7 +2677,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       // If the found content is inactive(un-enrolled), we should not proceed with resume
       if(foundContent && !foundContent?.active){
-        return 
+        return
       }
 
       const urlData = await this.contentLibSvc.getResourseLink(

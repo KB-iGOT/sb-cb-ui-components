@@ -220,4 +220,160 @@ describe('AppTocHomeV2Component', () => {
       expect(component.contentSvc.fetchCourseBatches).not.toHaveBeenCalled()
     })
   })
+
+  describe('loadBannerAndTocConfig karma points', () => {
+    const FORM_KARMA_POINTS = [
+      { displayButton: 'Enroll', points: '5', textAfterIcon: 'firstEnroll' },
+      { displayButton: 'Resume', points: '5', textAfterIcon: 'byCompleting', toolTipText: 'courseCompleteTip' },
+      { displayButton: 'ACBP', points: '15', textAfterIcon: 'byCompleting', toolTipText: 'acbpTip' },
+      { displayButton: 'ACBP CLAIM', points: '10', textBeforeIcon: 'claim' },
+    ]
+
+    function load(courseCategory: string, formData: any = { karmaPoints: FORM_KARMA_POINTS }): any {
+      const component = createComponent({ contentReadData: { courseCategory }, tocSvc: {} })
+      component.loadBannerAndTocConfig({ pageData: { data: formData } })
+      return component
+    }
+
+    const entries = (component: any, button: string) =>
+      component.kparray.filter((kp: any) => kp.displayButton === button)
+
+    it('keeps the form list for a course and adds a 10 point APAR entry', () => {
+      const component = load('Course')
+
+      expect(component.kparray.slice(0, FORM_KARMA_POINTS.length)).toEqual(FORM_KARMA_POINTS)
+      expect(entries(component, 'APAR')).toEqual([{
+        displayButton: 'APAR',
+        textBeforeIcon: 'earn',
+        points: '10',
+        textAfterPoints: 'karmaPoints',
+        textAfterIcon: 'byCompleting',
+        toolTipText: 'acbpTip',
+      }])
+    })
+
+    it('keeps the ACBP entry at its form points', () => {
+      expect(entries(load('Course'), 'ACBP')[0].points).toBe('15')
+    })
+
+    it('uses the APAR entry from the form when there is one', () => {
+      const formApar = { displayButton: 'APAR', points: '12', textAfterIcon: 'byCompleting' }
+      const component = load('Course', { karmaPoints: [...FORM_KARMA_POINTS, formApar] })
+
+      expect(entries(component, 'APAR')).toEqual([formApar])
+    })
+
+    it('adds no APAR entry to a list without an ACBP one', () => {
+      const component = load('Course', { karmaPoints: [FORM_KARMA_POINTS[0]] })
+
+      expect(entries(component, 'APAR')).toEqual([])
+    })
+
+    it('gives a learning pathway a 10 point completion entry', () => {
+      const component = load('Learning Pathway')
+
+      expect(component.kparray).toEqual([{
+        displayButton: 'Resume',
+        textBeforeIcon: 'earn',
+        points: '10',
+        textAfterPoints: 'karmaPoints',
+        textAfterIcon: 'byCompletingLP',
+        toolTipText: 'lpCompleteTip',
+      }])
+    })
+
+    it('uses the learning pathway list from the form when there is one', () => {
+      const karmaPointsLP = [{ displayButton: 'Resume', points: '20', textAfterIcon: 'byCompletingLP' }]
+
+      expect(load('Learning Pathway', { karmaPoints: FORM_KARMA_POINTS, karmaPointsLP }).kparray).toEqual(karmaPointsLP)
+    })
+
+    it('swaps the course completion entry for a 10 point curated program one', () => {
+      const component = load('Curated Program')
+
+      expect(entries(component, 'Resume')).toEqual([{
+        displayButton: 'Resume',
+        textBeforeIcon: 'earn',
+        points: '10',
+        textAfterPoints: 'karmaPoints',
+        textAfterIcon: 'byCompletingCP',
+        toolTipText: 'cpCompleteTip',
+      }])
+    })
+
+    it('keeps the other form entries for a curated program and adds the APAR one', () => {
+      const buttons = load('Curated Program').kparray.map((kp: any) => kp.displayButton)
+
+      expect(buttons).toEqual(['Enroll', 'ACBP', 'ACBP CLAIM', 'Resume', 'APAR'])
+    })
+
+    it('uses the curated program list from the form when there is one', () => {
+      const karmaPointsCP = [{ displayButton: 'Resume', points: '20', textAfterIcon: 'byCompletingCP' }]
+
+      expect(load('Curated Program', { karmaPoints: FORM_KARMA_POINTS, karmaPointsCP }).kparray).toEqual(karmaPointsCP)
+    })
+
+    it('leaves the form list itself untouched', () => {
+      const karmaPoints = FORM_KARMA_POINTS.map(kp => ({ ...kp }))
+
+      load('Curated Program', { karmaPoints })
+      load('Course', { karmaPoints })
+
+      expect(karmaPoints).toEqual(FORM_KARMA_POINTS)
+    })
+
+    it('has no entries for a course when the form has none', () => {
+      expect(load('Course', {}).kparray).toEqual([])
+    })
+  })
+
+  describe('findACPB', () => {
+    const COURSE_ID = 'do_1'
+
+    function planComponent(plans: any[]): any {
+      return createComponent({
+        courseID: COURSE_ID,
+        serverDate: '2026-10-16',
+        isAcbpCourse: false,
+        isAparCourse: false,
+        userServiceLib: { getCBPData: jest.fn(() => of(plans)) },
+        contentSvc: { getCourseKarmaPoints: jest.fn(() => of({})) },
+      })
+    }
+
+    it('marks a course in an APAR plan as APAR', async () => {
+      const component = planComponent([{ identifier: COURSE_ID, endDate: '2027-03-31', isApar: true }])
+
+      await component.findACPB()
+
+      expect(component.isAcbpCourse).toBe(true)
+      expect(component.isAparCourse).toBe(true)
+    })
+
+    it('does not mark a course in any other plan as APAR', async () => {
+      const component = planComponent([{ identifier: COURSE_ID, endDate: '2027-03-31', isApar: false }])
+
+      await component.findACPB()
+
+      expect(component.isAcbpCourse).toBe(true)
+      expect(component.isAparCourse).toBe(false)
+    })
+
+    it('treats a plan row without the flag as outside APAR', async () => {
+      const component = planComponent([{ identifier: COURSE_ID, endDate: '2027-03-31' }])
+
+      await component.findACPB()
+
+      expect(component.isAparCourse).toBe(false)
+    })
+
+    it('marks nothing for a course outside every plan', async () => {
+      const component = planComponent([{ identifier: 'do_other', endDate: '2027-03-31', isApar: true }])
+
+      await component.findACPB()
+
+      expect(component.isAcbpCourse).toBe(false)
+      expect(component.isAparCourse).toBe(false)
+    })
+  })
 })
