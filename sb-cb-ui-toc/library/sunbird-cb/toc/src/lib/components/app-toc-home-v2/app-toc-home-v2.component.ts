@@ -2447,10 +2447,21 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         {
           "displayButton": "Resume",
           "textBeforeIcon": "earn",
-          "points": "25",
+          "points": "10",
           "textAfterPoints": "karmaPoints",
           "textAfterIcon": "byCompletingLP",
           "toolTipText": "lpCompleteTip"
+        }
+      ]
+    } else if (this.contentReadData?.courseCategory === NsContent.ECourseCategory.CURATED_PROGRAM) {
+      this.kparray = this.tocConfig.karmaPointsCP || [
+        {
+          "displayButton": "Resume",
+          "textBeforeIcon": "earn",
+          "points": "10",
+          "textAfterPoints": "karmaPoints",
+          "textAfterIcon": "byCompletingCP",
+          "toolTipText": "cpCompleteTip"
         }
       ]
     } else {
@@ -2677,7 +2688,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       // If the found content is inactive(un-enrolled), we should not proceed with resume
       if(foundContent && !foundContent?.active){
-        return 
+        return
       }
 
       const urlData = await this.contentLibSvc.getResourseLink(
