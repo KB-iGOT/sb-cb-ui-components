@@ -49,6 +49,7 @@ const API_END_POINTS = {
   ENROLL_BATCH_WF: `/apis/proxies/v8/workflow/blendedprogram/enrol`,
   WITHDRAW_BATCH_WF: `/apis/proxies/v8/workflow/blendedprogram/unenrol`,
   BLENDED_USER_WF: `/apis/proxies/v8/workflow/blendedprogram/user/search`,
+  BLENDED_WF_DETAILS: `/apis/proxies/v8/workflow/blendedprogram/details`,
   BLENDED_USER_COUNT: `apis/proxies/v8/workflow/blendedprogram/enrol/status/count`,
   CERT_ADD_TEMPLATE: `${PROTECTED_SLAG_V8}/cohorts/course/batch/cert/template/add`,
   CERT_ISSUE: `${PROTECTED_SLAG_V8}/cohorts/course/batch/cert/issue`,
@@ -298,6 +299,12 @@ export class WidgetContentService {
   fetchBlendedUserWF(req: any) {
     return this.http
       .post(API_END_POINTS.BLENDED_USER_WF, req)
+      .toPromise()
+  }
+
+  fetchBlendedWFDetails(contentId: string) {
+    return this.http
+      .post(API_END_POINTS.BLENDED_WF_DETAILS, { contentId, serviceName: 'blendedprogram' })
       .toPromise()
   }
 
