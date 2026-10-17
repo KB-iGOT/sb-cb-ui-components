@@ -133,6 +133,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   primaryCategory = NsContent.EPrimaryCategory
   courseCategory = NsContent.ECourseCategory
   WFBlendedProgramStatus = NsContent.WFBlendedProgramStatus
+  blendedReRequestStatuses: string[] = [
+    NsContent.WFBlendedProgramStatus.REJECTED,
+    NsContent.WFBlendedProgramStatus.WITHDRAWN,
+    NsContent.WFBlendedProgramStatus.REMOVED,
+  ]
   comprehensiveAssessmentCategory = 'Comprehensive Assessment'
   isAllCoursesCompleted = false
   assessmentAttempts: IComprehensiveAssessmentAttempts = {
@@ -766,36 +771,72 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
 
 
-  public fetchUserWFForBlended() {
-    const applicationIds = (this.batchData && this.batchData.content && this.batchData.content.map(e => e.batchId)) || []
-    const req = {
-      applicationIds,
-      serviceName: 'blendedprogram',
-      limit: 100,
-      offset: 0,
+  private async fetchLatestBlendedWF(): Promise<any> {
+    if (!this.content || !this.content.identifier) {
+      return undefined
     }
+    const data: any = await this.contentSvc.fetchBlendedWFDetails(this.content.identifier)
+    return _.maxBy(_.get(data, 'result.data') || [], (wf: any) => wf.lastUpdatedOn)
+  }
 
-    this.contentSvc.fetchBlendedUserWF(req).then(
-      (data: any) => {
-        if (data && data.result && data.result.data.length) {
-          const latestWF = _.maxBy(data.result.data[0].wfInfo, (el: any) => {
-            return new Date(el.lastUpdatedOn).getTime()
-          })
-          // latestWF.currentStatus = this.WFBlendedProgramStatus.REJECTED
-          /* tslint:disable-next-line */
-          this.batchData!.workFlow = {
-            wfInitiated: true,
-            /* tslint:disable-next-line */
-            batch: this.batchData && this.batchData.content && this.batchData.content.find((e: any) => e.batchId === latestWF.applicationId),
-            wfItem: latestWF,
-          }
-          this.tocSvc.setWFData(this.batchData)
+  // attaches the latest workflow to the already loaded batch data (used when the user is enrolled)
+  public async fetchUserWFForBlended() {
+    try {
+      const latestWF = await this.fetchLatestBlendedWF()
+      if (latestWF && this.batchData) {
+        this.batchData.workFlow = {
+          wfInitiated: true,
+          batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === latestWF.applicationId),
+          wfItem: latestWF,
         }
+        this.tocSvc.setWFData(this.batchData)
+      }
+    } catch (error) {
+      this.loggerSvc.error('BLENDED WF DETAILS FETCH ERROR >', error)
+    }
+  }
 
-        this.loggerSvc.info('fetchBlendedUserWF data == ', data)
+  // not enrolled: an active request only needs its own batch, otherwise the user picks from the batch list
+  public async fetchBlendedProgramBatchDetails() {
+    let latestWF: any
+    try {
+      latestWF = await this.fetchLatestBlendedWF()
+    } catch (error) {
+      this.loggerSvc.error('BLENDED WF DETAILS FETCH ERROR >', error)
+    }
+    if (latestWF && !this.blendedReRequestStatuses.includes(latestWF.currentStatus)) {
+      this.fetchWFBatchDetails(latestWF)
+    } else {
+      this.fetchBatchDetails(latestWF)
+    }
+  }
+
+  private fetchWFBatchDetails(wfItem: any) {
+    this.contentSvc.fetchCourseBatch(wfItem.applicationId).subscribe(
+      (res: any) => {
+        const batch = _.get(res, 'result.response')
+        const isExpired = batch && wfItem.currentStatus !== this.WFBlendedProgramStatus.APPROVED
+          && !this.handleEnrollmentEndDate(batch)
+        if (!batch || isExpired) {
+          this.fetchBatchDetails()
+          return
+        }
+        this.batchData = {
+          content: [batch],
+          count: 1,
+          enrolled: false,
+          workFlow: {
+            wfInitiated: true,
+            batch,
+            wfItem,
+          },
+        }
+        this.tocSvc.setBatchData(this.batchData)
+        this.routerChangeHandler(false)
       },
       (error: any) => {
-        this.loggerSvc.error('CONTENT HISTORY FETCH ERROR >', error)
+        this.loggerSvc.error('BATCH READ ERROR > ', error)
+        this.fetchBatchDetails()
       },
     )
   }
@@ -970,7 +1011,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  public fetchBatchDetails() {
+  public fetchBatchDetails(wfItem?: any) {
     if (this.content && this.content.identifier) {
       const req = this.contentSvc.getCourseBatchesRequest(this.content.identifier)
       this.contentSvc.fetchCourseBatches(req).subscribe(
@@ -982,6 +1023,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               this.batchData.allBatchesExpired = this.batchData.content.every(
                 (batch: any) => !this.handleEnrollmentEndDate(batch)
               )
+            }
+          }
+          if (wfItem) {
+            this.batchData.workFlow = {
+              wfInitiated: true,
+              batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === wfItem.applicationId),
+              wfItem,
             }
           }
           this.tocSvc.setBatchData(this.batchData)
@@ -1386,8 +1434,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   withdrawOrEnroll(data: string) {
-    if (data === NsContent.WFBlendedProgramStatus.INITIATE) {
-      this.fetchUserWFForBlended()
+    if (data === NsContent.WFBlendedProgramStatus.INITIATE || data === NsContent.WFBlendedProgramStatus.WITHDRAW) {
+      this.fetchBlendedProgramBatchDetails()
     }
   }
 
@@ -1743,7 +1791,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           || this.content.primaryCategory !== this.primaryCategory.PROGRAM) {
           // Disabling auto enrollment to batch
           if (this.content.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
-            this.fetchBatchDetails()
+            this.fetchBlendedProgramBatchDetails()
           }
         } else {
           this.fetchBatchDetails()
@@ -2493,14 +2541,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   private handleBatchUpdate() {
-    this.fetchBatchDetails()
     if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
-      this.fetchUserWFForBlended()
+      this.fetchBlendedProgramBatchDetails()
+    } else {
+      this.fetchBatchDetails()
     }
   }
 
+  // for non-enrolled users the workflow is resolved before the batch data is set
   private handleBlendedProgramUpdate() {
-    if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+    if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM && this.batchData?.enrolled) {
       this.fetchUserWFForBlended()
     }
   }

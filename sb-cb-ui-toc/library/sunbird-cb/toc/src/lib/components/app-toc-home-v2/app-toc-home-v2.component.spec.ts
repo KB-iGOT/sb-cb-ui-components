@@ -220,4 +220,111 @@ describe('AppTocHomeV2Component', () => {
       expect(component.contentSvc.fetchCourseBatches).not.toHaveBeenCalled()
     })
   })
+
+  describe('fetchBlendedProgramBatchDetails', () => {
+    const COURSE_ID = 'do_11467506207798886418'
+    const BATCH_LIST = { count: 12, content: [{ batchId: 'batch_0' }, { batchId: 'batch_1' }] }
+    const WF_BATCH = { batchId: 'batch_wf', enrollmentEndDate: '2099-12-31' }
+
+    function wfItem(currentStatus: string, lastUpdatedOn = 1792084723975, applicationId = 'batch_wf') {
+      return { wfId: `wf_${lastUpdatedOn}`, applicationId, currentStatus, lastUpdatedOn }
+    }
+
+    function createBlendedComponent(wfData: any[] = [], batch: any = WF_BATCH): any {
+      return createComponent({
+        content: { identifier: COURSE_ID },
+        primaryCategory: { BLENDED_PROGRAM: 'Blended Program' },
+        WFBlendedProgramStatus: { APPROVED: 'APPROVED' },
+        blendedReRequestStatuses: ['REJECTED', 'WITHDRAWN', 'REMOVED'],
+        serverDate: '2026-10-17',
+        contentSvc: {
+          fetchBlendedWFDetails: jest.fn(() => Promise.resolve({ result: { data: wfData } })),
+          fetchCourseBatch: jest.fn(() => of({ result: { response: batch } })),
+          getCourseBatchesRequest: jest.fn(() => ({})),
+          fetchCourseBatches: jest.fn(() => of({ ...BATCH_LIST, content: [...BATCH_LIST.content] })),
+        },
+        tocSvc: { setBatchData: jest.fn(), setWFData: jest.fn() },
+        routerChangeHandler: jest.fn(),
+      })
+    }
+
+    it('looks up the workflow by content id', async () => {
+      const component = createBlendedComponent()
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.contentSvc.fetchBlendedWFDetails).toHaveBeenCalledWith(COURSE_ID)
+    })
+
+    it('lists batches when the user has no workflow', async () => {
+      const component = createBlendedComponent()
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.contentSvc.fetchCourseBatch).not.toHaveBeenCalled()
+      expect(component.contentSvc.fetchCourseBatches).toHaveBeenCalled()
+      expect(component.batchData.workFlow).toBeUndefined()
+    })
+
+    it('reads only the requested batch while the request is pending', async () => {
+      const latest = wfItem('ENROLL_IS_IN_PROGRESS', 2)
+      const component = createBlendedComponent([wfItem('WITHDRAWN', 1, 'batch_0'), latest])
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.contentSvc.fetchCourseBatch).toHaveBeenCalledWith('batch_wf')
+      expect(component.contentSvc.fetchCourseBatches).not.toHaveBeenCalled()
+      expect(component.batchData).toEqual({
+        content: [WF_BATCH],
+        count: 1,
+        enrolled: false,
+        workFlow: { wfInitiated: true, batch: WF_BATCH, wfItem: latest },
+      })
+      expect(component.tocSvc.setBatchData).toHaveBeenCalledWith(component.batchData)
+    })
+
+    it('falls back to the batch list when the pending request batch has expired', async () => {
+      const component = createBlendedComponent(
+        [wfItem('ENROLL_IS_IN_PROGRESS')],
+        { batchId: 'batch_wf', enrollmentEndDate: '2026-10-01' },
+      )
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.contentSvc.fetchCourseBatches).toHaveBeenCalled()
+      expect(component.batchData.workFlow).toBeUndefined()
+    })
+
+    it('keeps showing an approved request even after the enrollment window closes', async () => {
+      const component = createBlendedComponent(
+        [wfItem('APPROVED')],
+        { batchId: 'batch_wf', enrollmentEndDate: '2026-10-01' },
+      )
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.contentSvc.fetchCourseBatches).not.toHaveBeenCalled()
+      expect(component.batchData.workFlow.wfItem.currentStatus).toBe('APPROVED')
+    })
+
+    it('lists batches with the workflow attached when the request can be raised again', async () => {
+      const rejected = wfItem('REJECTED', 1, 'batch_1')
+      const component = createBlendedComponent([rejected])
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.contentSvc.fetchCourseBatch).not.toHaveBeenCalled()
+      expect(component.batchData.workFlow).toEqual({ wfInitiated: true, batch: { batchId: 'batch_1' }, wfItem: rejected })
+    })
+
+    it('lists batches when the workflow lookup fails', async () => {
+      const component = createBlendedComponent()
+      component.contentSvc.fetchBlendedWFDetails.mockRejectedValue(new Error('wf failed'))
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.loggerSvc.error).toHaveBeenCalled()
+      expect(component.contentSvc.fetchCourseBatches).toHaveBeenCalled()
+    })
+  })
 })
