@@ -211,6 +211,7 @@ export class WidgetContentService {
       request: {
         filters: {
           courseId,
+          status: [0, 1, 2],
         },
         sort_by: { createdDate: 'desc' },
         offset,
