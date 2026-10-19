@@ -214,6 +214,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   kparray: any = []
   enrollBtnLoading = false
   isAcbpCourse = false
+  isAparCourse = false
   isAcbpClaim = false
   courseID: any
   isClaimed = false
@@ -2311,6 +2312,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   private async processRouteData(data: Data) {
     this.courseID = data?.content?.data?.status === 'Retired' ? '' : data.content.data?.identifier
+    const aparCheck = this.isCourseInAparPlan(this.courseID)
     const initData = this.tocSvc.initData(data, true)
     // Get query parameters
     const queryParamsDataTemp = await this.getQueryParams()
@@ -2368,6 +2370,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     await this.handleContentPreviewOrEnrollment()
 
     this.initialrouteData = data
+    this.isAparCourse = await aparCheck
     this.loadBannerAndTocConfig(data)
     this.fetchPostAssessmentStatusIfNeeded()
     this.initData(data)
@@ -2516,6 +2519,57 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.kparray = this.tocConfig.karmaPoints || []
 
     }
+    this.applyAparKarmaPoints()
+  }
+
+  /** Whether the course is in an APAR plan in the cached CBP plans. No API call. */
+  private async isCourseInAparPlan(courseId: string): Promise<boolean> {
+    const list = (value: any): any[] => (Array.isArray(value) ? value : [])
+    const entries = courseId ? await this.readCbpPlanCache() : []
+    return entries.some((entry: any) =>
+      list(entry?.aparPlanList).some((plan: any) => list(plan?.contentList).some((c: any) => c?.identifier === courseId))
+      || list(entry?.data).some((item: any) => item?.identifier === courseId && item?.isApar))
+  }
+
+  private readCbpPlanCache(): Promise<any[]> {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve([]), 2000)
+      try {
+        const req = indexedDB.open('iGotAppDB')
+        // No database yet: abort rather than create an empty one.
+        req.onupgradeneeded = () => req.transaction?.abort()
+        req.onerror = () => resolve([])
+        req.onsuccess = () => {
+          const db = req.result
+          try {
+            const getReq = db.transaction('cbpPlans', 'readonly').objectStore('cbpPlans').getAll()
+            getReq.onsuccess = () => resolve(getReq.result || [])
+            getReq.onerror = () => resolve([])
+          } catch (_err) {
+            resolve([])
+          }
+          // Closes once the read above has finished.
+          db.close()
+        }
+      } catch (_err) {
+        resolve([])
+      }
+    })
+  }
+
+  /** APAR: Enroll and Resume read "Earn 10 Karma Points by completing this course"; other 5-point slides earn 10. */
+  private applyAparKarmaPoints() {
+    if (!this.isAparCourse || !Array.isArray(this.kparray)) {
+      return
+    }
+    const resume = this.kparray.find((item: any) => item?.displayButton === 'Resume')
+    // Copies, not in-place edits: the items belong to tocConfig. aparCourseCompleteTip is in the portal i18n.
+    this.kparray = this.kparray.map((item: any) => {
+      if (item?.displayButton === 'Enroll' || item?.displayButton === 'Resume') {
+        return { ...item, points: '10', textAfterIcon: resume?.textAfterIcon ?? item.textAfterIcon, toolTipText: 'aparCourseCompleteTip' }
+      }
+      return Number(item?.points) === 5 ? { ...item, points: '10' } : item
+    })
   }
 
   private fetchPostAssessmentStatusIfNeeded() {
