@@ -327,4 +327,217 @@ describe('AppTocHomeV2Component', () => {
       expect(component.contentSvc.fetchCourseBatches).toHaveBeenCalled()
     })
   })
+
+  describe('APAR karma points', () => {
+    const COURSE_ID = 'do_11450212340987654321'
+    const KARMA_POINTS = [
+      { displayButton: 'Enroll', points: '5', textAfterIcon: 'firstEnroll', toolTipText: 'firstEnrollTip' },
+      { displayButton: 'Resume', points: '5', textAfterIcon: 'byCompleting', toolTipText: 'courseCompleteTip' },
+      { displayButton: 'Rate this course', points: '2', textAfterIcon: 'rateThis', toolTipText: 'rateTip' },
+      { displayButton: 'Take Assessment', points: '5', textAfterIcon: '', toolTipText: 'assessmentTip' },
+    ]
+    const APAR_COMPLETION = { points: '10', textAfterIcon: 'byCompleting', toolTipText: 'aparCourseCompleteTip' }
+
+    describe('isCourseInAparPlan', () => {
+
+      function createAparComponent(entries: any[]): any {
+        return createComponent({ readCbpPlanCache: jest.fn(() => Promise.resolve(entries)) })
+      }
+
+      it('finds the course in a cached APAR plan', async () => {
+        const component = createAparComponent([
+          { aparPlanList: [{ contentList: [{ identifier: 'do_other' }, { identifier: COURSE_ID }] }], cbpPlanList: [] },
+        ])
+
+        expect(await component['isCourseInAparPlan'](COURSE_ID)).toBe(true)
+      })
+
+      it('finds the course flagged isApar in the older cache format', async () => {
+        const component = createAparComponent([{ data: [{ identifier: COURSE_ID, isApar: true }] }])
+
+        expect(await component['isCourseInAparPlan'](COURSE_ID)).toBe(true)
+      })
+
+      it('is false for a course that is only in a non-APAR plan', async () => {
+        const component = createAparComponent([
+          { aparPlanList: [], cbpPlanList: [{ contentList: [{ identifier: COURSE_ID }] }] },
+          { data: [{ identifier: COURSE_ID, isApar: false }] },
+        ])
+
+        expect(await component['isCourseInAparPlan'](COURSE_ID)).toBe(false)
+      })
+
+      it('ignores cache entries in an unexpected shape', async () => {
+        const component = createAparComponent([null, { aparPlanList: {} }, { data: 'x' }, { aparPlanList: [{ contentList: null }] }])
+
+        expect(await component['isCourseInAparPlan'](COURSE_ID)).toBe(false)
+      })
+
+      it('does not read the cache without a course id', async () => {
+        const component = createAparComponent([{ data: [{ identifier: '', isApar: true }] }])
+
+        expect(await component['isCourseInAparPlan']('')).toBe(false)
+        expect(component.readCbpPlanCache).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('readCbpPlanCache', () => {
+      const scope: any = globalThis
+      const originalIndexedDb = scope.indexedDB
+
+      beforeEach(() => jest.useFakeTimers())
+
+      afterEach(() => {
+        scope.indexedDB = originalIndexedDb
+        jest.useRealTimers()
+      })
+
+      /** indexedDB.open() double; its callbacks fire on a later microtask, as a real open's would. */
+      function stubIndexedDb(outcome: 'success' | 'error' | 'newDatabase' | 'pending', db?: any): any {
+        const request: any = { result: db, transaction: { abort: jest.fn() } }
+        const open = jest.fn(() => {
+          Promise.resolve().then(() => {
+            if (outcome === 'success') {
+              request.onsuccess()
+            } else if (outcome === 'newDatabase') {
+              request.onupgradeneeded()
+              request.onerror()
+            } else if (outcome === 'error') {
+              request.onerror()
+            }
+          })
+          return request
+        })
+        scope.indexedDB = { open }
+        return { open, request }
+      }
+
+      /** A database whose cbpPlans store holds `entries`; without them the store does not exist. */
+      function createDb(entries?: any[]): any {
+        return {
+          close: jest.fn(),
+          transaction: jest.fn(() => {
+            if (!entries) {
+              throw new Error('NotFoundError: no cbpPlans store')
+            }
+            return {
+              objectStore: () => ({
+                getAll: () => {
+                  const getReq: any = { result: entries }
+                  Promise.resolve().then(() => getReq.onsuccess())
+                  return getReq
+                },
+              }),
+            }
+          }),
+        }
+      }
+
+      it('returns every cached plan year and closes the database', async () => {
+        const entries = [{ aparPlanList: [] }, { data: [] }]
+        const db = createDb(entries)
+        const { open } = stubIndexedDb('success', db)
+
+        expect(await createComponent()['readCbpPlanCache']()).toEqual(entries)
+        expect(open).toHaveBeenCalledWith('iGotAppDB')
+        expect(db.transaction).toHaveBeenCalledWith('cbpPlans', 'readonly')
+        expect(db.close).toHaveBeenCalled()
+      })
+
+      it('returns nothing when the cbpPlans store does not exist', async () => {
+        const db = createDb()
+        stubIndexedDb('success', db)
+
+        expect(await createComponent()['readCbpPlanCache']()).toEqual([])
+        expect(db.close).toHaveBeenCalled()
+      })
+
+      it('aborts rather than creating the database when it does not exist yet', async () => {
+        const { request } = stubIndexedDb('newDatabase')
+
+        expect(await createComponent()['readCbpPlanCache']()).toEqual([])
+        expect(request.transaction.abort).toHaveBeenCalled()
+      })
+
+      it('returns nothing when the database fails to open', async () => {
+        stubIndexedDb('error')
+
+        expect(await createComponent()['readCbpPlanCache']()).toEqual([])
+      })
+
+      it('returns nothing when IndexedDB is unavailable', async () => {
+        scope.indexedDB = { open: jest.fn(() => { throw new Error('SecurityError') }) }
+
+        expect(await createComponent()['readCbpPlanCache']()).toEqual([])
+      })
+
+      it('stops waiting for a database that never answers after two seconds', async () => {
+        stubIndexedDb('pending')
+
+        const result = createComponent()['readCbpPlanCache']()
+        jest.advanceTimersByTime(2000)
+
+        expect(await result).toEqual([])
+      })
+    })
+
+    describe('applyAparKarmaPoints', () => {
+
+      it('leaves the karma points as configured for a course that is not APAR', () => {
+        const component = createComponent({ isAparCourse: false, kparray: KARMA_POINTS })
+
+        component['applyAparKarmaPoints']()
+
+        expect(component.kparray).toBe(KARMA_POINTS)
+      })
+
+      it('shows 10 points for completing the course on both Enroll and Resume', () => {
+        const component = createComponent({ isAparCourse: true, kparray: KARMA_POINTS })
+
+        component['applyAparKarmaPoints']()
+
+        expect(component.kparray[0]).toEqual({ displayButton: 'Enroll', ...APAR_COMPLETION })
+        expect(component.kparray[1]).toEqual({ displayButton: 'Resume', ...APAR_COMPLETION })
+      })
+
+      it('raises the other 5-point slides to 10 and keeps the rest as configured', () => {
+        const component = createComponent({ isAparCourse: true, kparray: KARMA_POINTS })
+
+        component['applyAparKarmaPoints']()
+
+        expect(component.kparray[2]).toBe(KARMA_POINTS[2])
+        expect(component.kparray[3]).toEqual({ ...KARMA_POINTS[3], points: '10' })
+      })
+
+      it('keeps the Enroll text when the config has no Resume slide', () => {
+        const component = createComponent({ isAparCourse: true, kparray: [KARMA_POINTS[0]] })
+
+        component['applyAparKarmaPoints']()
+
+        expect(component.kparray[0].textAfterIcon).toBe('firstEnroll')
+        expect(component.kparray[0].points).toBe('10')
+      })
+
+      it('does not modify the page config it was built from', () => {
+        const config = KARMA_POINTS.map((item: any) => ({ ...item }))
+        const component = createComponent({ isAparCourse: true, kparray: config })
+
+        component['applyAparKarmaPoints']()
+
+        expect(config).toEqual(KARMA_POINTS)
+      })
+    })
+
+    describe('loadBannerAndTocConfig', () => {
+
+      it('builds the karma points from the page config with the APAR points applied', () => {
+        const component = createComponent({ isAparCourse: true, contentReadData: { courseCategory: 'Course' }, tocSvc: {} })
+
+        component['loadBannerAndTocConfig']({ pageData: { data: { karmaPoints: KARMA_POINTS } } })
+
+        expect(component.kparray[0]).toEqual({ displayButton: 'Enroll', ...APAR_COMPLETION })
+        expect(component.tocConfig.karmaPoints).toBe(KARMA_POINTS)
+      })
+    })
+  })
 })
