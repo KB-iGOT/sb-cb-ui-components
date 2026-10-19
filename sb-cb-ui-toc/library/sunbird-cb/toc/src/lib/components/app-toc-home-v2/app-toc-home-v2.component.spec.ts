@@ -221,153 +221,110 @@ describe('AppTocHomeV2Component', () => {
     })
   })
 
-  describe('loadBannerAndTocConfig karma points', () => {
-    const FORM_KARMA_POINTS = [
-      { displayButton: 'Enroll', points: '5', textAfterIcon: 'firstEnroll' },
-      { displayButton: 'Resume', points: '5', textAfterIcon: 'byCompleting', toolTipText: 'courseCompleteTip' },
-      { displayButton: 'ACBP', points: '15', textAfterIcon: 'byCompleting', toolTipText: 'acbpTip' },
-      { displayButton: 'ACBP CLAIM', points: '10', textBeforeIcon: 'claim' },
-    ]
+  describe('fetchBlendedProgramBatchDetails', () => {
+    const COURSE_ID = 'do_11467506207798886418'
+    const BATCH_LIST = { count: 12, content: [{ batchId: 'batch_0' }, { batchId: 'batch_1' }] }
+    const WF_BATCH = { batchId: 'batch_wf', enrollmentEndDate: '2099-12-31' }
 
-    function load(courseCategory: string, formData: any = { karmaPoints: FORM_KARMA_POINTS }): any {
-      const component = createComponent({ contentReadData: { courseCategory }, tocSvc: {} })
-      component.loadBannerAndTocConfig({ pageData: { data: formData } })
-      return component
+    function wfItem(currentStatus: string, lastUpdatedOn = 1792084723975, applicationId = 'batch_wf') {
+      return { wfId: `wf_${lastUpdatedOn}`, applicationId, currentStatus, lastUpdatedOn }
     }
 
-    const entries = (component: any, button: string) =>
-      component.kparray.filter((kp: any) => kp.displayButton === button)
-
-    it('keeps the form list for a course and adds a 10 point APAR entry', () => {
-      const component = load('Course')
-
-      expect(component.kparray.slice(0, FORM_KARMA_POINTS.length)).toEqual(FORM_KARMA_POINTS)
-      expect(entries(component, 'APAR')).toEqual([{
-        displayButton: 'APAR',
-        textBeforeIcon: 'earn',
-        points: '10',
-        textAfterPoints: 'karmaPoints',
-        textAfterIcon: 'byCompleting',
-        toolTipText: 'acbpTip',
-      }])
-    })
-
-    it('keeps the ACBP entry at its form points', () => {
-      expect(entries(load('Course'), 'ACBP')[0].points).toBe('15')
-    })
-
-    it('uses the APAR entry from the form when there is one', () => {
-      const formApar = { displayButton: 'APAR', points: '12', textAfterIcon: 'byCompleting' }
-      const component = load('Course', { karmaPoints: [...FORM_KARMA_POINTS, formApar] })
-
-      expect(entries(component, 'APAR')).toEqual([formApar])
-    })
-
-    it('adds no APAR entry to a list without an ACBP one', () => {
-      const component = load('Course', { karmaPoints: [FORM_KARMA_POINTS[0]] })
-
-      expect(entries(component, 'APAR')).toEqual([])
-    })
-
-    it('gives a learning pathway a 10 point completion entry', () => {
-      const component = load('Learning Pathway')
-
-      expect(component.kparray).toEqual([{
-        displayButton: 'Resume',
-        textBeforeIcon: 'earn',
-        points: '10',
-        textAfterPoints: 'karmaPoints',
-        textAfterIcon: 'byCompletingLP',
-        toolTipText: 'lpCompleteTip',
-      }])
-    })
-
-    it('uses the learning pathway list from the form when there is one', () => {
-      const karmaPointsLP = [{ displayButton: 'Resume', points: '20', textAfterIcon: 'byCompletingLP' }]
-
-      expect(load('Learning Pathway', { karmaPoints: FORM_KARMA_POINTS, karmaPointsLP }).kparray).toEqual(karmaPointsLP)
-    })
-
-    it('gives a curated program a 10 point completion entry', () => {
-      const component = load('Curated Program')
-
-      expect(component.kparray).toEqual([{
-        displayButton: 'Resume',
-        textBeforeIcon: 'earn',
-        points: '10',
-        textAfterPoints: 'karmaPoints',
-        textAfterIcon: 'byCompletingCP',
-        toolTipText: 'cpCompleteTip',
-      }])
-    })
-
-    it('uses the curated program list from the form when there is one', () => {
-      const karmaPointsCP = [{ displayButton: 'Resume', points: '20', textAfterIcon: 'byCompletingCP' }]
-
-      expect(load('Curated Program', { karmaPoints: FORM_KARMA_POINTS, karmaPointsCP }).kparray).toEqual(karmaPointsCP)
-    })
-
-    it('leaves the form list itself untouched', () => {
-      const karmaPoints = FORM_KARMA_POINTS.map(kp => ({ ...kp }))
-
-      load('Curated Program', { karmaPoints })
-      load('Course', { karmaPoints })
-
-      expect(karmaPoints).toEqual(FORM_KARMA_POINTS)
-    })
-
-    it('has no entries for a course when the form has none', () => {
-      expect(load('Course', {}).kparray).toEqual([])
-    })
-  })
-
-  describe('findACPB', () => {
-    const COURSE_ID = 'do_1'
-
-    function planComponent(plans: any[]): any {
+    function createBlendedComponent(wfData: any[] = [], batch: any = WF_BATCH): any {
       return createComponent({
-        courseID: COURSE_ID,
-        serverDate: '2026-10-16',
-        isAcbpCourse: false,
-        isAparCourse: false,
-        userServiceLib: { getCBPData: jest.fn(() => of(plans)) },
-        contentSvc: { getCourseKarmaPoints: jest.fn(() => of({})) },
+        content: { identifier: COURSE_ID },
+        primaryCategory: { BLENDED_PROGRAM: 'Blended Program' },
+        WFBlendedProgramStatus: { APPROVED: 'APPROVED' },
+        blendedReRequestStatuses: ['REJECTED', 'WITHDRAWN', 'REMOVED'],
+        serverDate: '2026-10-17',
+        contentSvc: {
+          fetchBlendedWFDetails: jest.fn(() => Promise.resolve({ result: { data: wfData } })),
+          fetchCourseBatch: jest.fn(() => of({ result: { response: batch } })),
+          getCourseBatchesRequest: jest.fn(() => ({})),
+          fetchCourseBatches: jest.fn(() => of({ ...BATCH_LIST, content: [...BATCH_LIST.content] })),
+        },
+        tocSvc: { setBatchData: jest.fn(), setWFData: jest.fn() },
+        routerChangeHandler: jest.fn(),
       })
     }
 
-    it('marks a course in an APAR plan as APAR', async () => {
-      const component = planComponent([{ identifier: COURSE_ID, endDate: '2027-03-31', isApar: true }])
+    it('looks up the workflow by content id', async () => {
+      const component = createBlendedComponent()
 
-      await component.findACPB()
+      await component.fetchBlendedProgramBatchDetails()
 
-      expect(component.isAcbpCourse).toBe(true)
-      expect(component.isAparCourse).toBe(true)
+      expect(component.contentSvc.fetchBlendedWFDetails).toHaveBeenCalledWith(COURSE_ID)
     })
 
-    it('does not mark a course in any other plan as APAR', async () => {
-      const component = planComponent([{ identifier: COURSE_ID, endDate: '2027-03-31', isApar: false }])
+    it('lists batches when the user has no workflow', async () => {
+      const component = createBlendedComponent()
 
-      await component.findACPB()
+      await component.fetchBlendedProgramBatchDetails()
 
-      expect(component.isAcbpCourse).toBe(true)
-      expect(component.isAparCourse).toBe(false)
+      expect(component.contentSvc.fetchCourseBatch).not.toHaveBeenCalled()
+      expect(component.contentSvc.fetchCourseBatches).toHaveBeenCalled()
+      expect(component.batchData.workFlow).toBeUndefined()
     })
 
-    it('treats a plan row without the flag as outside APAR', async () => {
-      const component = planComponent([{ identifier: COURSE_ID, endDate: '2027-03-31' }])
+    it('reads only the requested batch while the request is pending', async () => {
+      const latest = wfItem('ENROLL_IS_IN_PROGRESS', 2)
+      const component = createBlendedComponent([wfItem('WITHDRAWN', 1, 'batch_0'), latest])
 
-      await component.findACPB()
+      await component.fetchBlendedProgramBatchDetails()
 
-      expect(component.isAparCourse).toBe(false)
+      expect(component.contentSvc.fetchCourseBatch).toHaveBeenCalledWith('batch_wf')
+      expect(component.contentSvc.fetchCourseBatches).not.toHaveBeenCalled()
+      expect(component.batchData).toEqual({
+        content: [WF_BATCH],
+        count: 1,
+        enrolled: false,
+        workFlow: { wfInitiated: true, batch: WF_BATCH, wfItem: latest },
+      })
+      expect(component.tocSvc.setBatchData).toHaveBeenCalledWith(component.batchData)
     })
 
-    it('marks nothing for a course outside every plan', async () => {
-      const component = planComponent([{ identifier: 'do_other', endDate: '2027-03-31', isApar: true }])
+    it('falls back to the batch list when the pending request batch has expired', async () => {
+      const component = createBlendedComponent(
+        [wfItem('ENROLL_IS_IN_PROGRESS')],
+        { batchId: 'batch_wf', enrollmentEndDate: '2026-10-01' },
+      )
 
-      await component.findACPB()
+      await component.fetchBlendedProgramBatchDetails()
 
-      expect(component.isAcbpCourse).toBe(false)
-      expect(component.isAparCourse).toBe(false)
+      expect(component.contentSvc.fetchCourseBatches).toHaveBeenCalled()
+      expect(component.batchData.workFlow).toBeUndefined()
+    })
+
+    it('keeps showing an approved request even after the enrollment window closes', async () => {
+      const component = createBlendedComponent(
+        [wfItem('APPROVED')],
+        { batchId: 'batch_wf', enrollmentEndDate: '2026-10-01' },
+      )
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.contentSvc.fetchCourseBatches).not.toHaveBeenCalled()
+      expect(component.batchData.workFlow.wfItem.currentStatus).toBe('APPROVED')
+    })
+
+    it('lists batches with the workflow attached when the request can be raised again', async () => {
+      const rejected = wfItem('REJECTED', 1, 'batch_1')
+      const component = createBlendedComponent([rejected])
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.contentSvc.fetchCourseBatch).not.toHaveBeenCalled()
+      expect(component.batchData.workFlow).toEqual({ wfInitiated: true, batch: { batchId: 'batch_1' }, wfItem: rejected })
+    })
+
+    it('lists batches when the workflow lookup fails', async () => {
+      const component = createBlendedComponent()
+      component.contentSvc.fetchBlendedWFDetails.mockRejectedValue(new Error('wf failed'))
+
+      await component.fetchBlendedProgramBatchDetails()
+
+      expect(component.loggerSvc.error).toHaveBeenCalled()
+      expect(component.contentSvc.fetchCourseBatches).toHaveBeenCalled()
     })
   })
 })

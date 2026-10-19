@@ -29,7 +29,7 @@ describe('WidgetContentService', () => {
 
       expect(service.getCourseBatchesRequest(COURSE_ID)).toEqual({
         request: {
-          filters: { courseId: COURSE_ID },
+          filters: { courseId: COURSE_ID, status: [0, 1, 2] },
           sort_by: { createdDate: 'desc' },
           offset: 0,
           limit: BATCH_LIST_LIMIT,
