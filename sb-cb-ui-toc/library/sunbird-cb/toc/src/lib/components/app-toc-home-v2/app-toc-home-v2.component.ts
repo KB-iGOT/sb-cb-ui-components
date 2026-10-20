@@ -29,7 +29,7 @@ import {
   UtilityService, WidgetEnrollService, WsEvents,
 } from '@sunbird-cb/utils-v2'
 
-import { CommonMethodsService, ConfirmationDialogComponent, ContentLanguageService, EnrolementDictionaryService, TOCMultiLingualDialogComponent, WidgetContentLibService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
+import { CommonMethodsService, ConfirmationDialogComponent, ContentLanguageService, EnrolementDictionaryService, TOCMultiLingualDialogComponent, IUserCbpPlan, IUserCbpPlanContent, UserCbpPlansService, WidgetContentLibService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
 import { NsAppToc } from '../../models/app-toc.model'
 import { AppTocService } from '../../services/app-toc.service'
 import { MobileAppsService } from '../../services/mobile-apps.service'
@@ -319,6 +319,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     public dataTransferSvc: DataTransferService,
     private matSnackbarNew: MatSnackbarNew,
     private userServiceLib: WidgetUserServiceLib,
+    private userCbpPlansSvc: UserCbpPlansService,
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
     private location: Location,
@@ -401,50 +402,54 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return res.filter((v: any) => v.identifier === this.courseID)
   }
 
+  // The first CBPlan V4 plan holding the content, checked APAR → CBP → AI-CBP.
+  async getPlanForContent(doId: string): Promise<IUserCbpPlan | undefined> {
+    if (!doId) {
+      return undefined
+    }
+    const data = await this.userCbpPlansSvc.getUserCbpPlansAsync()
+    if (!data) {
+      return undefined
+    }
+    const plans = [...(data.aparPlanList || []), ...(data.cbpPlanList || []), ...(data.aiCbpPlanList || [])]
+    return plans.find((plan: IUserCbpPlan) =>
+      (plan.contentList || []).some((content: IUserCbpPlanContent) => content && content.identifier === doId))
+  }
+
   async findACPB() {
-    // CBP plan data now lives in IndexedDB (iGotAppDB/cbpPlans); getCBPData() reads the
-    // current plan year from that cache instead of localStorage['cbpData'].
-    const localCbp = await this.userServiceLib.getCBPData().toPromise()
-    if (localCbp && localCbp.length) {
-      const storeageCbp = localCbp
-      const cbp = this.filteredAcbpList(storeageCbp)
-      if (cbp.length) {
-        const acbp = 'cbPlan'
-        this.cbPlanEndDate = cbp[0].endDate
-        const sDate = dayjs(this.serverDate).format('YYYY-MM-DD')
-        const daysCount = dayjs(this.cbPlanEndDate).diff(this.serverDate, 'day')
-        this.cbPlanDuration = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-          ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-        if (acbp && this.cbPlanEndDate && acbp === 'cbPlan') {
-          this.isAcbpCourse = true
-          const eDate = dayjs(this.cbPlanEndDate).format('YYYY-MM-DD')
-          if (dayjs(sDate).isSameOrBefore(eDate)) {
-            const requestObj = {
-              request: {
-                filters: {
-                  contextType: 'Course',
-                  contextId: this.courseID,
-                },
+    // CBPlan V4: the plan holding this course, from UserCbpPlansService.
+    const plan = await this.getPlanForContent(this.courseID)
+    if (plan && plan?.endDate) {
+      // this.cbPlanEndDate = cbp[0].endDate
+      this.cbPlanEndDate = plan.endDate
+      const sDate = dayjs(this.serverDate).format('YYYY-MM-DD')
+      const daysCount = dayjs(this.cbPlanEndDate).diff(this.serverDate, 'day')
+      this.cbPlanDuration = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
+        ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
+      if (plan?.isApar) {
+        this.isAcbpCourse = true
+        const eDate = dayjs(this.cbPlanEndDate).format('YYYY-MM-DD')
+        if (dayjs(sDate).isSameOrBefore(eDate)) {
+          const requestObj = {
+            request: {
+              filters: {
+                contextType: 'Course',
+                contextId: this.courseID,
               },
-            }
-            this.contentSvc.getCourseKarmaPoints(requestObj).subscribe((res: any) => {
-              if (res && res.kpList) {
-                const row = res.kpList
-                if (row.addinfo) {
-                  if (JSON.parse(row.addinfo).ACBP) {
-                    this.isAcbpClaim = false
-                    this.isClaimed = true
-                  } else {
-                    this.isAcbpClaim = true
-                  }
-                } else {
-                  this.isAcbpClaim = true
-                }
+            },
+          }
+          this.contentSvc.getCourseKarmaPoints(requestObj).subscribe((res: any) => {
+            if (res && res.kpList && res.kpList.addinfo) {
+              if (JSON.parse(res.kpList.addinfo).ACBP) {
+                this.isAcbpClaim = false
+                this.isClaimed = true
               } else {
                 this.isAcbpClaim = true
               }
-            })
-          }
+            } else {
+              this.isAcbpClaim = true
+            }
+          })
         }
       }
     }
