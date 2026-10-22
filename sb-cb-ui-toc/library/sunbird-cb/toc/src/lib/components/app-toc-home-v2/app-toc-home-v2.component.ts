@@ -133,6 +133,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   primaryCategory = NsContent.EPrimaryCategory
   courseCategory = NsContent.ECourseCategory
   WFBlendedProgramStatus = NsContent.WFBlendedProgramStatus
+  blendedReRequestStatuses: string[] = [
+    NsContent.WFBlendedProgramStatus.REJECTED,
+    NsContent.WFBlendedProgramStatus.WITHDRAWN,
+    NsContent.WFBlendedProgramStatus.REMOVED,
+  ]
   comprehensiveAssessmentCategory = 'Comprehensive Assessment'
   isAllCoursesCompleted = false
   assessmentAttempts: IComprehensiveAssessmentAttempts = {
@@ -209,6 +214,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   kparray: any = []
   enrollBtnLoading = false
   isAcbpCourse = false
+  isAparCourse = false
   isAcbpClaim = false
   courseID: any
   isClaimed = false
@@ -772,36 +778,72 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
 
 
-  public fetchUserWFForBlended() {
-    const applicationIds = (this.batchData && this.batchData.content && this.batchData.content.map(e => e.batchId)) || []
-    const req = {
-      applicationIds,
-      serviceName: 'blendedprogram',
-      limit: 100,
-      offset: 0,
+  private async fetchLatestBlendedWF(): Promise<any> {
+    if (!this.content || !this.content.identifier) {
+      return undefined
     }
+    const data: any = await this.contentSvc.fetchBlendedWFDetails(this.content.identifier)
+    return _.maxBy(_.get(data, 'result.data') || [], (wf: any) => wf.lastUpdatedOn)
+  }
 
-    this.contentSvc.fetchBlendedUserWF(req).then(
-      (data: any) => {
-        if (data && data.result && data.result.data.length) {
-          const latestWF = _.maxBy(data.result.data[0].wfInfo, (el: any) => {
-            return new Date(el.lastUpdatedOn).getTime()
-          })
-          // latestWF.currentStatus = this.WFBlendedProgramStatus.REJECTED
-          /* tslint:disable-next-line */
-          this.batchData!.workFlow = {
-            wfInitiated: true,
-            /* tslint:disable-next-line */
-            batch: this.batchData && this.batchData.content && this.batchData.content.find((e: any) => e.batchId === latestWF.applicationId),
-            wfItem: latestWF,
-          }
-          this.tocSvc.setWFData(this.batchData)
+  // attaches the latest workflow to the already loaded batch data (used when the user is enrolled)
+  public async fetchUserWFForBlended() {
+    try {
+      const latestWF = await this.fetchLatestBlendedWF()
+      if (latestWF && this.batchData) {
+        this.batchData.workFlow = {
+          wfInitiated: true,
+          batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === latestWF.applicationId),
+          wfItem: latestWF,
         }
+        this.tocSvc.setWFData(this.batchData)
+      }
+    } catch (error) {
+      this.loggerSvc.error('BLENDED WF DETAILS FETCH ERROR >', error)
+    }
+  }
 
-        this.loggerSvc.info('fetchBlendedUserWF data == ', data)
+  // not enrolled: an active request only needs its own batch, otherwise the user picks from the batch list
+  public async fetchBlendedProgramBatchDetails() {
+    let latestWF: any
+    try {
+      latestWF = await this.fetchLatestBlendedWF()
+    } catch (error) {
+      this.loggerSvc.error('BLENDED WF DETAILS FETCH ERROR >', error)
+    }
+    if (latestWF && !this.blendedReRequestStatuses.includes(latestWF.currentStatus)) {
+      this.fetchWFBatchDetails(latestWF)
+    } else {
+      this.fetchBatchDetails(latestWF)
+    }
+  }
+
+  private fetchWFBatchDetails(wfItem: any) {
+    this.contentSvc.fetchCourseBatch(wfItem.applicationId).subscribe(
+      (res: any) => {
+        const batch = _.get(res, 'result.response')
+        const isExpired = batch && wfItem.currentStatus !== this.WFBlendedProgramStatus.APPROVED
+          && !this.handleEnrollmentEndDate(batch)
+        if (!batch || isExpired) {
+          this.fetchBatchDetails()
+          return
+        }
+        this.batchData = {
+          content: [batch],
+          count: 1,
+          enrolled: false,
+          workFlow: {
+            wfInitiated: true,
+            batch,
+            wfItem,
+          },
+        }
+        this.tocSvc.setBatchData(this.batchData)
+        this.routerChangeHandler(false)
       },
       (error: any) => {
-        this.loggerSvc.error('CONTENT HISTORY FETCH ERROR >', error)
+        this.loggerSvc.error('BATCH READ ERROR > ', error)
+        this.fetchBatchDetails()
       },
     )
   }
@@ -997,7 +1039,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  public fetchBatchDetails() {
+  public fetchBatchDetails(wfItem?: any) {
     if (this.content && this.content.identifier) {
       const req = this.contentSvc.getCourseBatchesRequest(this.content.identifier)
       this.contentSvc.fetchCourseBatches(req).subscribe(
@@ -1009,6 +1051,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               this.batchData.allBatchesExpired = this.batchData.content.every(
                 (batch: any) => !this.handleEnrollmentEndDate(batch)
               )
+            }
+          }
+          if (wfItem) {
+            this.batchData.workFlow = {
+              wfInitiated: true,
+              batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === wfItem.applicationId),
+              wfItem,
             }
           }
           this.tocSvc.setBatchData(this.batchData)
@@ -1413,8 +1462,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   withdrawOrEnroll(data: string) {
-    if (data === NsContent.WFBlendedProgramStatus.INITIATE) {
-      this.fetchUserWFForBlended()
+    if (data === NsContent.WFBlendedProgramStatus.INITIATE || data === NsContent.WFBlendedProgramStatus.WITHDRAW) {
+      this.fetchBlendedProgramBatchDetails()
     }
   }
 
@@ -1770,7 +1819,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           || this.content.primaryCategory !== this.primaryCategory.PROGRAM) {
           // Disabling auto enrollment to batch
           if (this.content.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
-            this.fetchBatchDetails()
+            this.fetchBlendedProgramBatchDetails()
           }
         } else {
           this.fetchBatchDetails()
@@ -2295,6 +2344,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   private async processRouteData(data: Data) {
     this.courseID = data?.content?.data?.status === 'Retired' ? '' : data.content.data?.identifier
+    const aparCheck = this.isCourseInAparPlan(this.courseID)
     const initData = this.tocSvc.initData(data, true)
     // Get query parameters
     const queryParamsDataTemp = await this.getQueryParams()
@@ -2352,6 +2402,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     await this.handleContentPreviewOrEnrollment()
 
     this.initialrouteData = data
+    this.isAparCourse = await aparCheck
     this.loadBannerAndTocConfig(data)
     this.fetchPostAssessmentStatusIfNeeded()
     this.initData(data)
@@ -2479,16 +2530,78 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         {
           "displayButton": "Resume",
           "textBeforeIcon": "earn",
-          "points": "25",
+          "points": "10",
           "textAfterPoints": "karmaPoints",
           "textAfterIcon": "byCompletingLP",
           "toolTipText": "lpCompleteTip"
+        }
+      ]
+    } else if (this.contentReadData?.courseCategory === NsContent.ECourseCategory.CURATED_PROGRAM) {
+      this.kparray = this.tocConfig.karmaPointsCP || [
+        {
+          "displayButton": "Resume",
+          "textBeforeIcon": "earn",
+          "points": "10",
+          "textAfterPoints": "karmaPoints",
+          "textAfterIcon": "byCompletingCP",
+          "toolTipText": "cpCompleteTip"
         }
       ]
     } else {
       this.kparray = this.tocConfig.karmaPoints || []
 
     }
+    this.applyAparKarmaPoints()
+  }
+
+  /** Whether the course is in an APAR plan in the cached CBP plans. No API call. */
+  private async isCourseInAparPlan(courseId: string): Promise<boolean> {
+    const list = (value: any): any[] => (Array.isArray(value) ? value : [])
+    const entries = courseId ? await this.readCbpPlanCache() : []
+    return entries.some((entry: any) =>
+      list(entry?.aparPlanList).some((plan: any) => list(plan?.contentList).some((c: any) => c?.identifier === courseId))
+      || list(entry?.data).some((item: any) => item?.identifier === courseId && item?.isApar))
+  }
+
+  private readCbpPlanCache(): Promise<any[]> {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve([]), 2000)
+      try {
+        const req = indexedDB.open('iGotAppDB')
+        // No database yet: abort rather than create an empty one.
+        req.onupgradeneeded = () => req.transaction?.abort()
+        req.onerror = () => resolve([])
+        req.onsuccess = () => {
+          const db = req.result
+          try {
+            const getReq = db.transaction('cbpPlans', 'readonly').objectStore('cbpPlans').getAll()
+            getReq.onsuccess = () => resolve(getReq.result || [])
+            getReq.onerror = () => resolve([])
+          } catch (_err) {
+            resolve([])
+          }
+          // Closes once the read above has finished.
+          db.close()
+        }
+      } catch (_err) {
+        resolve([])
+      }
+    })
+  }
+
+  /** APAR: Enroll and Resume read "Earn 10 Karma Points by completing this course"; other 5-point slides earn 10. */
+  private applyAparKarmaPoints() {
+    if (!this.isAparCourse || !Array.isArray(this.kparray)) {
+      return
+    }
+    const resume = this.kparray.find((item: any) => item?.displayButton === 'Resume')
+    // Copies, not in-place edits: the items belong to tocConfig. aparCourseCompleteTip is in the portal i18n.
+    this.kparray = this.kparray.map((item: any) => {
+      if (item?.displayButton === 'Enroll' || item?.displayButton === 'Resume') {
+        return { ...item, points: '10', textAfterIcon: resume?.textAfterIcon ?? item.textAfterIcon, toolTipText: 'aparCourseCompleteTip' }
+      }
+      return Number(item?.points) === 5 ? { ...item, points: '10' } : item
+    })
   }
 
   private fetchPostAssessmentStatusIfNeeded() {
@@ -2525,14 +2638,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   private handleBatchUpdate() {
-    this.fetchBatchDetails()
     if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
-      this.fetchUserWFForBlended()
+      this.fetchBlendedProgramBatchDetails()
+    } else {
+      this.fetchBatchDetails()
     }
   }
 
+  // for non-enrolled users the workflow is resolved before the batch data is set
   private handleBlendedProgramUpdate() {
-    if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+    if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM && this.batchData?.enrolled) {
       this.fetchUserWFForBlended()
     }
   }
@@ -2709,7 +2824,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       // If the found content is inactive(un-enrolled), we should not proceed with resume
       if(foundContent && !foundContent?.active){
-        return 
+        return
       }
 
       const urlData = await this.contentLibSvc.getResourseLink(
