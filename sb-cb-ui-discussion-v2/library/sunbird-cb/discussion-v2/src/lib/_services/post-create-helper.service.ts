@@ -13,20 +13,15 @@ export class PostCreateHelperService {
   constructor(
     private discussV2Svc: DiscussionV2Service,
     @Inject('environment') environment: any
-  ) { }
+  ) {
+    this.environment = environment
+  }
 
-  createAnswerPost(formData: any, type: string, categoryType: any, parentDiscussionId: any, community: any) {
+  createAnswerPost(formData: any, type: string, _categoryType: any, parentDiscussionId: any, community: any) {
     const req = this.createReq(formData, type, parentDiscussionId, community)
     this.discussV2Svc.createAnswerPost(req).subscribe({
-      next: (res) => {
-        if (res && res.result) {
-          const discussionId = res.result.discussionId; // Get the discussion ID
-          if (categoryType.length) {
-            this.uploadHandler(discussionId, res.result);
-          } else {
-            return;
-          }
-        }
+      next: (_res) => {
+        // media/category upload handling is not implemented for answer posts
       },
       error: (err: any) => {
         console.error('Create post failed', err);

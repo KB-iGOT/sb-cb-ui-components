@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { MarkAsCompleteComponent } from './mark-as-complete.component'
 
@@ -9,6 +10,7 @@ describe('MarkAsCompleteComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [MarkAsCompleteComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

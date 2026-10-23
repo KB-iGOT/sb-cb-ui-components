@@ -83,7 +83,7 @@ describe('EventsCalendarComponent', () => {
       configSvcMock,
       routerMock,
       bottomSheetRefMock,
-      null, // No data provided initially
+      {}, // No data provided initially
       langtranslationsMock,
       eventsMock
     )
@@ -102,7 +102,7 @@ describe('EventsCalendarComponent', () => {
     expect(component.selected.getDate()).toBe(today.getDate())
     expect(component.selected.getMonth()).toBe(today.getMonth())
     expect(component.selected.getFullYear()).toBe(today.getFullYear())
-    expect(component.selectedDateText).toBe('19 Mar 2025')
+    expect(component.selectedDateText).toBe('Today')
     expect(component.currentMonthYearText).toBe('19 Mar 2025')
     expect(eventServiceMock.getUserEnrollEvents).toHaveBeenCalled()
   })
@@ -145,7 +145,10 @@ describe('EventsCalendarComponent', () => {
       {
         request: {
           retiredCoursesEnabled: true,
-          status: 'All'
+          status: 'All',
+          calendarEventEnabled: true,
+          eventStartDate: '19 Mar 2025',
+          eventEndDate: '19 Mar 2025'
         }
       }
     )
@@ -203,6 +206,7 @@ describe('EventsCalendarComponent', () => {
     // Setup
     component.currentMonth = new Date(2025, 2, 1) // March 1, 2025
     datePipeMock.transform.mockReturnValueOnce('Feb 2025')
+    eventServiceMock.getUserEnrollEvents.mockReturnValue(of({ result: { events: [] } }))
 
     // Call method
     component.prevMonth()
@@ -216,6 +220,7 @@ describe('EventsCalendarComponent', () => {
     // Setup
     component.currentMonth = new Date(2025, 2, 1) // March 1, 2025
     datePipeMock.transform.mockReturnValueOnce('Apr 2025')
+    eventServiceMock.getUserEnrollEvents.mockReturnValue(of({ result: { events: [] } }))
 
     // Call method
     component.nextMonth()
@@ -247,7 +252,7 @@ describe('EventsCalendarComponent', () => {
     datePipeMock.transform.mockReturnValueOnce('20 Mar 2025')
 
     // Call method
-    component.selectDate(newDate)
+    component.selectDate({ date: newDate, isPrevisDate: false })
 
     // Expectations
     expect(component.selected).toBe(newDate)

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { MatMenuModule } from '@angular/material/menu'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnAppsComponent } from './btn-apps.component'
 
@@ -9,6 +11,7 @@ describe('BtnAppsComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnAppsComponent],
+      imports: [HttpClientTestingModule, MatMenuModule],
     })
     .compileComponents()
   }))

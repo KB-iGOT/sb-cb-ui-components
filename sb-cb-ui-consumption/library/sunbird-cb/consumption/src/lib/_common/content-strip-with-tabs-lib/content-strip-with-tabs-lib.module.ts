@@ -28,15 +28,12 @@ import { MatTabsModule } from '@angular/material/tabs'
 import { MatToolbarModule } from '@angular/material/toolbar'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { ContentStripWithTabsLibComponent } from './content-strip-with-tabs-lib.component'
-import { HttpClient } from '@angular/common/http'
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core'
-import { TranslateHttpLoader } from '@ngx-translate/http-loader'
+import { HttpClient } from '@angular/common/http'
 import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
+import { HttpLoaderFactory } from '../http-loader-factory'
 
-// tslint:disable-next-line:function-name
-export function HttpLoaderFactory(http: HttpClient) {
-    return new TranslateHttpLoader(http)
-}
+export { HttpLoaderFactory }
 
 @NgModule({
     declarations: [ContentStripWithTabsLibComponent],

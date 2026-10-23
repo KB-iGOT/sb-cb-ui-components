@@ -16,6 +16,7 @@ describe('ActivityCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ActivityCardComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

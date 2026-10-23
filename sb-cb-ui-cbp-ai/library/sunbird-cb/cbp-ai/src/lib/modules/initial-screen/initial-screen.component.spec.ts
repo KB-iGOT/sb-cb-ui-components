@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { InitialScreenComponent } from './initial-screen.component';
 
@@ -8,7 +10,9 @@ describe('InitialScreenComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [InitialScreenComponent]
+      imports: [HttpClientTestingModule],
+      declarations: [InitialScreenComponent],
+      schemas: [NO_ERRORS_SCHEMA]
     });
     fixture = TestBed.createComponent(InitialScreenComponent);
     component = fixture.componentInstance;

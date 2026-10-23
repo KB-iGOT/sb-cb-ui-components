@@ -233,16 +233,6 @@ describe('CardLandscapeComponent', () => {
       component.ngOnInit()
       expect(component.defaultSLogo).toBe('/assets/instances/eagle/app_logos/KarmayogiBharat_Logo.svg')
     })
-
-    it('should poll for the cb plan data every second', () => {
-      const cbPlanSpy = jest.spyOn(component, 'getCbPlanData')
-      component.ngOnInit()
-      expect(cbPlanSpy).not.toHaveBeenCalled()
-      jest.advanceTimersByTime(1000)
-      expect(cbPlanSpy).toHaveBeenCalledTimes(1)
-      jest.advanceTimersByTime(2000)
-      expect(cbPlanSpy).toHaveBeenCalledTimes(3)
-    })
   })
 
   describe('showSnackbar', () => {

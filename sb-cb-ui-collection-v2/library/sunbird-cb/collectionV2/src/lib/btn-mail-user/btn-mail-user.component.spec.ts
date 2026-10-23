@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnMailUserComponent } from './btn-mail-user.component'
 
@@ -9,6 +10,7 @@ describe('BtnMailUserComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnMailUserComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

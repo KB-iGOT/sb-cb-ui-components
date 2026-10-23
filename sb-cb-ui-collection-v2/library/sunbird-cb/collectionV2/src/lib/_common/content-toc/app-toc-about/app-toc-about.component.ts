@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef, Inject } from '@angular/core'
+import { Component, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core'
 import { Router } from '@angular/router'
 import { Subject } from 'rxjs'
 import { takeUntil } from 'rxjs/operators'

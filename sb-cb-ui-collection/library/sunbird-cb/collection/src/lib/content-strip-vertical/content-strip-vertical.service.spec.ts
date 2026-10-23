@@ -1,12 +1,15 @@
 import { TestBed } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
-import { ContentStripMultipleService } from './content-strip-multiple.service'
+import { ContentStripVerticalService } from './content-strip-vertical.service'
 
-describe('ContentStripMultipleService', () => {
-  beforeEach(() => TestBed.configureTestingModule({}))
+describe('ContentStripVerticalService', () => {
+  beforeEach(() => TestBed.configureTestingModule({
+    imports: [HttpClientTestingModule],
+  }))
 
   it('should be created', () => {
-    const service: ContentStripMultipleService = TestBed.inject(ContentStripMultipleService)
+    const service: ContentStripVerticalService = TestBed.inject(ContentStripVerticalService)
     expect(service).toBeTruthy()
   })
 })

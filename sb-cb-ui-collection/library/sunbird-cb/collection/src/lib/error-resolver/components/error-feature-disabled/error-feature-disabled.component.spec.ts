@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { RouterTestingModule } from '@angular/router/testing'
 
 import { ErrorFeatureDisabledComponent } from './error-feature-disabled.component'
 
@@ -9,6 +10,7 @@ describe('ErrorFeatureDisabledComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorFeatureDisabledComponent],
+      imports: [RouterTestingModule],
     })
     .compileComponents()
   }))

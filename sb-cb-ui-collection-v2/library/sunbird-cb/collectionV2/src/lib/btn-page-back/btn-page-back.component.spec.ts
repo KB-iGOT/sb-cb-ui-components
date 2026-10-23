@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnPageBackComponent } from './btn-page-back.component'
 
@@ -9,6 +10,7 @@ describe('BtnPageBackComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnPageBackComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

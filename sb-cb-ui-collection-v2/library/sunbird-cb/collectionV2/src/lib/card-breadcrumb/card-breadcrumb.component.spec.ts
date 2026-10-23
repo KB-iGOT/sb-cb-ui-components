@@ -16,6 +16,7 @@ describe('CardBreadcrumbComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CardBreadcrumbComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

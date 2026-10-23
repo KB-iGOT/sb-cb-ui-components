@@ -1,4 +1,6 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing'
+import { TranslateModule } from '@ngx-translate/core'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { KarmaPointsComponent } from './karma-points.component'
 
@@ -6,8 +8,9 @@ describe('KarmaPointsComponent', () => {
   let component: KarmaPointsComponent
   let fixture: ComponentFixture<KarmaPointsComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot(), HttpClientTestingModule],
       declarations: [KarmaPointsComponent],
     })
     .compileComponents()

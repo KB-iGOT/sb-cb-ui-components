@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { ActivityCardComponent } from './activity-card.component'
 
@@ -9,6 +10,7 @@ describe('ActivityCardComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ActivityCardComponent],
+      imports: [HttpClientTestingModule],
     })
       .compileComponents()
   }))
@@ -16,6 +18,7 @@ describe('ActivityCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ActivityCardComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

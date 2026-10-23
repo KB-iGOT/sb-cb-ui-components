@@ -33,7 +33,7 @@ import { MatMenuModule } from '@angular/material/menu'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { EventCardV2Component } from './event-card-v2.component'
 import { ContentProgressModule } from '../../content-progress/content-progress.module'
-import { HttpLoaderFactory } from '../../content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'
+import { HttpLoaderFactory } from '../../http-loader-factory'
 import { SkeletonLoaderLibModule } from '../../skeleton-loader-lib/skeleton-loader-lib.module'
 @NgModule({
     declarations: [EventCardV2Component],

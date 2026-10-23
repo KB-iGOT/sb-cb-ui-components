@@ -160,7 +160,7 @@ expandedCourseLists: { [planId: string]: boolean } = {};
     this.enableScroll()
     // tslint:disable-next-line: max-line-length
     this.userIcon = this.userInfo && this.userInfo.profileImageUrl ? this.userInfo.profileImageUrl : ''
-    if (!this.userInfo.profileImageUrl && this.userInfo && this.userInfo.firstName) {
+    if (this.userInfo && !this.userInfo.profileImageUrl && this.userInfo.firstName) {
       this.createInititals(this.userInfo.firstName)
     }
 
@@ -821,7 +821,9 @@ if (activity.type === 'nested_picker') {
 
 
   ngAfterViewInit(): void {
-    this.resizeTextarea(this.textArea.nativeElement, '')
+    if (this.textArea) {
+      this.resizeTextarea(this.textArea.nativeElement, '')
+    }
 
       setTimeout(() => {
     

@@ -16,6 +16,7 @@ describe('ChannelHubComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ChannelHubComponent)
     component = fixture.componentInstance
+    component.widgetData = { cards: [] } as any
     fixture.detectChanges()
   })
 

@@ -1,15 +1,14 @@
-import { HttpClient } from '@angular/common/http'
 import { of, throwError } from 'rxjs'
 import { ConnectionHoverService } from './connection-hover.servive'
 
 describe('ConnectionHoverService', () => {
   let service: ConnectionHoverService
-  let httpClientMock: jest.Mocked<HttpClient>
+  let httpClientMock: any
 
   beforeEach(() => {
     httpClientMock = {
-      get: jest.fn(),
-    } as any
+      get: jasmine.createSpy('get'),
+    }
 
     service = new ConnectionHoverService(httpClientMock)
   })
@@ -32,7 +31,7 @@ describe('ConnectionHoverService', () => {
           }
         }
       }
-      httpClientMock.get.mockReturnValue(of(mockResponse))
+      httpClientMock.get.and.returnValue(of(mockResponse))
 
       // Act
       service.fetchProfile(userId).subscribe()
@@ -53,11 +52,11 @@ describe('ConnectionHoverService', () => {
         }
       }
       const expectedProfile = mockResponse.result.response
-      httpClientMock.get.mockReturnValue(of(mockResponse))
+      httpClientMock.get.and.returnValue(of(mockResponse))
 
       // Act & Assert
       service.fetchProfile(userId).subscribe(profile => {
-        expect(profile).toEqual(expectedProfile)
+        expect(profile).toEqual(expectedProfile as any)
       })
     })
 
@@ -68,7 +67,7 @@ describe('ConnectionHoverService', () => {
           response: ''
         }
       }
-      httpClientMock.get.mockReturnValue(of(mockResponse))
+      httpClientMock.get.and.returnValue(of(mockResponse))
 
       // Act & Assert
       service.fetchProfile(userId).subscribe(profile => {
@@ -79,7 +78,7 @@ describe('ConnectionHoverService', () => {
     it('should handle HTTP error', () => {
       // Arrange
       const mockError = new Error('HTTP Error')
-      httpClientMock.get.mockReturnValue(throwError(() => mockError))
+      httpClientMock.get.and.returnValue(throwError(() => mockError))
 
       // Act & Assert
       service.fetchProfile(userId).subscribe({
@@ -87,7 +86,7 @@ describe('ConnectionHoverService', () => {
           expect(response).toEqual({
             data: null,
             error: mockError
-          })
+          } as any)
         }
       })
     })
@@ -95,12 +94,15 @@ describe('ConnectionHoverService', () => {
     it('should handle malformed response data', () => {
       // Arrange
       const malformedResponse = {}  // completely empty response
-      httpClientMock.get.mockReturnValue(of(malformedResponse))
+      httpClientMock.get.and.returnValue(of(malformedResponse))
 
       // Act & Assert
+      // The malformed shape throws while reading it, which the service's catchError
+      // converts into a { data: null, error } result rather than emitting a value.
       service.fetchProfile(userId).subscribe({
-        next: (profile) => {
-          expect(profile).toBeUndefined()
+        next: (profile: any) => {
+          expect(profile.data).toBeNull()
+          expect(profile.error).toBeTruthy()
         }
       })
     })
@@ -110,13 +112,11 @@ describe('ConnectionHoverService', () => {
       const partialResponse = {
         result: {}  // missing 'response' property
       }
-      httpClientMock.get.mockReturnValue(of(partialResponse))
+      httpClientMock.get.and.returnValue(of(partialResponse))
 
       // Act & Assert
-      service.fetchProfile(userId).subscribe({
-        next: (profile) => {
-          expect(profile).toBeUndefined()
-        }
+      service.fetchProfile(userId).subscribe(profile => {
+        expect(profile).toBeNull()
       })
     })
   })

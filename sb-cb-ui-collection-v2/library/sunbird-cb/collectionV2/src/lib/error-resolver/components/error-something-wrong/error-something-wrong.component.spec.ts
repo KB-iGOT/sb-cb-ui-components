@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { RouterTestingModule } from '@angular/router/testing'
 
 import { ErrorSomethingWrongComponent } from './error-something-wrong.component'
 
@@ -9,6 +11,7 @@ describe('ErrorSomethingWrongComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorSomethingWrongComponent],
+      imports: [RouterTestingModule, HttpClientTestingModule],
     })
     .compileComponents()
   }))

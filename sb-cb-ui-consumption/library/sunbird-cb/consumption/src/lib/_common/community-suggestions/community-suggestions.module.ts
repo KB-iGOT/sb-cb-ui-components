@@ -7,7 +7,7 @@ import { MatCardModule } from '@angular/material/card'
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core'
 import { HttpClient } from '@angular/common/http'
 import { NumberShortenerModule } from '../../_pipes/number-shortener/number-shortener.module'
-import { HttpLoaderFactory } from '../content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'
+import { HttpLoaderFactory } from '../http-loader-factory'
 import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-lib.module'
 
 

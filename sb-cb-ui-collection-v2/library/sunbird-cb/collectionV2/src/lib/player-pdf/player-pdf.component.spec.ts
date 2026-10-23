@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { RouterTestingModule } from '@angular/router/testing'
 
 import { PlayerPdfComponent } from './player-pdf.component'
 
@@ -9,6 +11,10 @@ describe('PlayerPdfComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [PlayerPdfComponent],
+      imports: [RouterTestingModule, HttpClientTestingModule],
+      providers: [
+        { provide: 'environment', useValue: {} }
+      ],
     })
     .compileComponents()
   }))
@@ -16,6 +22,7 @@ describe('PlayerPdfComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(PlayerPdfComponent)
     component = fixture.componentInstance
+    component.widgetData = { disableTelemetry: false } as any
     fixture.detectChanges()
   })
 

@@ -1,4 +1,4 @@
-import { FOOTER_DETAILS, HEADER_DATA, NAV_FOOTER_DETAILS } from "src/app/modules/shared/constant/app.constant"
+import { FOOTER_DETAILS, HEADER_DATA, NAV_FOOTER_DETAILS } from "../../../shared/constant/app.constant"
 
 export const staticHiContent = {
   headerData: {

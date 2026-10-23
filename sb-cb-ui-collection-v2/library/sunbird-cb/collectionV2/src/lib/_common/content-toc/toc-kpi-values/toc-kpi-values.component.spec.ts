@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing'
 
 import { TocKpiValuesComponent } from './toc-kpi-values.component'
 
@@ -6,7 +6,7 @@ describe('TocKpiValuesComponent', () => {
   let component: TocKpiValuesComponent
   let fixture: ComponentFixture<TocKpiValuesComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TocKpiValuesComponent],
     })

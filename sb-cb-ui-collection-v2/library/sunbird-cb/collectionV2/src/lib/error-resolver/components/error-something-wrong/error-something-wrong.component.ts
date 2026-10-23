@@ -22,7 +22,7 @@ export class ErrorSomethingWrongComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (!this.errorData) {
       this.routeChangeSubs = this.route.data.subscribe(response => {
-        if (response.pageData.data) {
+        if (response.pageData?.data) {
           this.errorData = response.pageData.data
         } else {
           this.errorData = null

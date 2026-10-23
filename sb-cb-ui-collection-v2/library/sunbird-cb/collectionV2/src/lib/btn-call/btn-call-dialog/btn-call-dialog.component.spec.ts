@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 
 import { BtnCallDialogComponent } from './btn-call-dialog.component'
 
@@ -9,6 +11,11 @@ describe('BtnCallDialogComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnCallDialogComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+      { provide: MatDialogRef, useValue: { close: () => {} } },
+      { provide: MAT_DIALOG_DATA, useValue: {} }
+    ],
     })
     .compileComponents()
   }))

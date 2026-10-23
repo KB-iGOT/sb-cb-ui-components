@@ -28,6 +28,7 @@
     "@ctrl/ngx-emoji-mart": "^7.1.0",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "4.0.0",
+    "@project-sunbird/telemetry-sdk": "^2.0.1",
     "@sunbird-cb/design-system": "0.0.1",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
     "@sunbird-cb/utils-v2": "0.0.2-ang-17-20-unenroll",
@@ -36,7 +37,8 @@
     "moment": "^2.29.1",
     "ngx-image-cropper": "^6.3.4",
     "rxjs": "~6.5.2",
-    "tslib": "^2.0.0"
+    "tslib": "^2.0.0",
+    "zone.js": "~0.15.0"
   },
   "devDependencies": {
     "@angular/build": "^20.3.14",

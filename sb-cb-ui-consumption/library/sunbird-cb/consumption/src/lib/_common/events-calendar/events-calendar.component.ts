@@ -49,7 +49,7 @@ export class EventsCalendarComponent implements OnInit {
     private langtranslations: MultilingualTranslationsService,
     private events: libEventService,
   ) {
-    if (Object.keys(this.data).length !== 0) {
+    if (this.data && Object.keys(this.data).length !== 0) {
       this.eventCalendarDetails = this.data
       this.bottomSheet = true
       this.showAllEvents = true

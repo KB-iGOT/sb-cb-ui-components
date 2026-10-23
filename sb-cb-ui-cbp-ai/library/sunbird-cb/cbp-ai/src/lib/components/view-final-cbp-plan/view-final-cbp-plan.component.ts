@@ -165,9 +165,9 @@ export class ViewFinalCbpPlanComponent {
 
   getMappingData() {
     console.log('haredService?.cbpPlanFinalObj', this.sharedService.getCbpPlansWithSelectedCourses())
-    if (this.sharedService?.cbpPlanFinalObj.ministry.sbOrgType === 'ministry') {
+    if (this.sharedService?.cbpPlanFinalObj?.ministry?.sbOrgType === 'ministry') {
       this.loading = true
-      let state_center_id = this.sharedService?.cbpPlanFinalObj.ministry.identifier
+      let state_center_id = this.sharedService?.cbpPlanFinalObj?.ministry?.identifier
 
       if (this.sharedService?.cbpPlanFinalObj.departments?.length) {
 
@@ -378,10 +378,10 @@ export class ViewFinalCbpPlanComponent {
 
 
     }
-    if (this.sharedService?.cbpPlanFinalObj.ministry.sbOrgType === 'state') {
+    if (this.sharedService?.cbpPlanFinalObj?.ministry?.sbOrgType === 'state') {
       this.loading = true
       console.log('this.sharedService?.cbpPlanFinalObj', this.sharedService?.cbpPlanFinalObj)
-      let state_center_id = this.sharedService?.cbpPlanFinalObj.ministry.identifier
+      let state_center_id = this.sharedService?.cbpPlanFinalObj?.ministry?.identifier
       let department_id = this.sharedService?.cbpPlanFinalObj.departments
       // this.sharedService.getRoleMappingByStateCenterAndDepartment(state_center_id, department_id).subscribe((res)=>{
       //   console.log('res', res)
@@ -995,9 +995,9 @@ export class ViewFinalCbpPlanComponent {
   downloadCSV() {
     let fileName = ''
     if (!this.sharedService?.cbpPlanFinalObj.departments) {
-      fileName = `CBP_Report_${this.sharedService?.cbpPlanFinalObj.ministry.identifier}_${this.sharedService?.cbpPlanFinalObj.departments}.xlsx`
+      fileName = `CBP_Report_${this.sharedService?.cbpPlanFinalObj?.ministry?.identifier}_${this.sharedService?.cbpPlanFinalObj.departments}.xlsx`
     } else {
-      fileName = `CBP_Report_${this.sharedService?.cbpPlanFinalObj.ministry.identifier}.xlsx`
+      fileName = `CBP_Report_${this.sharedService?.cbpPlanFinalObj?.ministry?.identifier}.xlsx`
     }
     this.generateExcel(this.jsonData, fileName);
   }
@@ -1005,11 +1005,11 @@ export class ViewFinalCbpPlanComponent {
   downloadPdfFromBE(context: string) {
     let selectedLanguage = this.filterForm.get('language')?.value || 'en';
     this.loading = true
-    //  this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier)
+    //  this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj?.ministry?.identifier)
     if (!this.sharedService?.cbpPlanFinalObj.departments) {
-      this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier, context, selectedLanguage)
+      this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj?.ministry?.identifier, context, selectedLanguage)
     } else {
-      this.sharedService.downloadPdfForDepartment(this.sharedService?.cbpPlanFinalObj.ministry.identifier, this.sharedService?.cbpPlanFinalObj.departments, context, selectedLanguage)
+      this.sharedService.downloadPdfForDepartment(this.sharedService?.cbpPlanFinalObj?.ministry?.identifier, this.sharedService?.cbpPlanFinalObj.departments, context, selectedLanguage)
     }
 
     setTimeout(() => {

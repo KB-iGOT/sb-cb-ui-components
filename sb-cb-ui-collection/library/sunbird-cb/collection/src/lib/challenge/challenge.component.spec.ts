@@ -16,6 +16,7 @@ describe('ChallengeComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ChallengeComponent)
     component = fixture.componentInstance
+    component.widgetData = { activities: [] } as any
     fixture.detectChanges()
   })
 

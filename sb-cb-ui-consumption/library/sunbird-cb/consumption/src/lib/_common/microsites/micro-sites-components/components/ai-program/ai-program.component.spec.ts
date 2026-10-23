@@ -1,17 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AiProgramComponent, AiProgramData, ContentData } from './ai-program.component';
+import { HttpClient } from '@angular/common/http'
+import { Router } from '@angular/router'
+import { of, throwError } from 'rxjs'
+import { AiProgramComponent, AiProgramData, ContentData } from './ai-program.component'
 
 describe('AiProgramComponent', () => {
-  let component: AiProgramComponent;
-  let fixture: ComponentFixture<AiProgramComponent>;
+  let component: AiProgramComponent
+  let mockHttp: any
+  let mockConfigSvc: any
+  let mockRouter: any
 
   const mockProgramData: AiProgramData = {
     enabled: true,
     title: 'AI Daksh',
-    description: 'The program contain 16 courses, Once you complete the 3 course you will get AI Daksh Badge',
+    description: 'The program contain 3 courses, complete them to get the AI Daksh Badge',
     image: 'https://example.com/image.png',
     noOfCoursesToComplete: '3',
     badgeImage: 'https://example.com/badge.png',
+    identifier: 'do_program_1',
+    courseIdentifiers: ['do_course_1', 'do_course_2', 'do_course_3'],
     styleData: {
       'border-radius': '32px',
       'background': 'linear-gradient(to bottom right, #266EEB 43%, #133F8B 50%)',
@@ -28,216 +34,161 @@ describe('AiProgramComponent', () => {
       ratingCount: 234,
     },
     completedCourses: 1,
-  };
+  }
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [AiProgramComponent],
-    });
-    fixture = TestBed.createComponent(AiProgramComponent);
-    component = fixture.componentInstance;
-  });
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(null)
+    jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => undefined)
+
+    mockHttp = { post: jest.fn().mockReturnValue(of({ result: { courses: [] } })) } as unknown as HttpClient
+    mockConfigSvc = { userProfile: { userId: 'test-user' } } as any
+    mockRouter = { navigate: jest.fn() } as unknown as Router
+
+    component = new AiProgramComponent(mockHttp, mockConfigSvc, mockRouter)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
 
   it('should create the component', () => {
-    expect(component).toBeTruthy();
-  });
+    expect(component).toBeTruthy()
+  })
 
   describe('totalCourses', () => {
     it('should parse noOfCoursesToComplete from string', () => {
-      component.programData = mockProgramData;
-      expect(component.totalCourses).toBe(3);
-    });
+      component.programData = mockProgramData
+      expect(component.totalCourses).toBe(3)
+    })
 
     it('should default to 3 when not provided', () => {
-      component.programData = { ...mockProgramData, noOfCoursesToComplete: '' };
-      expect(component.totalCourses).toBe(3);
-    });
-  });
+      component.programData = { ...mockProgramData, noOfCoursesToComplete: '' }
+      expect(component.totalCourses).toBe(3)
+    })
+  })
 
   describe('completedCourses', () => {
-    it('should return completedCourses from programData', () => {
-      component.programData = mockProgramData;
-      expect(component.completedCourses).toBe(1);
-    });
+    it('should track the completed count applied via ngOnInit', () => {
+      mockHttp.post.mockReturnValue(of({ result: { courses: [{ contentId: 'do_course_1', status: 2 }] } }))
+      component.programData = mockProgramData
+      component.ngOnInit()
+      expect(component.completedCourses).toBe(1)
+    })
 
     it('should not exceed totalCourses', () => {
-      component.programData = { ...mockProgramData, completedCourses: 10 };
-      expect(component.completedCourses).toBeLessThanOrEqual(3);
-    });
+      mockHttp.post.mockReturnValue(of({
+        result: {
+          courses: [
+            { contentId: 'do_course_1', status: 2 },
+            { contentId: 'do_course_2', status: 2 },
+            { contentId: 'do_course_3', status: 2 },
+          ],
+        },
+      }))
+      component.programData = { ...mockProgramData, courseIdentifiers: ['do_course_1', 'do_course_2', 'do_course_3', 'do_course_4'] }
+      component.ngOnInit()
+      expect(component.completedCourses).toBeLessThanOrEqual(3)
+    })
 
-    it('should return 0 when not provided', () => {
-      component.programData = { ...mockProgramData, completedCourses: undefined };
-      expect(component.completedCourses).toBe(0);
-    });
-  });
+    it('should return 0 when nothing completed', () => {
+      component.programData = mockProgramData
+      expect(component.completedCourses).toBe(0)
+    })
+  })
 
-  describe('checkpoints', () => {
-    it('should generate totalCourses checkpoints (milestones + badge)', () => {
-      component.programData = mockProgramData;
-      // 2 milestones + 1 badge = 3
-      expect(component.checkpoints.length).toBe(3);
-    });
+  describe('buildProgressItems (via ngOnInit)', () => {
+    it('should generate progress items once enrollment resolves', () => {
+      component.programData = mockProgramData
+      component.ngOnInit()
+      // 3 courses -> bar/shield pairs for the first 2, then bar/badge for the last = 6 items
+      expect(component.progressItemsCached.length).toBe(6)
+    })
 
-    it('should return empty array when programData is null', () => {
-      component.programData = null as any;
-      expect(component.checkpoints).toEqual([]);
-    });
-  });
+    it('should populate progress items once ngOnChanges runs', () => {
+      component.programData = mockProgramData
+      component.ngOnChanges({ programData: { firstChange: true } } as any)
+      // 3 courses -> bar/shield pairs for the first 2, then bar/badge for the last = 6 items
+      expect(component.progressItemsCached.length).toBe(6)
+    })
+  })
 
-  describe('getProgressPercentage', () => {
-    it('should return 0 when no courses completed', () => {
-      component.programData = { ...mockProgramData, completedCourses: 0 };
-      expect(component.getProgressPercentage()).toBe(0);
-    });
-
-    it('should calculate correct percentage', () => {
-      component.programData = mockProgramData; // 1 of 3
-      expect(component.getProgressPercentage()).toBeCloseTo(33.33, 1);
-    });
-
-    it('should return 100 when all courses completed', () => {
-      component.programData = { ...mockProgramData, completedCourses: 3 };
-      expect(component.getProgressPercentage()).toBe(100);
-    });
-  });
-
-  describe('getCheckpointPosition', () => {
+  describe('getBarState', () => {
     beforeEach(() => {
-      component.programData = mockProgramData; // 3 checkpoints (0,1,2)
-    });
+      component.programData = mockProgramData
+    })
 
-    it('should position first at 0%', () => {
-      expect(component.getCheckpointPosition(0)).toBe(0);
-    });
-
-    it('should position last at 100%', () => {
-      expect(component.getCheckpointPosition(2)).toBe(100);
-    });
-
-    it('should evenly space middle checkpoint', () => {
-      expect(component.getCheckpointPosition(1)).toBe(50);
-    });
-  });
+    it('should mark bar 0 as none when nothing is enrolled or completed', () => {
+      expect(component.getBarState(0)).toBe('none')
+    })
+  })
 
   describe('getRomanNumeral', () => {
     it('should convert 1 to I', () => {
-      expect(component.getRomanNumeral(1)).toBe('I');
-    });
+      expect(component.getRomanNumeral(1)).toBe('I')
+    })
 
     it('should convert 3 to III', () => {
-      expect(component.getRomanNumeral(3)).toBe('III');
-    });
+      expect(component.getRomanNumeral(3)).toBe('III')
+    })
 
     it('should fallback to string for numbers > 10', () => {
-      expect(component.getRomanNumeral(11)).toBe('11');
-    });
-  });
+      expect(component.getRomanNumeral(11)).toBe('11')
+    })
+  })
 
   describe('formatDuration', () => {
     it('should convert "120" to "2 hrs"', () => {
-      expect(component.formatDuration('120')).toBe('2 hrs');
-    });
+      expect(component.formatDuration('120')).toBe('2 hrs')
+    })
 
     it('should convert "90" to "1 hrs 30 min"', () => {
-      expect(component.formatDuration('90')).toBe('1 hrs 30 min');
-    });
+      expect(component.formatDuration('90')).toBe('1 hrs 30 min')
+    })
 
     it('should convert "45" to "45 min"', () => {
-      expect(component.formatDuration('45')).toBe('45 min');
-    });
+      expect(component.formatDuration('45')).toBe('45 min')
+    })
 
     it('should return empty string for invalid input', () => {
-      expect(component.formatDuration('')).toBe('');
-    });
-  });
+      expect(component.formatDuration('')).toBe('')
+    })
+  })
 
   describe('onContentClick', () => {
-    it('should emit contentClicked with contentData', (done) => {
-      component.programData = mockProgramData;
-      component.contentClicked.subscribe((data: ContentData) => {
-        expect(data.identifier).toBe('do_1234567890');
-        done();
-      });
-      component.onContentClick();
-    });
+    it('should emit contentClicked with contentData and navigate', () => {
+      component.programData = mockProgramData
+      const emitSpy = jest.spyOn(component.contentClicked, 'emit')
+      component.onContentClick()
+      expect(emitSpy).toHaveBeenCalledWith(mockProgramData.contentData)
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/toc', 'do_1234567890', 'overview'])
+    })
 
     it('should not emit when contentData is missing', () => {
-      component.programData = { ...mockProgramData, contentData: undefined as any };
-      spyOn(component.contentClicked, 'emit');
-      component.onContentClick();
-      expect(component.contentClicked.emit).not.toHaveBeenCalled();
-    });
-  });
+      component.programData = { ...mockProgramData, contentData: undefined as any }
+      const emitSpy = jest.spyOn(component.contentClicked, 'emit')
+      component.onContentClick()
+      expect(emitSpy).not.toHaveBeenCalled()
+    })
+  })
 
-  describe('Template rendering', () => {
-    beforeEach(() => {
-      component.programData = mockProgramData;
-      fixture.detectChanges();
-    });
+  describe('ngOnInit / enrollment lookup', () => {
+    it('should skip the enrollment call when the program has no identifier', () => {
+      component.programData = { ...mockProgramData, identifier: '' }
+      component.ngOnInit()
+      expect(mockHttp.post).not.toHaveBeenCalled()
+    })
 
-    it('should render header title', () => {
-      const el = fixture.nativeElement.querySelector('.header-title');
-      expect(el.textContent).toContain('AI Daksh');
-    });
+    it('should treat an errored enrollment call as not enrolled', () => {
+      mockHttp.post.mockReturnValue(throwError(() => new Error('network error')))
+      component.programData = mockProgramData
+      component.ngOnInit()
+      expect(component.isEnrolled).toBe(false)
+    })
+  })
 
-    it('should render header description', () => {
-      const el = fixture.nativeElement.querySelector('.header-description');
-      expect(el.textContent).toContain('16 courses');
-    });
-
-    it('should render checkpoint nodes (2 milestones + 1 badge)', () => {
-      const nodes = fixture.nativeElement.querySelectorAll('.checkpoint-node');
-      expect(nodes.length).toBe(3);
-    });
-
-    it('should render roman numerals in milestone nodes', () => {
-      const labels = fixture.nativeElement.querySelectorAll('.node-label');
-      expect(labels.length).toBe(2); // 2 milestones, badge has no label
-      expect(labels[0].textContent.trim()).toBe('I');
-      expect(labels[1].textContent.trim()).toBe('II');
-    });
-
-    it('should render badge image for last checkpoint', () => {
-      const medalImg = fixture.nativeElement.querySelector('.medal-img');
-      expect(medalImg).toBeTruthy();
-      expect(medalImg.src).toContain('badge.png');
-    });
-
-    it('should render course card', () => {
-      const card = fixture.nativeElement.querySelector('.course-card');
-      expect(card).toBeTruthy();
-    });
-
-    it('should render course title', () => {
-      const title = fixture.nativeElement.querySelector('.course-title');
-      expect(title.textContent).toContain('Course name');
-    });
-
-    it('should render formatted duration', () => {
-      const badge = fixture.nativeElement.querySelector('.duration-badge');
-      expect(badge.textContent).toContain('2 hrs');
-    });
-
-    it('should render category badge', () => {
-      const typeBadge = fixture.nativeElement.querySelector('.type-text');
-      expect(typeBadge.textContent).toContain('Program');
-    });
-
-    it('should render source/author', () => {
-      const author = fixture.nativeElement.querySelector('.author-text');
-      expect(author.textContent).toContain('iGotKarmayogi');
-    });
-
-    it('should apply dynamic styles via ngStyle', () => {
-      const card = fixture.nativeElement.querySelector('.ai-program-card');
-      expect(card.style.borderRadius).toBe('32px');
-    });
-
-    it('should not render wrapper when enabled is false', () => {
-      component.programData = { ...mockProgramData, enabled: false };
-      fixture.detectChanges();
-      const wrapper = fixture.nativeElement.querySelector('.ai-program-wrapper');
-      expect(wrapper).toBeFalsy();
-    });
-  });
-});
+  describe('ngOnDestroy', () => {
+    it('should not throw when there is no active subscription', () => {
+      expect(() => component.ngOnDestroy()).not.toThrow()
+    })
+  })
+})

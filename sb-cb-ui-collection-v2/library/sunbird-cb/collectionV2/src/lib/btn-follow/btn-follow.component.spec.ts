@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnFollowComponent } from './btn-follow.component'
 
@@ -9,6 +10,7 @@ describe('BtnFollowComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnFollowComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))
@@ -16,6 +18,7 @@ describe('BtnFollowComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BtnFollowComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

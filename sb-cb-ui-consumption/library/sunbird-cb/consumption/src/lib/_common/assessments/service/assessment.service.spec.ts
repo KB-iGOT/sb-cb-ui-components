@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { AssessmentService } from './assessment.service';
 import { NsAssessment } from './assessment.model';
@@ -29,7 +30,8 @@ describe('AssessmentService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      imports: [HttpClientTestingModule],
+      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: 'environment', useValue: {} }],
     });
     service = TestBed.inject(AssessmentService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -44,14 +46,14 @@ describe('AssessmentService', () => {
   });
 
   it('should tell a comprehensive assessment only by its course category', () => {
-    service.setCourseCategory(NsAssessment.EAssessmentCourseCategory.COMPREHENSIVE_ASSESSMENT);
+    service.setContextCategory(NsAssessment.EAssessmentContextCategory.COMPREHENSIVE_ASSESSMENT);
     expect(service.isComprehensiveAssessment()).toBe(true);
 
-    service.setCourseCategory(NsAssessment.EAssessmentCourseCategory.STANDALONE_ASSESSMENT);
+    service.setContextCategory(NsAssessment.EAssessmentContextCategory.PRELIMINARY_ASSESSMENT);
     expect(service.isComprehensiveAssessment()).toBe(false);
 
-    service.setCourseCategory(undefined as any);
-    expect(service.getCourseCategory()).toBe('');
+    service.setContextCategory(undefined as any);
+    expect(service.getContextCategory()).toBe('');
     expect(service.isComprehensiveAssessment()).toBe(false);
   });
 
@@ -77,7 +79,7 @@ describe('AssessmentService', () => {
 
   describe('for a comprehensive assessment', () => {
     beforeEach(() => {
-      service.setCourseCategory(NsAssessment.EAssessmentCourseCategory.COMPREHENSIVE_ASSESSMENT);
+      service.setContextCategory(NsAssessment.EAssessmentContextCategory.COMPREHENSIVE_ASSESSMENT);
     });
 
     it('should create through the CA wrapper, with the payload unchanged', () => {
@@ -109,7 +111,7 @@ describe('AssessmentService', () => {
     });
 
     it('should keep the CQF endpoints even under the comprehensive course category', () => {
-      service.setCourseCategory(NsAssessment.EAssessmentCourseCategory.COMPREHENSIVE_ASSESSMENT);
+      service.setContextCategory(NsAssessment.EAssessmentContextCategory.COMPREHENSIVE_ASSESSMENT);
       service.createAssessment(cqfCreateReq).subscribe();
       service.updateAssessment(hierarchyReq).subscribe();
 

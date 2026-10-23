@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ViewCbpPlanComponent } from './view-cbp-plan.component';
 
@@ -8,7 +10,12 @@ describe('ViewCbpPlanComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ViewCbpPlanComponent]
+      declarations: [ViewCbpPlanComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+        { provide: MatDialogRef, useValue: { close: jest.fn() } },
+        { provide: MAT_DIALOG_DATA, useValue: { competencies: [] } }
+      ]
     });
     fixture = TestBed.createComponent(ViewCbpPlanComponent);
     component = fixture.componentInstance;

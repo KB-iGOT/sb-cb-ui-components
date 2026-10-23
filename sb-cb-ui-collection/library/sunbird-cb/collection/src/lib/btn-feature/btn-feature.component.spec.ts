@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { RouterTestingModule } from '@angular/router/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnFeatureComponent } from './btn-feature.component'
 
@@ -9,6 +11,10 @@ describe('BtnFeatureComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnFeatureComponent],
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      providers: [
+      { provide: 'environment', useValue: {} }
+    ],
     })
     .compileComponents()
   }))
@@ -16,6 +22,7 @@ describe('BtnFeatureComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BtnFeatureComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

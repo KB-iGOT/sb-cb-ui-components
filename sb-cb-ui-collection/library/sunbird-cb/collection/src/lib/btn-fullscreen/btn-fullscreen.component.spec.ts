@@ -16,6 +16,7 @@ describe('BtnFullscreenComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BtnFullscreenComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

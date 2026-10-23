@@ -22,8 +22,12 @@
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
-      "<rootDir>/dist/"
+      "<rootDir>/dist/",
+      "<rootDir>/library/sunbird-cb/consumption/src/test.ts"
     ],
+    "moduleNameMapper": {
+      "^ckeditor5$": "<rootDir>/library/sunbird-cb/consumption/test-mocks/ckeditor5.mock.js"
+    },
     "globals": {
       "ts-jest": {
         "tsConfig": "<rootDir>/library/sunbird-cb/consumption/tsconfig.spec.json",
@@ -42,6 +46,7 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-angular": "^9.1.0",
+    "@project-sunbird/telemetry-sdk": "^2.0.1",
     "@angular/animations": "^20.3.16",
     "@angular/cdk": "^20.2.14",
     "@angular/common": "^20.3.16",
@@ -66,7 +71,8 @@
     "rxjs": "^6.6.6",
     "rxjs-compat": "^6.6.6",
     "tslib": "^2.0.0",
-    "xlsx": "^0.16.1"
+    "xlsx": "^0.16.1",
+    "zone.js": "~0.15.0"
   },
   "devDependencies": {
     "@angular/build": "^20.3.15",

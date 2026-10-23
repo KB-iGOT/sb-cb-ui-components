@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 
 import { BtnKbDialogComponent } from './btn-kb-dialog.component'
 
@@ -8,7 +11,14 @@ describe('BtnKbDialogComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       declarations: [BtnKbDialogComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+      { provide: MatDialogRef, useValue: { close: () => {} } },
+      { provide: MAT_DIALOG_DATA, useValue: {} }
+    ],
+    
     })
     .compileComponents()
   }))

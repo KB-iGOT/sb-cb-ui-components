@@ -324,10 +324,10 @@ export class WidgetContentService {
     )
   }
 
-  fetchContentLikes(contentIds: { content_id: string[] }) {
+  fetchContentLikes(contentIds: { content_id: string[] }): Promise<{ [identifier: string]: number }> {
     return this.http
       .post<{ [identifier: string]: number }>(API_END_POINTS.CONTENT_LIKES, contentIds)
-      .toPromise()
+      .toPromise() as Promise<{ [identifier: string]: number }>
   }
   // fetchContentRatings(contentIds: { contentIds: string[] }) {
   //   return this.http

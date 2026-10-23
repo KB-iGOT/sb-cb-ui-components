@@ -314,7 +314,7 @@ export class PlayerPdfComponent extends WidgetBaseComponent
   }
 
   refresh() {
-    this.renderSubject.next()
+    this.renderSubject.next({})
   }
 
   private async loadDocument(url: string) {

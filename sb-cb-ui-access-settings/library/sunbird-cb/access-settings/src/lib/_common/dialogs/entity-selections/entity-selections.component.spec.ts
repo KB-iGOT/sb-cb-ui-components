@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { EntitySelectionsComponent } from './entity-selections.component';
 import { NsAccessControlConfig } from '../../../_models/access-control.model';
 import { ALL_ORGANISATIONS_SELECTION, MAX_ORGANISATION_SELECTIONS } from '../../../_constants/app.constants';
+import { AccessControlService } from '../../../_services/access-control.service';
 
 describe('EntitySelectionsComponent', () => {
   let component: EntitySelectionsComponent;
@@ -128,6 +131,8 @@ describe('EntitySelectionsComponent', () => {
     };
 
     it('should be offered to a CCA', () => {
+      component.ngOnInit();
+
       expect(component.canSelectAllOrganisations).toBe(true);
     });
 
@@ -177,6 +182,7 @@ describe('EntitySelectionsComponent', () => {
 
   describe('onChangeOrgSelectionMode', () => {
     it('should select every organisation and read the organisation count on "Select all"', () => {
+      component.ngOnInit();
       component.selectedDataTemp = ['org-a'];
 
       component.onChangeOrgSelectionMode({ value: 'all' } as any);
@@ -189,6 +195,7 @@ describe('EntitySelectionsComponent', () => {
     });
 
     it('should read the organisation count only once', () => {
+      component.ngOnInit();
       component.onChangeOrgSelectionMode({ value: 'all' } as any);
       component.onChangeOrgSelectionMode({ value: 'individual' } as any);
       component.onChangeOrgSelectionMode({ value: 'all' } as any);
@@ -205,6 +212,7 @@ describe('EntitySelectionsComponent', () => {
     });
 
     it('should clear the selection and go back to the list tab on "Manual Selection"', () => {
+      component.ngOnInit();
       component.onChangeOrgSelectionMode({ value: 'all' } as any);
       component.activeTab = 1;
       component.filterValue = 'selected';

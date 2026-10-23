@@ -18,21 +18,21 @@ const API_END_POINTS = {
 })
 export class ConnectionHoverService {
   constructor(private http: HttpClient) { }
-  fetchProfile(userId: string): Observable<NSProfileDataV2.IProfile | null> {
+  fetchProfile(userId: string): Observable<NSProfileDataV2.IProfile | { data: null; error: any } | null> {
     return this.http.get<NSProfileDataV2.IProfile | null>(`${API_END_POINTS.getUserdetailsV2FromRegistry}/${userId}`)
-      .pipe(map((data: any) => {
-        // tslint:disable-next-line: prefer-const
-        let profile!: NSProfileDataV2.IProfile | null
-        // _.set(profile, '.', _.first(_.get(data, 'result.UserProfile')))
-        // profile = _.first(_.get(data, 'result.UserProfile')) || null
-        // profile = _.first(_.get(data.result.response, 'result.UserProfile')) || null
-        profile = data.result.response
-        return profile
-      },
-        // tslint:disable-next-line: align
+      .pipe(
+        map((data: any) => {
+          // tslint:disable-next-line: prefer-const
+          let profile!: NSProfileDataV2.IProfile | null
+          // _.set(profile, '.', _.first(_.get(data, 'result.UserProfile')))
+          // profile = _.first(_.get(data, 'result.UserProfile')) || null
+          // profile = _.first(_.get(data.result.response, 'result.UserProfile')) || null
+          profile = data.result.response || null
+          return profile
+        }),
         catchError((err: any) => {
           return of({ data: null, error: err })
         })
-      ))
+      )
   }
 }

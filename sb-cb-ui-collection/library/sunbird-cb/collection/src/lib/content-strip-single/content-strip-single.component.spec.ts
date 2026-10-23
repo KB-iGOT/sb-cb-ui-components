@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { ContentStripSingleComponent } from './content-strip-single.component'
 
@@ -9,6 +10,7 @@ describe('ContentStripSingleComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ContentStripSingleComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))
@@ -16,6 +18,7 @@ describe('ContentStripSingleComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ContentStripSingleComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { MatMenuModule } from '@angular/material/menu'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { RouterTestingModule } from '@angular/router/testing'
+import { NPSGridService } from '@sunbird-cb/utils-v2'
 
 import { PageComponent } from './page.component'
 
@@ -9,6 +13,11 @@ describe('PageComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [PageComponent],
+      imports: [RouterTestingModule, HttpClientTestingModule, MatMenuModule],
+      providers: [
+        { provide: 'environment', useValue: {} },
+        NPSGridService
+      ],
     })
     .compileComponents()
   }))

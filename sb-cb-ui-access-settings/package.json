@@ -22,7 +22,8 @@
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
-      "<rootDir>/dist/"
+      "<rootDir>/dist/",
+      "<rootDir>/library/sunbird-cb/access-settings/src/test.ts"
     ],
     "globals": {
       "ts-jest": {
@@ -58,7 +59,8 @@
     "moment": "^2.29.1",
     "rxjs": "^6.6.6",
     "tslib": "^2.0.0",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "zone.js": "^0.15.1"
   },
   "devDependencies": {
     "@angular/build": "^20.3.14",

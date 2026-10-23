@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { staticHiContent, staticEnContent } from './latest-updates.model'
-import { KARMAYOGI_CORNER } from 'src/app/modules/shared/constant/app.constant';
+import { KARMAYOGI_CORNER } from '../../../shared/constant/app.constant';
 import { SharedService } from '../../../shared/services/shared.service';
 
 @Component({

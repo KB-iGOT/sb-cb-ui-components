@@ -165,7 +165,7 @@ export class PlayerSurveyComponent extends WidgetBaseComponent
     this.updateProgress(2)
   }
 
-  updateProgress(_status: number) {
+  updateProgress(status: number) {
     const id = this.activatedRoute.snapshot.data.content ?
       this.activatedRoute.snapshot.data.content.data?.identifier : this.widgetData?.identifier
     const resData = this.viewerSvc.getBatchIdAndCourseId(
@@ -174,8 +174,7 @@ export class PlayerSurveyComponent extends WidgetBaseComponent
     const collectionId = (resData && resData.courseId) ? resData.courseId : ''
     const batchId = (resData && resData.batchId) ? resData.batchId : ''
     if (collectionId && batchId && id) {
-      // TODO: ViewerUtilService needs to be properly imported
-      // this.viewerSvc.realTimeProgressUpdateQuiz(id, collectionId, batchId, status)
+      this.viewerSvc.realTimeProgressUpdateQuiz(id, collectionId, batchId, status)
     }
   }
 

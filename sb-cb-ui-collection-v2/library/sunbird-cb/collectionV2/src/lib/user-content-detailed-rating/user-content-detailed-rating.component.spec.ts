@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { UserContentDetailedRatingComponent } from './user-content-detailed-rating.component'
 
@@ -9,6 +10,7 @@ describe('UserContentDetailedRatingComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [UserContentDetailedRatingComponent],
+      imports: [HttpClientTestingModule],
     })
       .compileComponents()
   }))

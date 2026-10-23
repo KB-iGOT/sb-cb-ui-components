@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 
 import { BtnContentShareDialogComponent } from './btn-content-share-dialog.component'
 
@@ -9,6 +12,12 @@ describe('BtnContentShareDialogComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnContentShareDialogComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+      { provide: MatDialogRef, useValue: { close: () => {} } },
+      { provide: MAT_DIALOG_DATA, useValue: { content: { name: '' } } }
+    ],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

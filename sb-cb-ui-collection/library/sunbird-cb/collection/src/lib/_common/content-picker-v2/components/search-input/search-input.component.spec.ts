@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { MatMenuModule } from '@angular/material/menu'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { SearchInputComponent } from './search-input.component'
 
@@ -9,6 +11,7 @@ describe('SearchInputComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [SearchInputComponent],
+      imports: [HttpClientTestingModule, MatMenuModule],
     })
     .compileComponents()
   }))

@@ -16,6 +16,7 @@ describe('SlidersComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SlidersComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

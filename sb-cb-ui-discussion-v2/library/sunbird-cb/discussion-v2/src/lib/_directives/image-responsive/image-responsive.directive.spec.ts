@@ -1,8 +1,12 @@
+import { of } from 'rxjs'
 import { ImageResponsiveDirective } from './image-responsive.directive'
 
 describe('ImageResponsiveDirective', () => {
   it('should create an instance', () => {
-    const directive = new ImageResponsiveDirective()
+    const mockBreakpointObserver = {
+      observe: jasmine.createSpy('observe').and.returnValue(of({ breakpoints: {} })),
+    }
+    const directive = new ImageResponsiveDirective(mockBreakpointObserver as any)
     expect(directive).toBeTruthy()
   })
 })

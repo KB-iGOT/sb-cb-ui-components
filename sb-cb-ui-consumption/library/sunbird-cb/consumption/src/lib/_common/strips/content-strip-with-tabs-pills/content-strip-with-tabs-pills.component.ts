@@ -1128,22 +1128,21 @@ export class ContentStripWithTabsPillsComponent extends WidgetBaseComponent
       this.resetSelectedPill(stripMap.tabs[tabEventIndex].pillsData)
       stripMap.tabs[tabEventIndex].pillsData[pillIndex].selected = true
     }
-    // const data: WsEvents.ITelemetryTabData = {
-    //   label: `${stripMap.tabs[tabEvent].label}`,
-    //   index: tabEvent,
-    // };
-    // this.eventSvc.raiseInteractTelemetry(
-    //   {
-    //     type: WsEvents.EnumInteractTypes.CLICK,
-    //     subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
-    //     id: `${_.camelCase(data.label)}-tab`,
-    //   },
-    //   {},
-    //   {
-    //     module: WsEvents.EnumTelemetrymodules.HOME,
-    //   }
-
-    // );
+    const data: WsEvents.ITelemetryTabData = {
+      label: `${stripMap.tabs[tabEventIndex].label}`,
+      index: tabEventIndex,
+    };
+    this.eventSvc.raiseInteractTelemetry(
+      {
+        type: WsEvents.EnumInteractTypes.CLICK,
+        subType: WsEvents.EnumInteractSubTypes.HOME_PAGE_STRIP_TABS,
+        id: `${_.camelCase(data.label)}-tab`,
+      },
+      {},
+      {
+        module: WsEvents.EnumTelemetrymodules.HOME,
+      }
+    );
 
     const currentTabFromMap: any = stripMap.tabs && stripMap.tabs[tabEventIndex]
     const currentPillFromMap: any = stripMap.tabs && stripMap.tabs[tabEventIndex]?.pillsData[pillIndex]

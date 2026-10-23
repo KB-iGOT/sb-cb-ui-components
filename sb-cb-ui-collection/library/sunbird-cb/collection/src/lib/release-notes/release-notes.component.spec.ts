@@ -16,6 +16,7 @@ describe('ReleaseNotesComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ReleaseNotesComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

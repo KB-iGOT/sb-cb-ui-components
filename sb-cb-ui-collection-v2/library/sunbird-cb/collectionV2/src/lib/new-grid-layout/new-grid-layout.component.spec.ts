@@ -16,6 +16,7 @@ describe('NewGridLayoutComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(NewGridLayoutComponent)
     component = fixture.componentInstance
+    component.widgetData = { gutter: 0, widgets: [] } as any
     fixture.detectChanges()
   })
 

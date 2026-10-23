@@ -36,14 +36,18 @@ export class ElementHtmlComponent extends WidgetBaseComponent
           headers,
         })
         .toPromise()
-      this.render(template, this.widgetData.templateData)
+      if (template) {
+        this.render(template, this.widgetData.templateData)
+      }
     } else if (this.widgetData.templateUrl && this.widgetData.templateDataUrl) {
       try {
         const [template, data] = await Promise.all([
           this.http.get<string>(this.widgetData.templateUrl, { headers }).toPromise(),
           this.http.get<any>(this.widgetData.templateDataUrl).toPromise(),
         ])
-        this.render(template, data)
+        if (template) {
+          this.render(template, data)
+        }
       } catch (er) { }
     }
   }

@@ -94,7 +94,7 @@ export class PageComponent extends WidgetBaseComponent
         }
       } else {
         this.pageData = null
-        this.error = routeData.pageData.error
+        this.error = routeData.pageData?.error
         this.logger.warn('No page data available')
       }
       if (this.pageData) {

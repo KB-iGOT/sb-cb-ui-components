@@ -261,6 +261,9 @@ export class PlayerVideoComponent extends WidgetBaseComponent
     const content = await this.contentSvc
       .fetchContent(this.widgetData.identifier || '', 'minimal')
       .toPromise()
+    if (!content) {
+      return
+    }
     if (content.artifactUrl && content.artifactUrl.indexOf('/content-store/') > -1) {
       this.widgetData.url = content.artifactUrl
       this.widgetData.posterImage = content.appIcon

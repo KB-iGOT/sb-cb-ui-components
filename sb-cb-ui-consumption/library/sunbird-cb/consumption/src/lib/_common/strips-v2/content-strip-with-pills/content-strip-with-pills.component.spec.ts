@@ -14,6 +14,7 @@ describe('ContentStripWithPillsComponent', () => {
 
     fixture = TestBed.createComponent(ContentStripWithPillsComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('pills', []);
     fixture.detectChanges();
   });
 

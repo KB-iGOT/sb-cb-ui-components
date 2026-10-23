@@ -20,6 +20,6 @@ export class PickerContentService {
   }
 
   getSearchConfigs(): Promise<ISearchConfig> {
-    return this.http.get<ISearchConfig>(`${this.baseUrl}/feature/search.json`).toPromise()
+    return this.http.get<ISearchConfig>(`${this.baseUrl}/feature/search.json`).toPromise() as Promise<ISearchConfig>
   }
 }
