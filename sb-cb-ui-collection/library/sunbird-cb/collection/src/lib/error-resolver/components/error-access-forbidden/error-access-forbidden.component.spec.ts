@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { RouterTestingModule } from '@angular/router/testing'
 
 import { ErrorAccessForbiddenComponent } from './error-access-forbidden.component'
 
@@ -9,6 +10,7 @@ describe('ErrorAccessForbiddenComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorAccessForbiddenComponent],
+      imports: [RouterTestingModule],
     })
     .compileComponents()
   }))

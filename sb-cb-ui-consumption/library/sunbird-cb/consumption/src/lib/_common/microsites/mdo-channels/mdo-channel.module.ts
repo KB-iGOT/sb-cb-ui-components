@@ -9,19 +9,17 @@ import { HighlightsOfWeekModule } from '../../highlights-of-week/highlights-of-w
 import { EventsModule } from '../../events/events.module'
 import { SpeakersModule } from '../../speakers/speakers.module'
 
-import {
-  AnnouncementsModule,
-  CardsModule,
-  CommonMethodsService,
-  CommonStripModule,
-  CompetencyPassbookModule,
-  CompetencyPassbookMdoModule,
-  ContentStripWithTabsLibModule,
-  DataPointsModule,
-  SlidersLibModule,
-  TopLearnersModule,
-  CbpPlanModule
-} from './../../../../public-api'
+import { AnnouncementsModule } from '../../announcements/announcements.module'
+import { CardsModule } from '../../cards/cards.module'
+import { CommonMethodsService } from '../../../_services/common-methods.service'
+import { CommonStripModule } from '../../common-strip/common-strip.module'
+import { CompetencyPassbookModule } from '../../competency-passbook/competency-passbook.module'
+import { CompetencyPassbookMdoModule } from '../../competency-passbook-mdo/competency-passbook-mdo.module'
+import { ContentStripWithTabsLibModule } from '../../content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'
+import { DataPointsModule } from '../../data-points/data-points.module'
+import { SlidersLibModule } from '../../sliders/sliders.module'
+import { TopLearnersModule } from '../../top-learners/top-learners.module'
+import { CbpPlanModule } from '../../cbp-plan/cbp-plan.module'
 import { MdoChannelV2Component } from './mdo-channel-v2/mdo-channel-v2.component'
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { UserProgressModule } from '../../user-progress/user-progress.module'

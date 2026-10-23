@@ -16,6 +16,7 @@ describe('BtnChannelAnalyticsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BtnChannelAnalyticsComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core'
 import { Router } from '@angular/router'
 import { VIEWER_ROUTE_FROM_MIME } from '../../../_services/viewer-route-util'
-import { NsContent, ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { NsContent } from '@sunbird-cb/utils-v2'
 import { saveAs } from 'file-saver'
 
 @Component({

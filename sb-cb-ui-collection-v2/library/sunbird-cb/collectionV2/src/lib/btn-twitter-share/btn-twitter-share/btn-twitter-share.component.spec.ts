@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnTwitterShareComponent } from './btn-twitter-share.component'
 
@@ -9,6 +10,7 @@ describe('BtnTwitterShareComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnTwitterShareComponent],
+      imports: [HttpClientTestingModule],
     }).compileComponents()
   }))
 

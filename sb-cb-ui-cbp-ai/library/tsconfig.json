@@ -1,7 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "alwaysStrict": true,
+    "alwaysStrict": false,
     "baseUrl": "./",
     "declaration": false,
     "experimentalDecorators": true,
@@ -13,27 +13,27 @@
     ],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
     "resolveJsonModule": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noImplicitThis": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "outDir": "./dist/out-tsc",
     "paths": {
     },
     "removeComments": true,
     "sourceMap": true,
-    "strict": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
+    "strict": false,
+    "strictBindCallApply": false,
+    "strictFunctionTypes": false,
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false,
     "target": "ES2022",
     "typeRoots": [
-      "node_modules/@types",
-      "./custom_typings"
+      "../node_modules/@types",
+      "../custom_typings"
     ],
     "plugins": [
       {

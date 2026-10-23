@@ -13,6 +13,7 @@
     ],
     "module": "esnext",
     "moduleResolution": "bundler",
+    "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,

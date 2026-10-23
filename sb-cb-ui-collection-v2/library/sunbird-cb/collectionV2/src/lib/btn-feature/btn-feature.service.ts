@@ -10,7 +10,7 @@ export class BtnFeatureService {
     private http: HttpClient,
   ) { }
 
-  getBadgeCount(endpoint: string) {
-    return this.http.get<number>(endpoint).toPromise()
+  getBadgeCount(endpoint: string): Promise<number> {
+    return this.http.get<number>(endpoint).toPromise() as Promise<number>
   }
 }

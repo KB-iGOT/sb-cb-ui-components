@@ -106,16 +106,18 @@ describe('DynamicSidebarComponent', () => {
   })
 
   describe('onNavItemClicked', () => {
-    it('should emit the code via navItemClicked', () => {
+    it('should emit the event via navItemClicked', () => {
       const spy = jest.spyOn(component.navItemClicked, 'emit')
-      component.onNavItemClicked('home')
-      expect(spy).toHaveBeenCalledWith('home')
+      const event = { code: 'home', subType: '' }
+      component.onNavItemClicked(event)
+      expect(spy).toHaveBeenCalledWith(event)
     })
 
     it('should emit different codes', () => {
       const spy = jest.spyOn(component.navItemClicked, 'emit')
-      component.onNavItemClicked('profile')
-      expect(spy).toHaveBeenCalledWith('profile')
+      const event = { code: 'profile', subType: '' }
+      component.onNavItemClicked(event)
+      expect(spy).toHaveBeenCalledWith(event)
     })
   })
 

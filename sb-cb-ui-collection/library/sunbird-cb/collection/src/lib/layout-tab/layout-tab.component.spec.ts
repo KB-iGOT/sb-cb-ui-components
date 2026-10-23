@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { RouterTestingModule } from '@angular/router/testing'
 
 import { LayoutTabComponent } from './layout-tab.component'
 
@@ -9,6 +10,7 @@ describe('LayoutTabComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [LayoutTabComponent],
+      imports: [RouterTestingModule],
     })
     .compileComponents()
   }))

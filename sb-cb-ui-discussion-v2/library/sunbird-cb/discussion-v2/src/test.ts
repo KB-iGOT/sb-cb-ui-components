@@ -3,6 +3,9 @@
 import 'zone.js'
 import 'zone.js/testing'
 import { getTestBed } from '@angular/core/testing'
+
+(globalThis as any).$localize = (messageParts: TemplateStringsArray, ...expressions: any[]) =>
+  messageParts.reduce((acc, part, i) => acc + part + (i < expressions.length ? expressions[i] : ''), '')
 import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting,

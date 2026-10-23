@@ -1,187 +1,163 @@
-import { UntypedFormBuilder, UntypedFormGroup, UntypedFormControl } from '@angular/forms'
+import { UntypedFormBuilder } from '@angular/forms'
 import { MatSnackBar } from '@angular/material/snack-bar'
+import { ChangeDetectorRef } from '@angular/core'
 import { AddUsersFormMetaComponent } from './add-users-form-meta.component'
-import { ConfigurationsService } from '@ws-widget/utils/src/public-api'
-import { MyContentService } from '../../services/my-content.service'
-import { LoaderService } from '@ws/author/src/lib/services/loader.service'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { UserService } from '../user.service'
 import { of, throwError } from 'rxjs'
 
 describe('AddUsersFormMetaComponent', () => {
   let component: AddUsersFormMetaComponent
-  let mockFormBuilder: jest.Mocked<UntypedFormBuilder>
-  let mockConfigSvc: jest.Mocked<ConfigurationsService>
-  let mockContentService: jest.Mocked<MyContentService>
-  let mockLoaderService: jest.Mocked<LoaderService>
-  let mockSnackBar: jest.Mocked<MatSnackBar>
-  let mockChangeDetector: jest.Mocked<any>
-  let mockForm: UntypedFormGroup
+  let mockFormBuilder: UntypedFormBuilder
+  let mockConfigSvc: any
+  let mockUserService: any
+  let mockSnackBar: any
+  let mockChangeDetector: any
+  let mockEnvironment: any
 
   beforeEach(() => {
-    // Setup mock form
-    mockForm = new UntypedFormGroup({
-      firstName: new UntypedFormControl(''),
-      email: new UntypedFormControl('test@test.com'),
-      channel: new UntypedFormControl('Test Department'),
-      mobileNumber: new UntypedFormControl('1234567890'),
-      channelId: new UntypedFormControl('test-channel'),
-      selectedRoles: new UntypedFormControl(['ROLE_1'])
-    })
-
-    mockFormBuilder = {
-      group: jest.fn().mockReturnValue(mockForm)
-    } as any
+    mockFormBuilder = new UntypedFormBuilder()
 
     mockConfigSvc = {
       userProfile: {
         departmentName: 'Test Department',
-        rootOrgId: 'test-org'
+        rootOrgId: 'test-org',
       },
       unMappedUser: {
         rootOrg: {
-          channel: 'test-channel'
-        }
-      }
-    } as any
+          channel: 'test-channel',
+        },
+      },
+    }
 
-    mockContentService = {
-      getExistingUserData: jest.fn(),
-      createNewUserApi: jest.fn(),
-      assignUserRoleApi: jest.fn()
-    } as any
-
-    mockLoaderService = {
-      changeLoad: {
-        next: jest.fn()
-      }
-    } as any
+    mockUserService = {
+      getUserById: jest.fn().mockReturnValue(of(null)),
+      addUserToRole: jest.fn().mockReturnValue(of(null)),
+    }
 
     mockSnackBar = {
-      openFromComponent: jest.fn()
-    } as any
+      openFromComponent: jest.fn(),
+    }
 
     mockChangeDetector = {
-      detectChanges: jest.fn()
+      detectChanges: jest.fn(),
+    } as unknown as ChangeDetectorRef
+
+    mockEnvironment = {
+      portalRoles: ['ADMIN', 'USER', 'SPV_PUBLISHER'],
     }
 
     component = new AddUsersFormMetaComponent(
       mockFormBuilder,
-      mockConfigSvc,
-      mockContentService,
-      mockLoaderService,
-      mockSnackBar,
-      mockChangeDetector
-    );
+      mockConfigSvc as ConfigurationsService,
+      mockUserService as UserService,
+      mockSnackBar as MatSnackBar,
+      mockChangeDetector,
+      mockEnvironment,
+    )
+    component.userId = 'test-id'
+  })
 
-    // Mock environment.portalRoles
-    (component as any).listOfRoles = ['ADMIN', 'USER', 'SPV_PUBLISHER']
+  it('should create', () => {
+    expect(component).toBeTruthy()
   })
 
   describe('ngOnInit', () => {
-    it('should initialize form for new user when selectedAction is createNew', () => {
-      component.selectedAction = { type: 'createNew' }
+    it('should filter out SPV_PUBLISHER from portal roles and load user values', () => {
       component.ngOnInit()
-      expect(mockFormBuilder.group).toHaveBeenCalled()
-    })
-
-    it('should call assignValues for existing user when selectedAction is existingUser', () => {
-      const assignValuesSpy = jest.spyOn(component, 'assignValues').mockImplementation(() => Promise.resolve())
-      component.selectedAction = { type: 'existingUser', userId: 'test-id' }
-      component.ngOnInit()
-      expect(assignValuesSpy).toHaveBeenCalledWith('test-id')
+      expect(component.listOfRoles).toEqual(['ADMIN', 'USER'])
+      expect(mockUserService.getUserById).toHaveBeenCalledWith('test-id')
     })
   })
 
-  describe('emailVerification', () => {
-    it('should set emailLengthVal to true when local part exceeds 64 characters', () => {
-      const longEmail = 'a'.repeat(65) + '@test.com'
-      component.emailVerification(longEmail)
-      expect(component.emailLengthVal).toBeTruthy()
-    })
-
-    it('should set emailLengthVal to true when domain part exceeds 255 characters', () => {
-      const longEmail = 'test@' + 'a'.repeat(256) + '.com'
-      component.emailVerification(longEmail)
-      expect(component.emailLengthVal).toBeTruthy()
-    })
-
-    it('should set emailLengthVal to false for valid email length', () => {
-      component.emailVerification('test@test.com')
-      expect(component.emailLengthVal).toBeFalsy()
+  describe('ngAfterViewInit', () => {
+    it('should trigger change detection', () => {
+      component.ngAfterViewInit()
+      expect(mockChangeDetector.detectChanges).toHaveBeenCalled()
     })
   })
 
-  describe('createUser', () => {
+  describe('actionBtn', () => {
+    it('should emit cancel event', () => {
+      const emitSpy = jest.spyOn(component.updateEvent, 'emit')
+      component.actionBtn()
+      expect(emitSpy).toHaveBeenCalledWith('cancel')
+    })
+  })
+
+  describe('assignValues', () => {
+    it('should populate the form when user data is found', async () => {
+      mockUserService.getUserById.mockReturnValue(of({
+        firstName: 'John',
+        channel: 'Test Department',
+        maskedEmail: 't***@test.com',
+        phone: '1234567890',
+        organisations: [{ roles: ['ROLE_1'] }],
+      }))
+
+      await component.assignValues('test-id')
+
+      expect(component.userCompleteData).toBeTruthy()
+      expect(component.contentForm.get('firstName')?.value).toBe('John')
+    })
+
+    it('should show a fail toast when no user data is found', async () => {
+      mockUserService.getUserById.mockReturnValue(of(null))
+
+      await component.assignValues('test-id')
+
+      expect(mockSnackBar.openFromComponent).toHaveBeenCalled()
+    })
+  })
+
+  describe('updateuser', () => {
     beforeEach(() => {
-      component.contentForm = mockForm
+      component.createFormContent()
     })
 
-    it('should show error message when form is invalid', () => {
-      mockForm.setErrors({ 'invalid': true })
-      component.createUser()
-      expect(mockSnackBar.openFromComponent).toHaveBeenCalled()
-      expect(component.disableCreateButton).toBeTruthy()
-    })
-
-    it('should create user successfully', () => {
-      mockForm.setErrors(null)
-      mockContentService.createNewUserApi.mockReturnValue(of({ success: true }))
-
-      component.createUser()
-
-      expect(mockLoaderService.changeLoad.next).toHaveBeenCalledWith(true)
-      expect(mockContentService.createNewUserApi).toHaveBeenCalled()
-      expect(component.disableCreateButton).toBeFalsy()
-    })
-
-    it('should handle error when email already exists', () => {
-      mockForm.setErrors(null)
-      mockContentService.createNewUserApi.mockReturnValue(
-        throwError({ error: { params: { errmsg: 'email already exists' } } })
-      )
-
-      component.createUser()
-
-      expect(mockSnackBar.openFromComponent).toHaveBeenCalled()
-    })
-  })
-
-  describe('updateUser', () => {
-    beforeEach(() => {
-      component.contentForm = mockForm
-    })
-
-    it('should show up-to-date message when roles haven\'t changed', async () => {
-      component.userCompleteData = {
-        organisations: [{ roles: ['ROLE_1'] }]
-      }
-
-      await component.updateuser()
-      expect(mockSnackBar.openFromComponent).toHaveBeenCalled()
-    })
-
-    it('should call assignRoleToUser when roles have changed', async () => {
+    it('should show up-to-date message when roles have not changed', () => {
       component.userCompleteData = {
         organisations: [{ roles: ['ROLE_1'] }],
-        userId: 'test-id'
       }
-      mockForm.get('selectedRoles')?.setValue(['ROLE_2'])
+      component.contentForm.get('selectedRoles')?.setValue(['ROLE_1'])
 
-      mockContentService.assignUserRoleApi.mockReturnValue(
-        of({ params: { status: 'SUCCESS' } })
-      )
+      component.updateuser()
 
-      await component.updateuser()
-      expect(mockContentService.assignUserRoleApi).toHaveBeenCalled()
+      expect(mockSnackBar.openFromComponent).toHaveBeenCalled()
+      expect(mockUserService.addUserToRole).not.toHaveBeenCalled()
+    })
+
+    it('should assign new roles when roles have changed', () => {
+      component.userCompleteData = {
+        userId: 'test-id',
+        organisations: [{ roles: ['ROLE_1'] }],
+      }
+      component.contentForm.get('selectedRoles')?.setValue(['ROLE_2'])
+      mockUserService.addUserToRole.mockReturnValue(of({ params: { status: 'SUCCESS' } }))
+
+      component.updateuser()
+
+      expect(mockUserService.addUserToRole).toHaveBeenCalled()
     })
   })
 
-  describe('numericOnly', () => {
-    it('should return true for numeric input', () => {
-      expect(component.numericOnly({ key: '5' })).toBeTruthy()
+  describe('assignRoleToUser', () => {
+    it('should show success toast and emit updated event on success', async () => {
+      const emitSpy = jest.spyOn(component.updateEvent, 'emit')
+      mockUserService.addUserToRole.mockReturnValue(of({ params: { status: 'SUCCESS' } }))
+
+      await component.assignRoleToUser('test-id', ['ROLE_1'])
+
+      expect(mockSnackBar.openFromComponent).toHaveBeenCalled()
+      expect(emitSpy).toHaveBeenCalledWith('updated')
     })
 
-    it('should return false for non-numeric input', () => {
-      expect(component.numericOnly({ key: 'a' })).toBeFalsy()
+    it('should show fail toast when the request errors', async () => {
+      mockUserService.addUserToRole.mockReturnValue(throwError(() => new Error('failed')))
+
+      await component.assignRoleToUser('test-id', ['ROLE_1'])
+
+      expect(mockSnackBar.openFromComponent).toHaveBeenCalled()
     })
   })
 })

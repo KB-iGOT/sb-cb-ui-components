@@ -16,6 +16,7 @@ describe('FooterComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(FooterComponent);
     component = fixture.componentInstance;
+    component.footerDetails = {};
     fixture.detectChanges();
   });
 

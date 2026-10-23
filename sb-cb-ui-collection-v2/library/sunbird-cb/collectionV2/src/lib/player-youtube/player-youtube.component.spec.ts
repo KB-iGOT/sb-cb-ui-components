@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { RouterTestingModule } from '@angular/router/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { PlayerYoutubeComponent } from './player-youtube.component'
 
@@ -9,6 +11,10 @@ describe('PlayerYoutubeComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [PlayerYoutubeComponent],
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      providers: [
+      { provide: 'environment', useValue: {} }
+    ],
     })
     .compileComponents()
   }))

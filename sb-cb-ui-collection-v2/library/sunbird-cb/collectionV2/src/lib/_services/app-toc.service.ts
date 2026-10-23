@@ -46,7 +46,7 @@ export namespace NsAppToc {
 })
 export class AppTocService {
   analyticsReplaySubject: Subject<any> = new Subject()
-  batchReplaySubject: Subject<any> = new Subject()
+  batchReplaySubject: Subject<void> = new Subject()
   setBatchDataSubject: Subject<any> = new Subject()
   getSelectedBatch: Subject<any> = new Subject()
   setWFDataSubject: Subject<any> = new Subject()

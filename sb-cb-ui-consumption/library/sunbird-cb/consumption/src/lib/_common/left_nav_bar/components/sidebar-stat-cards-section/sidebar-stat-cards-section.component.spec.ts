@@ -7,6 +7,7 @@ const mockLangtranslations = {
   languageSelectedObservable: new Subject(),
   translateActualLabel: jest.fn((label: string) => label)
 } as any
+const mockCdr = { markForCheck: jest.fn() } as any
 
 describe('SidebarStatCardsSectionComponent', () => {
   let component: SidebarStatCardsSectionComponent
@@ -16,7 +17,6 @@ describe('SidebarStatCardsSectionComponent', () => {
     sectionTitle: 'My Stats',
     collapsible: true,
     showViewAll: true,
-    maxItemsVisible: 2,
     items: [
       { headerLabel: 'Rank', value: '#5', iconName: 'emoji_events' },
       { headerLabel: 'Points', value: '1200', iconName: 'stars' },
@@ -26,19 +26,19 @@ describe('SidebarStatCardsSectionComponent', () => {
   }
 
   beforeEach(() => {
-    component = new SidebarStatCardsSectionComponent(mockTranslateService, mockLangtranslations)
+    component = new SidebarStatCardsSectionComponent(mockTranslateService, mockLangtranslations, mockCdr)
     component.section = mockSection
+    component.detailsChanged = false
     component.isOpen = true
     component.showContent = true
+    component.ngOnChanges({
+      section: { previousValue: undefined, currentValue: mockSection, firstChange: true, isFirstChange: () => true }
+    } as any)
   })
 
   describe('initialization', () => {
     it('should create the component', () => {
       expect(component).toBeTruthy()
-    })
-
-    it('should have isExpanded signal default to false', () => {
-      expect(component.isExpanded()).toBe(false)
     })
 
     it('should accept section input', () => {
@@ -55,116 +55,53 @@ describe('SidebarStatCardsSectionComponent', () => {
   })
 
   describe('visibleItems', () => {
-    it('should return limited items when showViewAll is true and not expanded', () => {
-      const items = component.visibleItems()
-      expect(items.length).toBe(2)
+    it('should return all items from the section', () => {
+      expect(component.visibleItems()).toEqual(mockSection.items)
     })
 
-    it('should return all items when expanded', () => {
-      component.isExpanded.set(true)
-      const items = component.visibleItems()
-      expect(items.length).toBe(4)
-    })
-
-    it('should return all items when showViewAll is false', () => {
-      component.section = { ...mockSection, showViewAll: false } as any
-      const items = component.visibleItems()
-      expect(items.length).toBe(4)
-    })
-
-    it('should return empty array when section items is null', () => {
-      component.section = { ...mockSection, items: null } as any
-      const items = component.visibleItems()
-      expect(items).toEqual([])
-    })
-
-    it('should return empty array when section items is undefined', () => {
-      component.section = { ...mockSection, items: undefined } as any
-      const items = component.visibleItems()
-      expect(items).toEqual([])
-    })
-
-    it('should use DEFAULTS.MAX_ITEMS_VISIBLE when maxItemsVisible is not set', () => {
-      component.section = { ...mockSection, maxItemsVisible: undefined } as any
-      const items = component.visibleItems()
-      // DEFAULTS.MAX_ITEMS_VISIBLE is 3
-      expect(items.length).toBe(3)
-    })
-
-    it('should use maxItemsVisible from config when set', () => {
-      component.section = { ...mockSection, maxItemsVisible: 1 } as any
-      const items = component.visibleItems()
-      expect(items.length).toBe(1)
-    })
-
-    it('should return all items when maxItemsVisible is null', () => {
-      component.section = { ...mockSection, maxItemsVisible: null } as any
-      const items = component.visibleItems()
-      expect(items.length).toBe(4)
+    it('should return empty array when section items is missing', () => {
+      component.section = { ...mockSection, items: undefined }
+      component.ngOnChanges({
+        section: { previousValue: mockSection, currentValue: component.section, firstChange: false, isFirstChange: () => false }
+      } as any)
+      expect(component.visibleItems()).toEqual([])
     })
   })
 
   describe('shouldShowViewAll', () => {
-    it('should return true when items exceed maxItemsVisible', () => {
-      const result = component.shouldShowViewAll()
-      expect(result).toBe(true)
+    it('should reflect the section showViewAll flag', () => {
+      expect(component.shouldShowViewAll()).toBe(true)
     })
 
     it('should return false when showViewAll is false', () => {
-      component.section = { ...mockSection, showViewAll: false } as any
-      const result = component.shouldShowViewAll()
-      expect(result).toBe(false)
-    })
-
-    it('should return false when items is null', () => {
-      component.section = { ...mockSection, items: null } as any
-      const result = component.shouldShowViewAll()
-      expect(result).toBe(false)
-    })
-
-    it('should return false when items is undefined', () => {
-      component.section = { ...mockSection, items: undefined } as any
-      const result = component.shouldShowViewAll()
-      expect(result).toBe(false)
-    })
-
-    it('should return false when items length is less than maxItemsVisible', () => {
-      component.section = {
-        ...mockSection,
-        maxItemsVisible: 10
-      } as any
-      const result = component.shouldShowViewAll()
-      expect(result).toBe(false)
-    })
-
-    it('should return false when items length equals maxItemsVisible', () => {
-      component.section = {
-        ...mockSection,
-        maxItemsVisible: 4
-      } as any
-      const result = component.shouldShowViewAll()
-      expect(result).toBe(false)
+      component.section = { ...mockSection, showViewAll: false }
+      component.ngOnChanges({
+        section: { previousValue: mockSection, currentValue: component.section, firstChange: false, isFirstChange: () => false }
+      } as any)
+      expect(component.shouldShowViewAll()).toBe(false)
     })
   })
 
-  describe('toggleViewAll', () => {
-    it('should toggle isExpanded from false to true', () => {
-      expect(component.isExpanded()).toBe(false)
-      component.toggleViewAll()
-      expect(component.isExpanded()).toBe(true)
+  describe('onViewAllClick', () => {
+    it('should emit itemClicked with the section viewAllKey', () => {
+      const emitSpy = jest.spyOn(component.itemClicked, 'emit')
+      component.section = { ...mockSection, viewAllKey: 'stats' }
+      component.onViewAllClick()
+      expect(emitSpy).toHaveBeenCalledWith({ code: 'stats', subType: '' })
     })
 
-    it('should toggle isExpanded from true to false', () => {
-      component.isExpanded.set(true)
-      component.toggleViewAll()
-      expect(component.isExpanded()).toBe(false)
+    it('should emit an empty code when viewAllKey is absent', () => {
+      const emitSpy = jest.spyOn(component.itemClicked, 'emit')
+      component.onViewAllClick()
+      expect(emitSpy).toHaveBeenCalledWith({ code: '', subType: '' })
     })
+  })
 
-    it('should toggle multiple times correctly', () => {
-      component.toggleViewAll()
-      component.toggleViewAll()
-      component.toggleViewAll()
-      expect(component.isExpanded()).toBe(true)
+  describe('translateLabels', () => {
+    it('should delegate to MultilingualTranslationsService', () => {
+      const result = component.translateLabels('Rank', 'header')
+      expect(mockLangtranslations.translateActualLabel).toHaveBeenCalledWith('Rank', 'header', '')
+      expect(result).toBe('Rank')
     })
   })
 

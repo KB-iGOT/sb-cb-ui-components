@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TranslateModule } from '@ngx-translate/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { SidebarFooterComponent } from './sidebar-footer.component';
 
@@ -8,7 +11,7 @@ describe('SidebarFooterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SidebarFooterComponent]
+      imports: [SidebarFooterComponent, TranslateModule.forRoot(), HttpClientTestingModule, RouterTestingModule]
     })
     .compileComponents();
 

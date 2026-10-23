@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { CardLearnComponent } from './card-learn.component'
 
@@ -9,6 +10,7 @@ describe('CardLearnComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [CardLearnComponent],
+      imports: [HttpClientTestingModule],
     })
       .compileComponents()
   }))

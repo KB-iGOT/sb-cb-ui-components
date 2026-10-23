@@ -16,6 +16,7 @@ describe('BtnKbAnalyticsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BtnKbAnalyticsComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { ContentProgressComponent } from './content-progress.component'
 
@@ -9,6 +10,7 @@ describe('ContentProgressComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ContentProgressComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { GapAnalysisRecommendedCourseComponent } from './gap-analysis-recommended-course.component';
 
@@ -8,7 +10,9 @@ describe('GapAnalysisRecommendedCourseComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [GapAnalysisRecommendedCourseComponent]
+      imports: [HttpClientTestingModule],
+      declarations: [GapAnalysisRecommendedCourseComponent],
+      schemas: [NO_ERRORS_SCHEMA]
     });
     fixture = TestBed.createComponent(GapAnalysisRecommendedCourseComponent);
     component = fixture.componentInstance;

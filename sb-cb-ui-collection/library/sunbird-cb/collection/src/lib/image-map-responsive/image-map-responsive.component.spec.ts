@@ -16,6 +16,7 @@ describe('ImageMapResponsiveComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ImageMapResponsiveComponent)
     component = fixture.componentInstance
+    component.widgetData = { map: [], externalData: null } as any
     fixture.detectChanges()
   })
 

@@ -57,6 +57,6 @@ export class DynamicAssetsLoaderService {
         }),
         map(() => true),
       )
-      .toPromise()
+      .toPromise() as Promise<boolean>
   }
 }

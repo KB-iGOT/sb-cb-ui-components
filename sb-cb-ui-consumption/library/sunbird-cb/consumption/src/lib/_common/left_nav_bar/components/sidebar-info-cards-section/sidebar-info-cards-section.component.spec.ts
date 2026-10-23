@@ -46,7 +46,12 @@ describe('SidebarInfoCardsSectionComponent', () => {
   }
 
   beforeEach(() => {
-    component = new SidebarInfoCardsSectionComponent(mockTranslateService, mockLangtranslations)
+    component = new SidebarInfoCardsSectionComponent(
+      mockTranslateService,
+      mockLangtranslations,
+      { markForCheck: jest.fn() } as any,
+      { setRouteData: jest.fn() } as any
+    )
     component.section = mockSection
     component.isOpen = true
     component.showContent = true

@@ -18,26 +18,26 @@
                         {{getFullName(review)}}
                     </ng-container>
                     <ng-container *ngIf="!review?.firstName">
-                        {{review.user_id}}
+                        {{review?.user_id}}
                     </ng-container>
                 </div>
                 <div class="flex items-center ">
-                    <span class="margin-right-xs ws-mat-orange-text mat-body-2"> {{review.rating}} </span>
+                    <span class="margin-right-xs ws-mat-orange-text mat-body-2"> {{review?.rating}} </span>
                     <mat-icon class="comments-rating mr-1 mat-icon material-icons ws-mat-black16-text"
-                        [ngClass]="{'ws-mat-orange-text': getRatingIconClass(rating, review.rating )}"
+                        [ngClass]="{'ws-mat-orange-text': getRatingIconClass(rating, review?.rating)}"
                         *ngFor="let rating of [1, 2, 3, 4, 5]">
-                        {{ getRatingIcon(rating, review.rating) }}</mat-icon>
+                        {{ getRatingIcon(rating, review?.rating) }}</mat-icon>
                     <!--  <span i18n>from</span> -->
-                    <span class="margin-left-s  ws-mat-black60-text mat-body-2" *ngIf="review.date"> {{review.date |
+                    <span class="margin-left-s  ws-mat-black60-text mat-body-2" *ngIf="review?.date"> {{review?.date |
                         pipeRelativeTime}}
                     </span>
-                    <span class="margin-left-s  ws-mat-black60-text mat-body-2" *ngIf="review.updatedon">
-                        {{review.updatedon |
+                    <span class="margin-left-s  ws-mat-black60-text mat-body-2" *ngIf="review?.updatedon">
+                        {{review?.updatedon |
                         pipeRelativeTime}}
                     </span>
                 </div>
                 <div class="margin-top-m mat-body-2">
-                    {{review.review}}
+                    {{review?.review}}
                 </div>
             </div>
         </div>

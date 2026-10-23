@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { UserImageComponent } from './user-image.component'
 
@@ -9,6 +10,7 @@ describe('UserImageComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [UserImageComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

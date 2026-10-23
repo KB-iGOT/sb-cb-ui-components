@@ -16,6 +16,7 @@ describe('LeftMenuV2Component', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(LeftMenuV2Component);
     component = fixture.componentInstance;
+    component.widgetData = {} as any;
     fixture.detectChanges();
   });
 

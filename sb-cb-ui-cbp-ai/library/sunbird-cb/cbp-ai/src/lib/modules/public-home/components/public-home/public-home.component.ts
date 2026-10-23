@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ABOUT_US, CONFERENCE_DATA, DASHBOARD_ANALYTICS_LIST, FEATURES_COURSES, FOOTER_DETAILS, FOOTER_PROVIDER, HEADER_DATA, HOW_TO_CARD_LIST, IGON_VISION_DETAILS, INFOCUS_CARD, MOBILE_APP_DOWNLOADS_DETAILS, MOBILE_VIEW_APP_DOWNLOADS_DETAILS, NAV_FOOTER_DETAILS, NEWSROOM_COURSES, ORGANISATION_PARTNERS, PHOTO_GALLARY, QUICK_WALKTHROUGH_DETAILS, REGISTER_DETAILS, SOLUTIONS_SPACE, STAT_ARR, TESTIMONIALS, TOP_PROVIDERS, VIDEO_CONF, WHAT_IS_CARD } from 'src/app/modules/shared/constant/app.constant';
+import { ABOUT_US, CONFERENCE_DATA, DASHBOARD_ANALYTICS_LIST, FEATURES_COURSES, FOOTER_DETAILS, FOOTER_PROVIDER, HEADER_DATA, HOW_TO_CARD_LIST, IGON_VISION_DETAILS, INFOCUS_CARD, MOBILE_APP_DOWNLOADS_DETAILS, MOBILE_VIEW_APP_DOWNLOADS_DETAILS, NAV_FOOTER_DETAILS, NEWSROOM_COURSES, ORGANISATION_PARTNERS, PHOTO_GALLARY, QUICK_WALKTHROUGH_DETAILS, REGISTER_DETAILS, SOLUTIONS_SPACE, STAT_ARR, TESTIMONIALS, TOP_PROVIDERS, VIDEO_CONF, WHAT_IS_CARD } from '../../../shared/constant/app.constant';
 
 import { DomSanitizer } from '@angular/platform-browser';
 import { SharedService } from '../../../shared/services/shared.service';
@@ -112,7 +112,7 @@ export class PublicHomeComponent implements OnInit {
         }
       })
     }
-    if (this.statArr.length) {
+    if (this.configDetails && this.statArr.length) {
       this.statArr[0].count = this.configDetails.karmayogiOnboarded;
       this.statArr[1].count = this.configDetails.courses;
       this.statArr[2].count = this.configDetails.courseProgramCompletionCount;

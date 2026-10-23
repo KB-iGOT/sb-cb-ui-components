@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { IntranetSelectorComponent } from './intranet-selector.component'
 
@@ -9,6 +10,7 @@ describe('IntranetSelectorComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [IntranetSelectorComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

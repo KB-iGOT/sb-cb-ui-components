@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 
 import { DialogSocialDeletePostComponent } from './dialog-social-delete-post.component'
 
@@ -9,6 +12,12 @@ describe('DialogSocialDeletePostComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [DialogSocialDeletePostComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+      { provide: MatDialogRef, useValue: { close: () => {} } },
+      { provide: MAT_DIALOG_DATA, useValue: {} }
+    ],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

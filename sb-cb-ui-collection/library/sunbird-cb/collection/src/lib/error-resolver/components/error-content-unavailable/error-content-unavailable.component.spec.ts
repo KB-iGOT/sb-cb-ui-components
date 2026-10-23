@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { RouterTestingModule } from '@angular/router/testing'
 
 import { ErrorContentUnavailableComponent } from './error-content-unavailable.component'
 
@@ -9,6 +10,7 @@ describe('ErrorContentUnavailableComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorContentUnavailableComponent],
+      imports: [RouterTestingModule],
     })
     .compileComponents()
   }))

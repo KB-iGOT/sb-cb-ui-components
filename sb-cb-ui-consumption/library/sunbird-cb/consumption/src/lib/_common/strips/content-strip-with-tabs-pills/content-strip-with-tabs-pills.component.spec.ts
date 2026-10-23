@@ -82,7 +82,10 @@ describe("ContentStripWithTabsPillsComponent", () => {
       {} as MultilingualTranslationsService,
       {} as WidgetEnrollService,
       {} as MatDialog,
-      {} as MatSnackBar
+      {} as MatSnackBar,
+      {} as any,
+      { watchPlanMap: jest.fn().mockReturnValue(of({})) } as any,
+      {} as any
     );
 
     component.widgetData = {
@@ -145,7 +148,7 @@ describe("ContentStripWithTabsPillsComponent", () => {
 
       // Act
       component.subscribeToTelementry();
-      telemetrySubject.next({ someData: "test" });
+      telemetrySubject.next({ someData: "test", typeOfTelemetry: "cbpPlan" });
 
       // Assert
       setTimeout(() => {
@@ -154,6 +157,7 @@ describe("ContentStripWithTabsPillsComponent", () => {
         ).toHaveBeenCalledWith(true);
         expect(emitSpy).toHaveBeenCalledWith({
           someData: "test",
+          typeOfTelemetry: "cbpPlan",
           selectedTab: "test-tab",
           selectedPill: "testpill",
         });
@@ -189,7 +193,7 @@ describe("ContentStripWithTabsPillsComponent", () => {
 
       // Act
       component.subscribeToTelementry();
-      telemetrySubject.next({ someData: "test" });
+      telemetrySubject.next({ someData: "test", typeOfTelemetry: "forYou" });
 
       // Assert
       setTimeout(() => {
@@ -877,7 +881,7 @@ describe("ContentStripWithTabsPillsComponent", () => {
         component.widgetData.strips[0],
         tabEvent,
         true,
-        ["rec1", "rec2"]
+        ["id1", "id2"]
       );
       expect(stripMap.tabs[0].pillsData[0].tabLoading).toBe(false);
     });
@@ -901,6 +905,7 @@ describe("ContentStripWithTabsPillsComponent", () => {
         setRecommendedIds: jest.fn(),
         setFeedbackData: jest.fn(),
         searchContentSearch_PROD: jest.fn().mockReturnValue(of({})),
+        searchV6: jest.fn().mockReturnValue(of({})),
         filterCoursesWithNoRating: jest.fn(),
         saveFeedbackSakshamAI: jest.fn().mockReturnValue(of({})),
         releventNotRelevent$: new Subject(),
@@ -939,7 +944,10 @@ describe("ContentStripWithTabsPillsComponent", () => {
         {} as any,
         mockEnrollService,
         {} as any,
-        mockSnackBar
+        mockSnackBar,
+        {} as any,
+        {} as any,
+        {} as any
       );
     });
 
@@ -986,7 +994,7 @@ describe("ContentStripWithTabsPillsComponent", () => {
         // Arrange
         mockUserService.generateCoursesSakshamAI.mockReturnValue(of(mockResponse));
         mockEnrollService.fetchEnrollContentData.mockReturnValue(of(mockEnrollResponse));
-        mockContentService.searchContentSearch_PROD.mockReturnValue(of(mockSearchResponse));
+        mockContentService.searchV6.mockReturnValue(of(mockSearchResponse));
         mockContentService.filterCoursesWithNoRating.mockReturnValue(['filtered-content']);
   
         // Act
@@ -1010,7 +1018,7 @@ describe("ContentStripWithTabsPillsComponent", () => {
         // Arrange
         mockUserService.getRecommendedCoursesSakshamAI.mockReturnValue(of(mockResponse));
         mockEnrollService.fetchEnrollContentData.mockReturnValue(of(mockEnrollResponse));
-        mockContentService.searchContentSearch_PROD.mockReturnValue(of(mockSearchResponse));
+        mockContentService.searchV6.mockReturnValue(of(mockSearchResponse));
   
         // Act
         await component.generateCourseRecommendation(mockStrip as any, 0, true, 'existing-rec-id');

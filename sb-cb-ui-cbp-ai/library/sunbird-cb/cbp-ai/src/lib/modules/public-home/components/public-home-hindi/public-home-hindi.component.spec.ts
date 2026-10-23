@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { PublicHomeHindiComponent } from './public-home-hindi.component';
 
@@ -8,7 +11,9 @@ describe('PublicHomeHindiComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ PublicHomeHindiComponent ]
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      declarations: [ PublicHomeHindiComponent ],
+      schemas: [NO_ERRORS_SCHEMA]
     })
     .compileComponents();
   }));

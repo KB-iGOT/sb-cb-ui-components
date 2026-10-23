@@ -659,12 +659,11 @@ export class ContentStripWithTabsComponent extends WidgetBaseComponent
     }
   }
 
-  async trendingSearchRequest(strip: NsContentStripWithTabs.IContentStripUnit,
+  async trendingSearchRequest(_strip: NsContentStripWithTabs.IContentStripUnit,
     request: NsContentStripWithTabs.IContentStripUnit['request'],
-    calculateParentStatus: boolean
+    _calculateParentStatus: boolean
   ): Promise<any> {
-    const originalFilters: any = []
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<any>((_resolve, reject) => {
       if (request && request.trendingSearch) {
         // check for the request if it has dynamic values]
         if (request.trendingSearch.request.filters.organisation &&
@@ -1204,7 +1203,7 @@ export class ContentStripWithTabsComponent extends WidgetBaseComponent
     this.activeTabData = tabData
   }
 
-  tracker(index: number, item: any) {
+  tracker(index: number, _item: any) {
     return index
   }
 

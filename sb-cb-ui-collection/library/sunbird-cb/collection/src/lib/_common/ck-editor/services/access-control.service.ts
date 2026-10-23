@@ -65,7 +65,7 @@ export class AccessControlService {
 
   get defaultLogo(): string {
     return this.configService.instanceConfig
-      ? this.configService.instanceConfig.logos.defaultContent
+      ? this.configService.instanceConfig.logos.defaultContent || ''
       : ''
   }
 

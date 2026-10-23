@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { RouterTestingModule } from '@angular/router/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { PlayerBriefComponent } from './player-brief.component'
 
@@ -9,6 +11,7 @@ describe('PlayerBriefComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [PlayerBriefComponent],
+      imports: [HttpClientTestingModule, RouterTestingModule],
     })
     .compileComponents()
   }))

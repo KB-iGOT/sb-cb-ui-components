@@ -9,9 +9,9 @@ export class ErrorResolverService {
   constructor(private http: HttpClient) {}
 
   async getErrorConfig(path: string): Promise<NsError.IErrorConfig> {
-    const errorData: NsError.IErrorConfig = await this.http
+    const errorData = await this.http
       .get<NsError.IErrorConfig>(path)
-      .toPromise()
+      .toPromise() as NsError.IErrorConfig
     return errorData
   }
 }

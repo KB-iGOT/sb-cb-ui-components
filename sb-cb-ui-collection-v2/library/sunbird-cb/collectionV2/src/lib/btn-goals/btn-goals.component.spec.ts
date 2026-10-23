@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnGoalsComponent } from './btn-goals.component'
 
@@ -9,6 +10,7 @@ describe('BtnGoalsComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnGoalsComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

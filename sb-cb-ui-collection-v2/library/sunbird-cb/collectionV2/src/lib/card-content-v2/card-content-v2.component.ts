@@ -57,7 +57,7 @@ export class CardContentV2Component extends WidgetBaseComponent
     private contSvc: WidgetContentService,
     private langtranslations: MultilingualTranslationsService,
     private cbpCacheSvc: CbpPlanCacheService,
-    @Inject('environment') private environment: any
+    @Inject('environment') _environment: any
   ) {
     super()
 

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnContentFeedbackComponent } from './btn-content-feedback.component'
 
@@ -9,6 +10,7 @@ describe('BtnContentFeedbackComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnContentFeedbackComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

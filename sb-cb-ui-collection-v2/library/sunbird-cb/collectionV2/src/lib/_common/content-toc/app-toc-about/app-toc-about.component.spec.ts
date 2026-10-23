@@ -8,80 +8,77 @@
 
 import { Subject } from 'rxjs'
 import { AppTocAboutComponent } from './app-toc-about.component'
-import { RatingService } from '@ws-widget/collection/src/public-api'
-import { LoggerService, ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { TimerService } from '@ws/app/src/lib/routes/app-toc/services/timer.service'
-import { AppTocService } from '@ws/app/src/lib/routes/app-toc/services/app-toc.service'
-import { ResetRatingsService } from '@ws/app/src/lib/routes/app-toc/services/reset-ratings.service'
 
 describe('AppTocAboutComponent', () => {
   let component: AppTocAboutComponent
-  let mockRatingService: jest.Mocked<RatingService>
-  let mockLoggerService: jest.Mocked<LoggerService>
-  let mockTimerService: jest.Mocked<TimerService>
+  let mockRatingService: any
+  let mockLoggerService: any
+  let mockTimerService: any
   let mockDialog: any
   let mockMatSnackBar: any
   let mockLoadCheckService: any
-  let mockTocSvc: jest.Mocked<AppTocService>
-  let mockConfigService: jest.Mocked<ConfigurationsService>
+  let mockTocSvc: any
+  let mockConfigService: any
   let mockRouter: any
   let mockReviewDataService: any
   let mockHandleClaimService: any
-  let mockResetRatingsService: jest.Mocked<ResetRatingsService>
+  let mockResetRatingsService: any
   let mockContentSvc: any
 
   beforeEach(() => {
     // Create mock services
     mockRatingService = {
-      getRatingSummary: jest.fn(),
-      getRatingLookup: jest.fn(),
-      getRatingReply: jest.fn(),
-    } as any
+      getRatingSummary: jasmine.createSpy('getRatingSummary'),
+      getRatingLookup: jasmine.createSpy('getRatingLookup'),
+      getRatingReply: jasmine.createSpy('getRatingReply'),
+    }
 
     mockLoggerService = {
-      error: jest.fn(),
-    } as any
+      error: jasmine.createSpy('error'),
+    }
 
     mockTimerService = {
-      getTimerData: jest.fn().mockReturnValue(new Subject()),
-    } as any
+      getTimerData: jasmine.createSpy('getTimerData').and.returnValue(new Subject()),
+    }
 
     mockDialog = {
-      open: jest.fn(),
+      open: jasmine.createSpy('open'),
     }
 
     mockMatSnackBar = {
-      open: jest.fn(),
+      open: jasmine.createSpy('open'),
     }
 
     mockLoadCheckService = {
-      componentLoaded: jest.fn(),
+      componentLoaded: jasmine.createSpy('componentLoaded'),
     }
 
     mockTocSvc = {
-      getTocStructure: jest.fn(),
-    } as any
+      getTocStructure: jasmine.createSpy('getTocStructure'),
+    }
 
-    mockConfigService = {} as any
+    mockConfigService = {
+      compentency: {},
+    }
 
     mockRouter = {
-      navigate: jest.fn(),
+      navigate: jasmine.createSpy('navigate'),
     }
 
     mockReviewDataService = {
-      setReviewData: jest.fn(),
+      setReviewData: jasmine.createSpy('setReviewData'),
     }
 
     mockHandleClaimService = {
-      setClaimData: jest.fn(),
+      setClaimData: jasmine.createSpy('setClaimData'),
     }
 
     mockResetRatingsService = {
       resetRatings$: new Subject(),
-    } as any
+    }
 
     mockContentSvc = {
-      downloadCert: jest.fn(),
+      downloadCert: jasmine.createSpy('downloadCert'),
     }
 
     // Initialize component
@@ -115,7 +112,7 @@ describe('AppTocAboutComponent', () => {
 
 
     it('should set isMobile to false when window width > 1200', () => {
-      global.innerWidth = 1300
+      window.innerWidth = 1300
       component.ngOnInit()
       expect(component.isMobile).toBeFalsy()
     })
@@ -158,7 +155,7 @@ describe('AppTocAboutComponent', () => {
 
       expect(mockRouter.navigate).toHaveBeenCalledWith(
         ['/app/discussion-forum'],
-        expect.any(Object)
+        jasmine.any(Object)
       )
     })
   })
@@ -177,8 +174,8 @@ describe('AppTocAboutComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should unsubscribe from observables', () => {
-      const destroySpy = jest.spyOn(component['destroySubject$'], 'unsubscribe')
-      const timerUnsubSpy = jest.spyOn(component.timerUnsubscribe, 'unsubscribe')
+      const destroySpy = spyOn(component['destroySubject$'], 'unsubscribe')
+      const timerUnsubSpy = spyOn(component.timerUnsubscribe, 'unsubscribe')
 
       component.ngOnDestroy()
 

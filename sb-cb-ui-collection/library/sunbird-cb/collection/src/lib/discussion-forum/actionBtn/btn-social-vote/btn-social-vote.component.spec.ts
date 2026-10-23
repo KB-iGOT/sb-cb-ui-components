@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BtnSocialVoteComponent } from './btn-social-vote.component'
 
@@ -9,6 +10,7 @@ describe('BtnSocialVoteComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BtnSocialVoteComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

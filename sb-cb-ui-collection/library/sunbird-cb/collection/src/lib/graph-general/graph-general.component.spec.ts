@@ -16,6 +16,7 @@ describe('GraphGeneralComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(GraphGeneralComponent)
     component = fixture.componentInstance
+    component.widgetData = {} as any
     fixture.detectChanges()
   })
 

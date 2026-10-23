@@ -6,31 +6,24 @@
 }
 
 import { CardContentV2Component } from './card-content-v2.component'
-import { EventService, ConfigurationsService, UtilityService, WsEvents } from '@sunbird-cb/utils-v2'
-import { MatSnackBar } from '@angular/material/snack-bar'
-import { Router, ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router'
-import { WidgetContentService } from '../_services/widget-content.service'
-import { Subject } from 'rxjs'
-import _ from 'lodash'
-
-jest.mock('lodash', () => ({
-  camelCase: jest.fn(str => str.toLowerCase()),
-}))
+import { WsEvents } from '@sunbird-cb/utils-v2'
+import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router'
+import { of, Subject } from 'rxjs'
 
 describe('CardContentV2Component', () => {
   let component: CardContentV2Component
-  let mockEventService: jest.Mocked<EventService>
-  let mockConfigService: jest.Mocked<ConfigurationsService>
-  let mockUtilityService: jest.Mocked<UtilityService>
-  let mockSnackBar: jest.Mocked<MatSnackBar>
-  let mockRouter: jest.Mocked<Router>
+  let mockEventService: any
+  let mockConfigService: any
+  let mockUtilityService: any
+  let mockSnackBar: any
+  let mockRouter: any
   let mockActivatedRoute: Partial<ActivatedRoute>
-  let mockContentService: jest.Mocked<WidgetContentService>
+  let mockContentService: any
 
   beforeEach(() => {
     mockEventService = {
-      raiseInteractTelemetry: jest.fn(),
-    } as any
+      raiseInteractTelemetry: jasmine.createSpy('raiseInteractTelemetry'),
+    }
 
     mockConfigService = {
       isIntranetAllowed: false,
@@ -49,12 +42,12 @@ describe('CardContentV2Component', () => {
     } as any
 
     mockSnackBar = {
-      open: jest.fn(),
-    } as any
+      open: jasmine.createSpy('open'),
+    }
 
     mockRouter = {
-      navigate: jest.fn(),
-    } as any
+      navigate: jasmine.createSpy('navigate'),
+    }
 
     mockActivatedRoute = {
       snapshot: {
@@ -74,11 +67,11 @@ describe('CardContentV2Component', () => {
         paramMap: undefined,
         queryParamMap: undefined
       },
-    }
+    } as any
 
     mockContentService = {
-      getResourseLink: jest.fn(),
-    } as any
+      getResourseLink: jasmine.createSpy('getResourseLink'),
+    }
 
     component = new CardContentV2Component(
       mockEventService,
@@ -87,7 +80,10 @@ describe('CardContentV2Component', () => {
       mockSnackBar,
       mockRouter,
       mockActivatedRoute as ActivatedRoute,
-      mockContentService
+      mockContentService,
+      {} as any,
+      { watchPlanMap: jasmine.createSpy('watchPlanMap').and.returnValue(of({})) } as any,
+      {}
     )
   })
 
@@ -153,14 +149,14 @@ describe('CardContentV2Component', () => {
         {
           queryParams: {
             primaryCategory: 'Learning Resource',
-            ...mockActivatedRoute.snapshot.queryParams,
+            ...mockActivatedRoute.snapshot?.queryParams,
           },
         }
       )
     })
 
     it('should handle content service response for non-resource content', async () => {
-      mockContentService.getResourseLink.mockResolvedValue({
+      mockContentService.getResourseLink.and.resolveTo({
         url: '/test-url',
         queryParams: { test: 'param' },
       })
@@ -176,7 +172,7 @@ describe('CardContentV2Component', () => {
     })
 
     it('should show snackbar when content is archived', async () => {
-      mockContentService.getResourseLink.mockResolvedValue(null)
+      mockContentService.getResourseLink.and.resolveTo(null)
 
       await component.getRedirectUrlData(mockContent, false)
 

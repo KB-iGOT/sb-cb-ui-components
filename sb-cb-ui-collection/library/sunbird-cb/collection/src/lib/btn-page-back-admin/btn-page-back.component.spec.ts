@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
-import { BtnPageBackComponent } from './btn-page-back.component'
+import { BtnPageBackAdminComponent } from './btn-page-back.component'
 
-describe('BtnPageBackComponent', () => {
-  let component: BtnPageBackComponent
-  let fixture: ComponentFixture<BtnPageBackComponent>
+describe('BtnPageBackAdminComponent', () => {
+  let component: BtnPageBackAdminComponent
+  let fixture: ComponentFixture<BtnPageBackAdminComponent>
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [BtnPageBackComponent],
+      declarations: [BtnPageBackAdminComponent],
     })
     .compileComponents()
   }))
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(BtnPageBackComponent)
+    fixture = TestBed.createComponent(BtnPageBackAdminComponent)
     component = fixture.componentInstance
     fixture.detectChanges()
   })

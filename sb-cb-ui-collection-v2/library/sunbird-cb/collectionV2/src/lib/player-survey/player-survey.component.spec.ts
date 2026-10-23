@@ -1,21 +1,22 @@
 import { of, Subject } from 'rxjs'
+import { FormBuilder } from '@angular/forms'
 import { PlayerSurveyComponent } from './player-survey.component'
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router'
 import { EventService, ConfigurationsService, WsEvents } from '@sunbird-cb/utils-v2'
-// import { ViewerUtilService } from '@ws/viewer/src/lib/viewer-util.service'
-// import { ViewerDataService } from '@ws/viewer/src/lib/viewer-data.service'
+import { ViewerUtilService } from '../_services/viewer-util.service'
+import { ViewerDataService } from '../_services/viewer-data.service'
 import { WidgetContentService } from '../_services/widget-content.service'
 import { MatSnackBar } from '@angular/material/snack-bar'
 
 describe('PlayerSurveyComponent', () => {
   let component: PlayerSurveyComponent
   let mockActivatedRoute: Partial<ActivatedRoute>
-  let mockEventService: jest.Mocked<EventService>
-  let mockViewerService: jest.Mocked<ViewerUtilService>
-  let mockSnackBar: jest.Mocked<MatSnackBar>
-  let mockViewerDataService: jest.Mocked<ViewerDataService>
-  let mockConfigService: jest.Mocked<ConfigurationsService>
-  let mockWidgetService: jest.Mocked<WidgetContentService>
+  let mockEventService: any
+  let mockViewerService: any
+  let mockSnackBar: any
+  let mockViewerDataService: any
+  let mockConfigService: any
+  let mockWidgetService: any
 
   beforeEach(() => {
     mockActivatedRoute = {
@@ -50,37 +51,38 @@ describe('PlayerSurveyComponent', () => {
       params: of({
         resourceId: 'test-resource'
       })
-    }
-
-    mockEventService = {
-      dispatchEvent: jest.fn()
     } as any
 
+    mockEventService = {
+      dispatchEvent: jasmine.createSpy('dispatchEvent')
+    }
+
     mockViewerService = {
-      getBatchIdAndCourseId: jest.fn().mockReturnValue({
+      getBatchIdAndCourseId: jasmine.createSpy('getBatchIdAndCourseId').and.returnValue({
         batchId: 'test-batch',
         courseId: 'test-course'
       }),
-      realTimeProgressUpdateQuiz: jest.fn()
-    } as any
+      realTimeProgressUpdateQuiz: jasmine.createSpy('realTimeProgressUpdateQuiz'),
+      getFormById: jasmine.createSpy('getFormById').and.returnValue(of({}))
+    }
 
     mockSnackBar = {
-      open: jest.fn()
-    } as any
+      open: jasmine.createSpy('open')
+    }
 
     mockViewerDataService = {
       resourceId: 'test-resource',
       changedSubject: new Subject()
-    } as any
+    }
 
     mockConfigService = {
       userProfile: {
         userId: 'test-user'
       }
-    } as any
+    }
 
     mockWidgetService = {
-      fetchContentHistoryV2: jest.fn().mockReturnValue(of({
+      fetchContentHistoryV2: jasmine.createSpy('fetchContentHistoryV2').and.returnValue(of({
         result: {
           contentList: [{
             contentId: 'test-resource',
@@ -88,17 +90,18 @@ describe('PlayerSurveyComponent', () => {
           }]
         }
       })),
-      setProgramChildResumeData: jest.fn()
-    } as any
+      setProgramChildResumeData: jasmine.createSpy('setProgramChildResumeData')
+    }
 
     component = new PlayerSurveyComponent(
       mockActivatedRoute as any,
-      mockEventService,
-      mockViewerService,
-      mockSnackBar,
-      mockViewerDataService,
-      mockConfigService,
-      mockWidgetService
+      mockEventService as EventService,
+      mockViewerService as ViewerUtilService,
+      mockSnackBar as MatSnackBar,
+      mockViewerDataService as ViewerDataService,
+      mockConfigService as ConfigurationsService,
+      mockWidgetService as WidgetContentService,
+      new FormBuilder(),
     )
 
     component.widgetData = {
@@ -109,7 +112,7 @@ describe('PlayerSurveyComponent', () => {
       identifier: 'test-identifier',
       contentType: 'Resource',
       disableTelemetry: false
-    }
+    } as any
   })
 
   it('should create component', () => {
@@ -117,14 +120,6 @@ describe('PlayerSurveyComponent', () => {
   })
 
   describe('ngOnInit', () => {
-    beforeEach(() => {
-      jest.useFakeTimers()
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     it('should initialize component with widget data', () => {
       component.ngOnInit()
       expect(component.courseId).toBe('test-collection')
@@ -137,8 +132,6 @@ describe('PlayerSurveyComponent', () => {
       expect(component.apiData).toBeTruthy()
       expect(component.apiData?.getAPI).toContain('test-survey')
     })
-
-
 
     it('should not dispatch events when telemetry is disabled', () => {
       component.widgetData.disableTelemetry = true
@@ -155,13 +148,13 @@ describe('PlayerSurveyComponent', () => {
 
   describe('checkAfterSubmit', () => {
     it('should update progress and show success message', () => {
-      const updateProgressSpy = jest.spyOn(component, 'updateProgress')
+      const updateProgressSpy = spyOn(component, 'updateProgress')
       component.checkAfterSubmit({})
       expect(updateProgressSpy).toHaveBeenCalledWith(2)
       expect(mockSnackBar.open).toHaveBeenCalledWith(
         'Survey is submitted successfully',
         'X',
-        expect.any(Object)
+        jasmine.any(Object)
       )
     })
   })
@@ -181,7 +174,7 @@ describe('PlayerSurveyComponent', () => {
   describe('ngOnDestroy', () => {
     it('should unsubscribe from viewer data service', () => {
       const mockSubscription = {
-        unsubscribe: jest.fn()
+        unsubscribe: jasmine.createSpy('unsubscribe')
       }
       component.viewerDataServiceSubscription = mockSubscription as any
       component.ngOnDestroy()
@@ -200,9 +193,9 @@ describe('PlayerSurveyComponent', () => {
       component.enableTelemetry = true
       component['eventDispatcher'](WsEvents.EnumTelemetrySubType.Init)
       expect(mockEventService.dispatchEvent).toHaveBeenCalledWith(
-        expect.objectContaining({
+        jasmine.objectContaining({
           eventType: WsEvents.WsEventType.Telemetry,
-          data: expect.objectContaining({
+          data: jasmine.objectContaining({
             eventSubType: WsEvents.EnumTelemetrySubType.Init
           })
         })

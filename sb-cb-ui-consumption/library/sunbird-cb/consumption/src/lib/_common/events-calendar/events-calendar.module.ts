@@ -19,7 +19,7 @@ import { HttpClient } from '@angular/common/http'
 
 // Events module dependencies
 import { EventsCalendarComponent } from './events-calendar.component'
-import { HttpLoaderFactory } from '../../../public-api'
+import { HttpLoaderFactory } from '../http-loader-factory'
 import { SkeletonLoaderLibModule } from '../skeleton-loader-lib/skeleton-loader-lib.module'
 import { EventsService } from '../../_services/events.service'
 

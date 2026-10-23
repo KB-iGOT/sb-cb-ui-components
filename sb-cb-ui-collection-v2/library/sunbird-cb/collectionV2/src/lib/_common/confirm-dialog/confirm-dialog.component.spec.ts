@@ -1,13 +1,18 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing'
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog'
 import { ConfirmDialogComponent } from './confirm-dialog.component'
 
 describe('ConfirmDialogComponent', () => {
   let component: ConfirmDialogComponent
   let fixture: ComponentFixture<ConfirmDialogComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [ConfirmDialogComponent],
+        providers: [
+          { provide: MatDialogRef, useValue: { close: () => {} } },
+          { provide: MAT_DIALOG_DATA, useValue: {} }
+        ]
       }).compileComponents()
     }
   ))

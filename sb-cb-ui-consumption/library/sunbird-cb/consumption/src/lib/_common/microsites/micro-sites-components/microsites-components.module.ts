@@ -5,26 +5,24 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatTabsModule } from '@angular/material/tabs'
 import { MatTooltipModule } from '@angular/material/tooltip'
 
-import {
-  AnnouncementsModule,
-  CardsModule,
-  CommonMethodsService,
-  CommonStripModule,
-  CompetencyPassbookModule,
-  CompetencyPassbookMdoModule,
-  ContentStripWithTabsLibModule,
-  DataPointsModule,
-  SlidersLibModule,
-  HttpLoaderFactory,
-  TopLearnersModule,
-  CbpPlanModule,
-  HighlightsOfWeekModule,
-  UserProgressModule,
-  EventsModule,
-  SpeakersModule,
-  MdoLeaderboardModule,
-  KeyHighlightsModule
-} from './../../../../public-api'
+import { AnnouncementsModule } from '../../announcements/announcements.module'
+import { CardsModule } from '../../cards/cards.module'
+import { CommonMethodsService } from '../../../_services/common-methods.service'
+import { CommonStripModule } from '../../common-strip/common-strip.module'
+import { CompetencyPassbookModule } from '../../competency-passbook/competency-passbook.module'
+import { CompetencyPassbookMdoModule } from '../../competency-passbook-mdo/competency-passbook-mdo.module'
+import { ContentStripWithTabsLibModule } from '../../content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'
+import { DataPointsModule } from '../../data-points/data-points.module'
+import { SlidersLibModule } from '../../sliders/sliders.module'
+import { TopLearnersModule } from '../../top-learners/top-learners.module'
+import { CbpPlanModule } from '../../cbp-plan/cbp-plan.module'
+import { HighlightsOfWeekModule } from '../../highlights-of-week/highlights-of-week.module'
+import { UserProgressModule } from '../../user-progress/user-progress.module'
+import { EventsModule } from '../../events/events.module'
+import { SpeakersModule } from '../../speakers/speakers.module'
+import { MdoLeaderboardModule } from '../../mdo-leaderboard/mdo-leaderboard.module'
+import { KeyHighlightsModule } from '../../key-highlights/key-highlights.module'
+import { HttpLoaderFactory } from '../../http-loader-factory'
 // Import all section components
 import { TopSectionComponent } from './components/top-section/top-section.component'
 import { LookerSectionComponent } from './components/looker-section/looker-section.component'

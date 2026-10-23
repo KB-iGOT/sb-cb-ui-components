@@ -8,9 +8,8 @@
 import { SimpleChange } from '@angular/core'
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router'
 import { ContentTocComponent } from './content-toc.component'
-import { UtilityService } from '@sunbird-cb/utils-v2'
-import { LoadCheckService } from '@ws/app/src/lib/routes/app-toc/services/load-check.service'
-import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { UtilityService, ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { LoadCheckService } from '../../_services/load-check.service'
 
 describe('ContentTocComponent', () => {
   let component: ContentTocComponent
@@ -43,7 +42,7 @@ describe('ContentTocComponent', () => {
         pathFromRoot: [],
         paramMap: undefined,
         queryParamMap: undefined
-      }
+      } as any
     }
 
     mockUtilityService = {
@@ -51,7 +50,7 @@ describe('ContentTocComponent', () => {
     }
 
     mockLoadCheckService = {
-      componentLoaded: jest.fn()
+      componentLoaded: jasmine.createSpy('componentLoaded')
     }
 
     mockConfigService = {

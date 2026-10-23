@@ -29,7 +29,7 @@ import { RouterModule } from '@angular/router'
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core'
 import { TranslateHttpLoader } from '@ngx-translate/http-loader'
 import { HttpClient } from '@angular/common/http'
-import { HttpLoaderFactory } from '../content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'
+import { HttpLoaderFactory } from '../http-loader-factory'
 import { HorizontalScrollerV2Module } from '../horizontal-scroller-v2/horizontal-scroller-v2.module'
 
 @NgModule({

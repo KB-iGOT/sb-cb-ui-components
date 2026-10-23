@@ -1,4 +1,5 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { RatingSummaryComponent } from './rating-summary.component'
 
@@ -6,9 +7,10 @@ describe('RatingSummaryComponent', () => {
   let component: RatingSummaryComponent
   let fixture: ComponentFixture<RatingSummaryComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [RatingSummaryComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

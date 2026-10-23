@@ -29,13 +29,10 @@ import { MatTooltipModule } from '@angular/material/tooltip'
 import { ContentStripWithTabsPillsComponent } from './content-strip-with-tabs-pills.component'
 import { HttpClient } from '@angular/common/http'
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core'
-import { TranslateHttpLoader } from '@ngx-translate/http-loader'
 import { SbUiResolverModule } from '@sunbird-cb/resolver-v2'
+import { HttpLoaderFactory as HttpLoaderFactory1 } from '../../http-loader-factory'
 
-// tslint:disable-next-line:function-name
-export function HttpLoaderFactory1(http: HttpClient) {
-    return new TranslateHttpLoader(http)
-}
+export { HttpLoaderFactory1 }
 
 @NgModule({
     declarations: [ContentStripWithTabsPillsComponent],

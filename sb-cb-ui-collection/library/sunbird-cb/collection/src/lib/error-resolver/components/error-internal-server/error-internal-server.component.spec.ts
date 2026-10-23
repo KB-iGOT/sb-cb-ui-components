@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { RouterTestingModule } from '@angular/router/testing'
 
 import { ErrorInternalServerComponent } from './error-internal-server.component'
 
@@ -9,6 +10,7 @@ describe('ErrorInternalServerComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ErrorInternalServerComponent],
+      imports: [RouterTestingModule],
     })
     .compileComponents()
   }))

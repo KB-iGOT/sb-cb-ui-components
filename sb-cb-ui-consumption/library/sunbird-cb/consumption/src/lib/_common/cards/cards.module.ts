@@ -28,7 +28,7 @@ import { CardProgressPortraitLibComponent } from './card-progress-portrait-lib/c
 // import { ContentProgressComponent } from './content-progress/content-progress.component';
 import { ContentProgressModule } from './../content-progress/content-progress.module'
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core'
-import { HttpLoaderFactory } from '../content-strip-with-tabs-lib/content-strip-with-tabs-lib.module'
+import { HttpLoaderFactory } from '../http-loader-factory'
 import { HttpClient } from '@angular/common/http'
 import { DialogComponentsModule } from '../dialog-components/dialog-components.module'
 import { CardMdoChannelV1Component } from './card-mdo-channel-v1/card-mdo-channel-v1.component'

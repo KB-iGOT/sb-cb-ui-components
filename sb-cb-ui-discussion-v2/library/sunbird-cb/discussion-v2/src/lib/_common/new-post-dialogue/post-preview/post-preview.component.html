@@ -19,8 +19,8 @@
                     i18n-aria-label aria-label="verified">check_circle</mat-icon>
             </div>
             <div class="ws-mat-black60-text mat-body-2 nodtranslate"
-                *ngIf="loogedInUserProfile?.professionalDetails[0]?.designation  && (loogedInUserProfile?.professionalDetails[0]?.designation !== 'null') ">
-                {{loogedInUserProfile?.professionalDetails[0]?.designation}}
+                *ngIf="loogedInUserProfile?.professionalDetails?.[0]?.designation  && (loogedInUserProfile?.professionalDetails?.[0]?.designation !== 'null') ">
+                {{loogedInUserProfile?.professionalDetails?.[0]?.designation}}
             </div>
         </div>
         <!-- <span class="mat-body-2">{{post?.createdOn | pipeRelativeTime}}</span> -->

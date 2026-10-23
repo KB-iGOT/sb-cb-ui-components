@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { HttpClientTestingModule } from '@angular/common/http/testing'
 
 import { BreadcrumbsOrgComponent } from './breadcrumbs-org.component'
 
@@ -9,6 +10,7 @@ describe('BreadcrumbsOrgComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [BreadcrumbsOrgComponent],
+      imports: [HttpClientTestingModule],
     })
     .compileComponents()
   }))

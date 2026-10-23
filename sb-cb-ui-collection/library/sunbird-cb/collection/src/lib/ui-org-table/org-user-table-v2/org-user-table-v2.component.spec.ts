@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
+import { MatMenuModule } from '@angular/material/menu'
 
 import { OrgUserTableV2Component } from './org-user-table-v2.component'
 
@@ -9,6 +10,7 @@ describe('OrgTableV2Component', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [OrgUserTableV2Component],
+      imports: [MatMenuModule],
     })
     .compileComponents()
   }))
