@@ -10,6 +10,7 @@ import { TocConfigService } from './toc-config.service'
 import _ from 'lodash'
 import {  viewerRouteGenerator } from './viewer-route-util'
 import moment from 'moment'
+import dayjs from 'dayjs'
 import { ActivatedRoute } from '@angular/router'
 // tslint:enable
 
@@ -212,6 +213,7 @@ export class WidgetContentService {
         filters: {
           courseId,
           status: [0, 1, 2],
+          endDate: { '>=': dayjs().format('YYYY-MM-DD') },
         },
         sort_by: { createdDate: 'desc' },
         offset,
