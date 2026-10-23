@@ -5,12 +5,12 @@ import { NSPractice } from './practice.model'
 
 describe('PracticeService', () => {
   let service: PracticeService
-  let httpClientMock: jest.Mocked<HttpClient>
+  let httpClientMock: jasmine.SpyObj<HttpClient>
 
   beforeEach(() => {
     httpClientMock = {
-      post: jest.fn(),
-      get: jest.fn(),
+      post: jasmine.createSpy(),
+      get: jasmine.createSpy(),
     } as any
 
     service = new PracticeService(httpClientMock)
@@ -58,7 +58,7 @@ describe('PracticeService', () => {
       const postData = { data: 'test' }
       const mockResponse = { success: true }
 
-      httpClientMock.post.mockReturnValue(of(mockResponse))
+      httpClientMock.post.and.returnValue(of(mockResponse))
 
       service.getSection(sectionId, true, postData).subscribe(response => {
         expect(response).toEqual(mockResponse)
@@ -74,7 +74,7 @@ describe('PracticeService', () => {
       const sectionId = 'section1'
       const mockResponse = { success: true }
 
-      httpClientMock.get.mockReturnValue(of(mockResponse))
+      httpClientMock.get.and.returnValue(of(mockResponse))
 
       service.getSection(sectionId, false).subscribe(response => {
         expect(response).toEqual(mockResponse)
@@ -89,6 +89,7 @@ describe('PracticeService', () => {
   describe('shuffle', () => {
     it('should shuffle array elements', () => {
       const original = ['a', 'b', 'c', 'd']
+      spyOn(Math, 'random').and.returnValue(0)
       const shuffled = service.shuffle([...original])
 
       // Length should remain the same
@@ -99,9 +100,7 @@ describe('PracticeService', () => {
         expect(shuffled).toContain(item)
       })
 
-      // Note: There's a small chance this could fail if the shuffle
-      // randomly produces the same order
-      expect(shuffled).not.toEqual(original)
+      expect(shuffled).toEqual(['b', 'c', 'd', 'a'])
     })
   })
 
@@ -115,7 +114,7 @@ describe('PracticeService', () => {
         }
       }
 
-      httpClientMock.get.mockReturnValue(of(mockResponse))
+      httpClientMock.get.and.returnValue(of(mockResponse))
 
       service.canAttend(identifier).subscribe(response => {
         expect(response).toEqual(mockResponse.result)
