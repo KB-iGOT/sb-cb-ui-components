@@ -116,6 +116,28 @@ describe('AppTocBannerComponent', () => {
       expect(new Set(batchIds).size).toBe(18)
     })
 
+    it('continues from the shared offset rather than the loaded batch count', () => {
+      const component = createComponent()
+      component.batchData.nextOffset = 30
+
+      component.fetchMoreBatches()
+
+      expect(component.contentSvc.getCourseBatchesRequest).toHaveBeenCalledWith(COURSE_ID, 30)
+    })
+
+    it('advances the shared offset by the size of the page the server returned', () => {
+      const component = createComponent()
+      component.contentSvc.fetchCourseBatches.mockReturnValue(of({
+        count: 76,
+        content: [...createBatches(2, 8), ...createBatches(8, BATCH_LIST_LIMIT)],
+      }))
+
+      component.fetchMoreBatches()
+
+      expect(component.batchData.content.length).toBe(18)
+      expect(component.batchData.nextOffset).toBe(BATCH_LIST_LIMIT * 2)
+    })
+
     it('stops paging when a page comes back shorter than the limit', () => {
       const component = createComponent()
       component.contentSvc.fetchCourseBatches.mockReturnValue(of({ count: 76, content: createBatches(6, BATCH_LIST_LIMIT) }))
@@ -187,10 +209,19 @@ describe('AppTocBannerComponent', () => {
   })
 
   describe('fillBatchPanel', () => {
+    let panel: HTMLElement
+
+    beforeEach(() => {
+      panel = document.createElement('div')
+      document.body.appendChild(panel)
+    })
+
+    afterEach(() => {
+      panel.remove()
+    })
 
     it('fetches another page while the panel is too short to scroll', () => {
-      const component = createComponent()
-      const panel = document.createElement('div')
+      const component = createComponent({ batchPanel: panel })
       setPanelMetrics(panel, { clientHeight: 256, scrollHeight: 120 })
       component.fetchMoreBatches = jest.fn()
 
@@ -200,9 +231,29 @@ describe('AppTocBannerComponent', () => {
     })
 
     it('waits for a scroll once the panel overflows', () => {
-      const component = createComponent()
-      const panel = document.createElement('div')
+      const component = createComponent({ batchPanel: panel })
       setPanelMetrics(panel, { clientHeight: 256, scrollHeight: 600 })
+      component.fetchMoreBatches = jest.fn()
+
+      component.fillBatchPanel(panel)
+
+      expect(component.fetchMoreBatches).not.toHaveBeenCalled()
+    })
+
+    it('stops once the dropdown has closed', () => {
+      const component = createComponent({ batchPanel: null })
+      setPanelMetrics(panel, { clientHeight: 256, scrollHeight: 120 })
+      component.fetchMoreBatches = jest.fn()
+
+      component.fillBatchPanel(panel)
+
+      expect(component.fetchMoreBatches).not.toHaveBeenCalled()
+    })
+
+    it('stops once the panel is removed from the page', () => {
+      const component = createComponent({ batchPanel: panel })
+      panel.remove()
+      setPanelMetrics(panel, { clientHeight: 0, scrollHeight: 0 })
       component.fetchMoreBatches = jest.fn()
 
       component.fillBatchPanel(panel)
@@ -271,6 +322,21 @@ describe('AppTocBannerComponent', () => {
       jest.runAllTimers()
 
       expect(component.fillBatchPanel).not.toHaveBeenCalled()
+    })
+
+    it('stops listening to the panel once the dropdown closes', () => {
+      const component = createComponent()
+      component.fillBatchPanel = jest.fn()
+      component.fetchMoreBatches = jest.fn()
+
+      component.onBatchDropdownToggle(true, { id: SELECT_ID })
+      jest.runAllTimers()
+      component.onBatchDropdownToggle(false, { id: SELECT_ID })
+      setPanelMetrics(panel, { scrollTop: 320, clientHeight: 256, scrollHeight: 600 })
+      panel.dispatchEvent(new Event('scroll'))
+
+      expect(component.batchPanel).toBeNull()
+      expect(component.fetchMoreBatches).not.toHaveBeenCalled()
     })
 
     it('does nothing when the panel is not rendered', () => {

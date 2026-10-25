@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing'
 import { of } from 'rxjs'
+import dayjs from 'dayjs'
 
 import { BATCH_LIST_LIMIT, WidgetContentService } from './widget-content.service'
 
@@ -29,7 +30,11 @@ describe('WidgetContentService', () => {
 
       expect(service.getCourseBatchesRequest(COURSE_ID)).toEqual({
         request: {
-          filters: { courseId: COURSE_ID, status: [0, 1, 2] },
+          filters: {
+            courseId: COURSE_ID,
+            status: [0, 1, 2],
+            endDate: { '>=': dayjs().format('YYYY-MM-DD') },
+          },
           sort_by: { createdDate: 'desc' },
           offset: 0,
           limit: BATCH_LIST_LIMIT,
