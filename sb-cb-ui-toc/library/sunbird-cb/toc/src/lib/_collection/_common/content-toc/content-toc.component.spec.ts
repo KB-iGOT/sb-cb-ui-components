@@ -194,6 +194,50 @@ describe('ContentTocComponent', () => {
     })
   })
 
+  describe('isEnabledForMinistryOrState', () => {
+
+    const withUserRootOrg = (userRootOrg: any) => createComponent({
+      configService: { userProfile: { rootOrgId: 'org-1', userRootOrg } },
+    })
+
+    it('enables a feature listing the ministry/state of the user root org', () => {
+      const component = withUserRootOrg({ ministryOrStateType: 'state', ministryOrStateId: 'state-1' })
+
+      expect(component['isEnabledForMinistryOrState']({ forMinistryOrStateId: ['state-1'] })).toBe(true)
+    })
+
+    it('does not enable a feature that lists other ministries/states', () => {
+      const component = withUserRootOrg({ ministryOrStateType: 'ministry', ministryOrStateId: 'ministry-1' })
+
+      expect(component['isEnabledForMinistryOrState']({ forMinistryOrStateId: ['ministry-2'] })).toBe(false)
+    })
+
+    it('ignores the old forOrg list', () => {
+      const component = withUserRootOrg({ ministryOrStateType: 'ministry', ministryOrStateId: 'ministry-1' })
+
+      expect(component['isEnabledForMinistryOrState']({ forOrg: ['org-1', 'ministry-1'] })).toBe(false)
+    })
+
+    it('matches an spv on its own root org id', () => {
+      const component = withUserRootOrg({ ministryOrStateType: 'SPV', ministryOrStateId: 'ministry-1' })
+
+      expect(component['isEnabledForMinistryOrState']({ forMinistryOrStateId: ['org-1'] })).toBe(true)
+      expect(component['isEnabledForMinistryOrState']({ forMinistryOrStateId: ['ministry-1'] })).toBe(false)
+    })
+
+    it('falls back to the root org id when the root org carries no ministry/state', () => {
+      const component = withUserRootOrg(null)
+
+      expect(component['isEnabledForMinistryOrState']({ forMinistryOrStateId: ['org-1'] })).toBe(true)
+    })
+
+    it('does not enable a feature with no config', () => {
+      const component = withUserRootOrg({ ministryOrStateType: 'state', ministryOrStateId: 'state-1' })
+
+      expect(component['isEnabledForMinistryOrState'](undefined)).toBe(false)
+    })
+  })
+
   describe('TestBed', () => {
     let component: ContentTocComponent
     let fixture: ComponentFixture<ContentTocComponent>

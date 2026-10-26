@@ -191,9 +191,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig?.aiTutor?.all) {
       this.enableAITutorFlag = this.onlyscormAssessmentExists(this.route.snapshot?.data?.content?.data?.children, 'mimeType', ['application/vnd.ekstep.html-archive', 'application/vnd.sunbird.questionset', 'application/json', 'text/x-url'])
       // this.enableAITutorFlag = true
-    } else if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig?.aiTutor?.forOrg && this.configService.iGOTAIConfig.aiTutor?.forOrg?.length &&
-      this.configService.iGOTAIConfig?.aiTutor?.forOrg.includes(this.configService.userProfile?.rootOrgId)
-    ) {
+    } else if (this.isEnabledForMinistryOrState(this.configService.iGOTAIConfig?.aiTutor)) {
       this.enableAITutorFlag = this.onlyscormAssessmentExists(this.route.snapshot?.data?.content?.data?.children, 'mimeType', ['application/vnd.ekstep.html-archive', 'application/vnd.sunbird.questionset', 'application/json', 'text/x-url'])
       // this.enableAITutorFlag = true
     } else {
@@ -226,9 +224,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
         })
       this.enableTranscriptionFlag = true
-    } else if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.transcription && this.configService.iGOTAIConfig?.transcription?.forOrg && this.configService.iGOTAIConfig?.transcription?.forOrg?.length &&
-      this.configService.iGOTAIConfig?.transcription?.forOrg?.includes(this.configService.userProfile?.rootOrgId)
-    ) {
+    } else if (this.isEnabledForMinistryOrState(this.configService.iGOTAIConfig?.transcription)) {
       // this.resourceIdentifier$ = this.tocSvc.transriptionIdentifier.subscribe((value:any)=>{
       //   if(value &&  value?.identifier) {
       //     this.resourceIdentifier = value?.identifier //value?.identifier // do_1138891198489067521147
@@ -320,9 +316,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.transcription?.all) {
       this.enableTranscriptionFlag = true
-    } else if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.transcription && this.configService.iGOTAIConfig?.transcription?.forOrg && this.configService.iGOTAIConfig?.transcription?.forOrg?.length &&
-      this.configService.iGOTAIConfig?.transcription?.forOrg?.includes(this.configService?.userProfile?.rootOrgId)
-    ) {
+    } else if (this.isEnabledForMinistryOrState(this.configService.iGOTAIConfig?.transcription)) {
       this.enableTranscriptionFlag = true
     } else {
       this.enableTranscriptionFlag = false
@@ -331,9 +325,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig.aiTutor?.all) {
       this.enableAITutorFlag = this.onlyscormAssessmentExists(this.content?.children, 'mimeType', ['application/vnd.ekstep.html-archive', 'application/vnd.sunbird.questionset', 'application/json', 'text/x-url'])
       // this.enableAITutorFlag = true
-    } else if (this.configService.iGOTAIConfig && this.configService.iGOTAIConfig?.aiTutor && this.configService.iGOTAIConfig?.aiTutor?.forOrg && this.configService.iGOTAIConfig?.aiTutor?.forOrg?.length
-      && this.configService.iGOTAIConfig.aiTutor?.forOrg?.includes(this.configService?.userProfile?.rootOrgId)
-    ) {
+    } else if (this.isEnabledForMinistryOrState(this.configService.iGOTAIConfig?.aiTutor)) {
       this.enableAITutorFlag = this.onlyscormAssessmentExists(this.content?.children, 'mimeType', ['application/vnd.ekstep.html-archive', 'application/vnd.sunbird.questionset', 'application/json', 'text/x-url'])
     } else {
       this.enableAITutorFlag = false
@@ -986,5 +978,20 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
       .catch(() => {
         this.caPendingCourses = []
       })
+  }
+
+  /**
+   * Whether an iGOTAI feature config (web.<feature>) enables it for the logged-in user's
+   * ministry/state through its forMinistryOrStateId list. SPV orgs have no ministry/state
+   * above them, so their own rootOrgId is matched. Mirrors CommonDataService in the portal.
+   */
+  private isEnabledForMinistryOrState(featureConfig: any): boolean {
+    const ministryOrStateIds: string[] = _.get(featureConfig, 'forMinistryOrStateId') || []
+    const userRootOrg = _.get(this.configService, 'userProfile.userRootOrg') || {}
+    const rootOrgId = _.get(this.configService, 'userProfile.rootOrgId') || ''
+    const ministryOrStateId = (userRootOrg.ministryOrStateType || '').toLowerCase() === 'spv'
+      ? rootOrgId
+      : (userRootOrg.ministryOrStateId || rootOrgId)
+    return !!ministryOrStateId && ministryOrStateIds.includes(ministryOrStateId)
   }
 }
