@@ -1,4 +1,5 @@
-import { Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, Output, SimpleChanges, ViewChild } from '@angular/core'
+import { Component, ElementRef, EventEmitter, Inject, Injector, Input, OnChanges, OnDestroy, OnInit, Optional, Output, SimpleChanges, ViewChild, inject } from '@angular/core'
+import { createCloseScrollStrategy } from '@angular/cdk/overlay'
 // import { MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent, MatDialog, MatSnackBar } from '@angular/material'
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser'
 import { ActivatedRoute, Event, NavigationEnd, Router } from '@angular/router'
@@ -8,7 +9,7 @@ import { viewerRouteGenerator } from '../../_services/viewer-route-util'
 import { TFetchStatus, UtilityService, ConfigurationsService, LoggerService, WsEvents, EventService, MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
 import { ConfirmDialogComponent } from '../../_collection/_common/confirm-dialog/confirm-dialog.component'
 import { AccessControlService } from '../../services/access-control.service'
-import { Subscription } from 'rxjs'
+import { Subscription, fromEvent } from 'rxjs'
 import { NsAnalytics } from '../../models/app-toc-analytics.model'
 import { NsAppToc } from '../../models/app-toc.model'
 import { NsPlaylist } from '../../models/playlist.model'
@@ -30,14 +31,14 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { EnrollQuestionnaireComponent } from '../enroll-questionnaire/enroll-questionnaire.component'
 import { TranslateService } from '@ngx-translate/core'
 import { ENTER } from '@angular/cdk/keycodes'
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
+import { debounceTime, distinctUntilChanged, throttleTime } from 'rxjs/operators'
 import { TimerService } from '../../services/timer.service'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { MatAutocomplete as MatAutocomplete, MatAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
 import { MatChipInputEvent as MatChipInputEvent } from '@angular/material/chips'
 import { MatDialog as MatDialog } from '@angular/material/dialog'
 import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
-import { MatSelect } from '@angular/material/select'
+import { MAT_SELECT_SCROLL_STRATEGY, MatSelect } from '@angular/material/select'
 import { EnrollProfileFormComponent } from '../enroll-profile-form/enroll-profile-form.component'
 
 dayjs.extend(isSameOrBefore)
@@ -47,7 +48,17 @@ dayjs.extend(isSameOrAfter)
   selector: 'ws-app-toc-banner',
   templateUrl: './app-toc-banner.component.html',
   styleUrls: ['./app-toc-banner.component.scss'],
-  providers: [AccessControlService, DatePipe],
+  providers: [
+    AccessControlService,
+    DatePipe,
+    {
+      provide: MAT_SELECT_SCROLL_STRATEGY,
+      useFactory: () => {
+        const injector = inject(Injector)
+        return () => createCloseScrollStrategy(injector)
+      },
+    },
+  ],
   standalone: false
 })
 
@@ -147,6 +158,8 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   showLoader = false
   batchListLoading = false
   allBatchesLoaded = false
+  batchPanel: HTMLElement | null = null
+  batchPanelScrollSubscription: Subscription | null = null
   constructor(
     private sanitizer: DomSanitizer,
     private router: Router,
@@ -1606,7 +1619,11 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onBatchDropdownToggle(opened: boolean, batchSelect: MatSelect) {
-    if (!opened || !batchSelect) {
+    if (!opened) {
+      this.detachBatchPanel()
+      return
+    }
+    if (!batchSelect) {
       return
     }
     setTimeout(() => {
@@ -1614,16 +1631,32 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       if (!panel) {
         return
       }
-      panel.addEventListener('scroll', () => {
-        if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 50) {
-          this.fetchMoreBatches(panel)
-        }
-      })
+      this.detachBatchPanel()
+      this.batchPanel = panel
+      this.batchPanelScrollSubscription = fromEvent(panel, 'scroll')
+        .pipe(throttleTime(200, undefined, { leading: true, trailing: true }))
+        .subscribe(() => {
+          if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 50) {
+            this.fetchMoreBatches(panel)
+          }
+        })
       this.fillBatchPanel(panel)
     })
   }
 
+  detachBatchPanel() {
+    if (this.batchPanelScrollSubscription) {
+      this.batchPanelScrollSubscription.unsubscribe()
+      this.batchPanelScrollSubscription = null
+    }
+    this.batchPanel = null
+  }
+
   fillBatchPanel(panel: HTMLElement) {
+    // the panel is destroyed on close; a detached element measures 0 <= 0 and would page forever
+    if (panel !== this.batchPanel || !panel.isConnected) {
+      return
+    }
     if (panel.scrollHeight <= panel.clientHeight) {
       this.fetchMoreBatches(panel)
     }
@@ -1634,10 +1667,13 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       return
     }
     this.batchListLoading = true
-    const req = this.contentSvc.getCourseBatchesRequest(this.content.identifier, this.batchData.content.length)
+    // batchData is shared by every banner on the page, so the offset lives on it rather than on this instance
+    const offset = this.batchData.nextOffset || this.batchData.content.length
+    const req = this.contentSvc.getCourseBatchesRequest(this.content.identifier, offset)
     this.contentSvc.fetchCourseBatches(req).subscribe(
       (data: NsContent.IBatchListResponse) => {
         const newBatches = (data && data.content) || []
+        this.batchData.nextOffset = offset + newBatches.length
         const loadedBatchIds = this.batchData.content.map((batch: any) => batch.batchId)
         const uniqueBatches = newBatches.filter((batch: any) => !loadedBatchIds.includes(batch.batchId))
         this.batchData.content.push(...uniqueBatches)
@@ -1658,6 +1694,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.detachBatchPanel()
     this.tocSvc.analyticsFetchStatus = 'none'
     if (this.routerParamSubscription) {
       this.routerParamSubscription.unsubscribe()

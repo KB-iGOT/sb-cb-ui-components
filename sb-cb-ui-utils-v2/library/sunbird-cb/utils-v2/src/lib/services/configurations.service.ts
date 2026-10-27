@@ -133,7 +133,7 @@ export class ConfigurationsService {
   // Holds the in-flight Observable so concurrent callers share one HTTP request
   private formDataRequest$: Observable<any> | null = null
 
-  public readonly noSpecialChar = new RegExp(/^[\p{L}\p{M}\p{N}\p{Cf}._\-$/:।()\[\]'! ]+$/u)
+  public readonly noSpecialChar = new RegExp(/^[\p{L}\p{M}\p{N}\p{Cf}._\-$/,:।()\[\]'! ]+$/u)
   public readonly assessmentNoSpecialChar = new RegExp(/^[\p{L}\p{M}\p{N}\p{Cf}._\-\s$":/?,।()\[\]'! ]+$/u)
   public readonly htmlTasRemovalRegex = /<\/?[^>]+>|&nbsp;|<br\s*\/?>|<\/br>|&#39;|&quot;/gi
   public readonly noSpecialCharHowToSection = new RegExp(/^[\p{L}\p{M}\p{N}\p{Cf}._\-$/:,।()\[\]'! ]+$/u)

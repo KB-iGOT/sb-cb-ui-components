@@ -57,7 +57,7 @@
             <div class="flex flex-row font-normal py-2">{{'apptocsessionscards.resources' | translate }}</div>
             <div class="flex gap-4 card justify-between flex-middle py-2 "
                *ngFor="let resource of session[content?.identifier]?.resources">
-               <div class="mr-2" (click)="redirectToSessionPageWithHtml(resource.resourceLink) ">{{resource.resourceTitle}}</div>
+               <div class="mr-2 cursor-pointer" (click)="redirectToSessionPageWithHtml(resource.resourceLink) ">{{resource.resourceTitle}}</div>
                <a class="download-resource-link" target=”_blank” download href="{{resource.resourceLink}}"
                   *ngIf="resource?.resourceType === 'URL'">
                   {{'apptocsessionscards.view' | translate }}
@@ -73,7 +73,7 @@
             <div class="flex gap-4 card justify-between flex-middle py-2 "
                >
                <!-- <div class="mr-2">Session Content</div> -->
-               <a class="download-resource-link" (click)="redirectToSessionPageWithHtml(session[content?.identifier]?.sessionContent)">Session Content
+               <a class="download-resource-link cursor-pointer" (click)="redirectToSessionPageWithHtml(session[content?.identifier]?.sessionContent)">Session Content
                </a>
                <a class="download-link" target=”_blank” download [href]="session[content?.identifier]?.sessionContent"
                   >
