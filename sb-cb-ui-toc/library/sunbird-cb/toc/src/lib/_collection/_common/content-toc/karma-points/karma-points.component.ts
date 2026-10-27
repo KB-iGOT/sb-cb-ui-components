@@ -62,6 +62,8 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
             this.getKPData('Resume')
 
           }
+        } else if (this.condition.content.courseCategory === NsContent.ECourseCategory.CURATED_PROGRAM) {
+          this.getKPData('Resume')
         }
       }
 

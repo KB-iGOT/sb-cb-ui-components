@@ -650,13 +650,14 @@ export class AssessmentBasicInfoComponent implements OnInit, OnDestroy {
   }
 
   initForm(): void {
+    const allowedPattern = this.configSvc.noSpecialChar
     this.assessmentForm = this.fb.group({
       assessmentType: ['basic', Validators.required],
       questionWeightageType: [null],
       numberOfQuestionsToDisplay: [0],
       noOfSection: [1],
       sections: this.fb.array([this.createSectionGroup()]),
-      name: ['', [Validators.required, Validators.minLength(this.nameMinLength), Validators.maxLength(this.nameMaxLength), Validators.pattern(/^[a-zA-Z0-9.\-_$/:\[\]*!'\s]+$/)]],
+      name: ['', [Validators.required, Validators.minLength(this.nameMinLength), Validators.maxLength(this.nameMaxLength), Validators.pattern(allowedPattern)]],
       scoreCutoffType: ['AssessmentLevel', Validators.required],
       maxAssessmentRetakeAttempts: [null, Validators.required],
       durationHours: [0, [Validators.min(0), Validators.max(23)]],
