@@ -981,17 +981,20 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   /**
-   * Whether an iGOTAI feature config (web.<feature>) enables it for the logged-in user's
-   * ministry/state through its forMinistryOrStateId list. SPV orgs have no ministry/state
-   * above them, so their own rootOrgId is matched. Mirrors CommonDataService in the portal.
+   * Whether an iGOTAI feature config (web.<feature>) enables it for the logged-in user, either
+   * through its forOrg list (user's rootOrgId) or its forMinistryOrStateId list (user's
+   * ministry/state). SPV orgs have no ministry/state above them, so their own rootOrgId is
+   * matched. Mirrors CommonDataService in the portal.
    */
   private isEnabledForMinistryOrState(featureConfig: any): boolean {
+    const orgIds: string[] = _.get(featureConfig, 'forOrg') || []
     const ministryOrStateIds: string[] = _.get(featureConfig, 'forMinistryOrStateId') || []
     const userRootOrg = _.get(this.configService, 'userProfile.userRootOrg') || {}
     const rootOrgId = _.get(this.configService, 'userProfile.rootOrgId') || ''
     const ministryOrStateId = (userRootOrg.ministryOrStateType || '').toLowerCase() === 'spv'
       ? rootOrgId
       : (userRootOrg.ministryOrStateId || rootOrgId)
-    return !!ministryOrStateId && ministryOrStateIds.includes(ministryOrStateId)
+    return (!!rootOrgId && orgIds.includes(rootOrgId))
+      || (!!ministryOrStateId && ministryOrStateIds.includes(ministryOrStateId))
   }
 }
