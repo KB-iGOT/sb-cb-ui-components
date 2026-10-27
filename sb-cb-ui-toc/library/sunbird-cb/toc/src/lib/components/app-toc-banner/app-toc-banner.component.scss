@@ -63,6 +63,7 @@
 }
 
 ::ng-deep .batch-dropdown {
+    overscroll-behavior: contain;
 
     .mat-option {
         height: fit-content !important;
