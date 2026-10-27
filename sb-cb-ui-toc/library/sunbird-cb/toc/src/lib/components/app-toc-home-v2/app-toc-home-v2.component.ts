@@ -1463,6 +1463,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   withdrawOrEnroll(data: string) {
     if (data === NsContent.WFBlendedProgramStatus.INITIATE || data === NsContent.WFBlendedProgramStatus.WITHDRAW) {
+      // the user's own request changes the batch counts
+      this.contentSvc.clearBlendedUserCountCache()
       this.fetchBlendedProgramBatchDetails()
     }
   }
@@ -3233,8 +3235,14 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       queryParams.MLId = this.contentReadData.identifier
     }
 
+    // The router reloads on same-URL navigation (onSameUrlNavigation: 'reload'), so navigating to
+    // params the URL already has still runs a full navigation - every NavigationEnd listener
+    // (mandatory notification check, banner change detection and its batch count) fires again
+    const currentParams = this.route.snapshot.queryParamMap
+    const alreadyInUrl = Object.keys(queryParams).every(key => currentParams.get(key) === String(queryParams[key]))
+
     // Only navigate if we have batch ID or other parameters
-    if (Object.keys(queryParams).length > 0) {
+    if (Object.keys(queryParams).length > 0 && !alreadyInUrl) {
       this.router.navigate(
         [],
         {
