@@ -74,6 +74,11 @@ const API_END_POINTS = {
   providedIn: 'root',
 })
 export class WidgetContentService {
+  // blended-program user counts, shared for a few seconds: the TOC page and its banners
+  // (two on mobile) all ask for the same batch while the page loads
+  private blendedUserCountCache = new Map<string, { at: number, request: Promise<any> }>()
+  private readonly blendedUserCountTtlMs = 30 * 1000
+
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService,
@@ -312,9 +317,23 @@ export class WidgetContentService {
   }
 
   fetchBlendedUserCOUNT(req: any) {
-    return this.http
+    const key = JSON.stringify(req)
+    const cached = this.blendedUserCountCache.get(key)
+    if (cached && Date.now() - cached.at < this.blendedUserCountTtlMs) {
+      return cached.request
+    }
+    const request = this.http
       .post(API_END_POINTS.BLENDED_USER_COUNT, req)
       .toPromise()
+    // a failed count must not be served to the next caller
+    request.catch(() => this.blendedUserCountCache.delete(key))
+    this.blendedUserCountCache.set(key, { at: Date.now(), request })
+    return request
+  }
+
+  /** Drops the shared counts, e.g. after the user requests or withdraws from a batch. */
+  clearBlendedUserCountCache() {
+    this.blendedUserCountCache.clear()
   }
 
   fetchContentLikes(contentIds: { content_id: string[] }) {
