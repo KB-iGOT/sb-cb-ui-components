@@ -15,12 +15,12 @@
       <label class="field-label required">Title</label>
       <mat-form-field appearance="outline" class="full-width">
         <input matInput formControlName="name" [maxlength]="nameMaxLength" placeholder="Enter name">
-        <mat-hint>Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' ! ) characters are supported</mat-hint>
+        <mat-hint>Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] ' ! ) characters are supported</mat-hint>
         <mat-hint align="end">{{ nameLength }} / {{ nameMaxLength }}</mat-hint>
         <mat-error *ngIf="controls['name'].hasError('required')">Name is required</mat-error>
         <mat-error *ngIf="controls['name'].hasError('minlength')">Name must be of minimum {{nameMinLength}}
           characters</mat-error>
-        <mat-error *ngIf="controls['name'].hasError('pattern')">Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] * ' !
+        <mat-error *ngIf="controls['name'].hasError('pattern')">Only ( a-z/A-Z , 0-9 , . - _ $ / : [ ] ' !
           ) characters are supported</mat-error>
         <mat-error *ngIf="controls['name'].hasError('maxlength')">Name cannot exceed {{ nameMaxLength }}
           characters</mat-error>
