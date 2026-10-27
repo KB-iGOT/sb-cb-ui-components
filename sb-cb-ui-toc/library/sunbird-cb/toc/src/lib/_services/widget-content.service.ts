@@ -10,11 +10,13 @@ import { TocConfigService } from './toc-config.service'
 import _ from 'lodash'
 import {  viewerRouteGenerator } from './viewer-route-util'
 import moment from 'moment'
+import dayjs from 'dayjs'
 import { ActivatedRoute } from '@angular/router'
 // tslint:enable
 
 // TODO: move this in some common place
 const PROTECTED_SLAG_V8 = '/apis/protected/v8'
+export const BATCH_LIST_LIMIT = 10
 
 const API_END_POINTS = {
   CONTENT: `${PROTECTED_SLAG_V8}/content`,
@@ -33,6 +35,7 @@ const API_END_POINTS = {
   CONTENT_HISTORY: `${PROTECTED_SLAG_V8}/user/history`,
   CONTENT_HISTORYV2: `/apis/proxies/v8/read/content-progres`,
   COURSE_BATCH_LIST: `/apis/proxies/v8/learner/course/v1/batch/list`,
+  COURSE_BATCH_LIST_WITH_PG: `/apis/proxies/v8/learner/course/v1/learner/batch/list`,
   COURSE_BATCH: `/apis/proxies/v8/course/v1/batch/read`,
   AUTO_ASSIGN_BATCH: `/apis/protected/v8/cohorts/user/autoenrollment/`,
   AUTO_ASSIGN_CURATED_BATCH: `/apis/proxies/v8/curatedprogram/v1/enrol`,
@@ -47,6 +50,7 @@ const API_END_POINTS = {
   ENROLL_BATCH_WF: `/apis/proxies/v8/workflow/blendedprogram/enrol`,
   WITHDRAW_BATCH_WF: `/apis/proxies/v8/workflow/blendedprogram/unenrol`,
   BLENDED_USER_WF: `/apis/proxies/v8/workflow/blendedprogram/user/search`,
+  BLENDED_WF_DETAILS: `/apis/proxies/v8/workflow/blendedprogram/details`,
   BLENDED_USER_COUNT: `apis/proxies/v8/workflow/blendedprogram/enrol/status/count`,
   CERT_ADD_TEMPLATE: `${PROTECTED_SLAG_V8}/cohorts/course/batch/cert/template/add`,
   CERT_ISSUE: `${PROTECTED_SLAG_V8}/cohorts/course/batch/cert/issue`,
@@ -203,9 +207,24 @@ export class WidgetContentService {
 
   }
 
+  getCourseBatchesRequest(courseId: string, offset = 0, limit = BATCH_LIST_LIMIT) {
+    return {
+      request: {
+        filters: {
+          courseId,
+          status: [0, 1, 2],
+          endDate: { '>=': dayjs().format('YYYY-MM-DD') },
+        },
+        sort_by: { createdDate: 'desc' },
+        offset,
+        limit,
+      },
+    }
+  }
+
   fetchCourseBatches(req: any): Observable<NsContent.IBatchListResponse> {
     return this.http
-      .post<NsContent.IBatchListResponse>(API_END_POINTS.COURSE_BATCH_LIST, req)
+      .post<NsContent.IBatchListResponse>(API_END_POINTS.COURSE_BATCH_LIST_WITH_PG, req)
       .pipe(
         retry(1),
         map(
@@ -283,6 +302,12 @@ export class WidgetContentService {
   fetchBlendedUserWF(req: any) {
     return this.http
       .post(API_END_POINTS.BLENDED_USER_WF, req)
+      .toPromise()
+  }
+
+  fetchBlendedWFDetails(contentId: string) {
+    return this.http
+      .post(API_END_POINTS.BLENDED_WF_DETAILS, { contentId, serviceName: 'blendedprogram' })
       .toPromise()
   }
 

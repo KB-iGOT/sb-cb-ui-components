@@ -29,7 +29,7 @@ import {
   UtilityService, WidgetEnrollService, WsEvents,
 } from '@sunbird-cb/utils-v2'
 
-import { CommonMethodsService, ConfirmationDialogComponent, ContentLanguageService, TOCMultiLingualDialogComponent, WidgetContentLibService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
+import { CommonMethodsService, ConfirmationDialogComponent, ContentLanguageService, EnrolementDictionaryService, TOCMultiLingualDialogComponent, IUserCbpPlan, IUserCbpPlanContent, UserCbpPlansService, WidgetContentLibService, WidgetUserServiceLib } from '@sunbird-cb/consumption'
 import { NsAppToc } from '../../models/app-toc.model'
 import { AppTocService } from '../../services/app-toc.service'
 import { MobileAppsService } from '../../services/mobile-apps.service'
@@ -133,6 +133,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   primaryCategory = NsContent.EPrimaryCategory
   courseCategory = NsContent.ECourseCategory
   WFBlendedProgramStatus = NsContent.WFBlendedProgramStatus
+  blendedReRequestStatuses: string[] = [
+    NsContent.WFBlendedProgramStatus.REJECTED,
+    NsContent.WFBlendedProgramStatus.WITHDRAWN,
+    NsContent.WFBlendedProgramStatus.REMOVED,
+  ]
   comprehensiveAssessmentCategory = 'Comprehensive Assessment'
   isAllCoursesCompleted = false
   assessmentAttempts: IComprehensiveAssessmentAttempts = {
@@ -209,6 +214,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   kparray: any = []
   enrollBtnLoading = false
   isAcbpCourse = false
+  isAparCourse = false
   isAcbpClaim = false
   courseID: any
   isClaimed = false
@@ -319,11 +325,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     public dataTransferSvc: DataTransferService,
     private matSnackbarNew: MatSnackbarNew,
     private userServiceLib: WidgetUserServiceLib,
+    private userCbpPlansSvc: UserCbpPlansService,
     public netCoreService: NetCoreService,
     public appTocV2Svc: AppTocV2Service,
     private location: Location,
     private commonMethodsSvc: CommonMethodsService,
     private comprehensiveAssessmentSvc: ComprehensiveAssessmentService,
+    private enrolementDictionarySvc: EnrolementDictionaryService,
     @Inject('environment') public environment: any,
     private cdr: ChangeDetectorRef
   ) {
@@ -400,50 +408,54 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return res.filter((v: any) => v.identifier === this.courseID)
   }
 
+  // The first CBPlan V4 plan holding the content, checked APAR → CBP → AI-CBP.
+  async getPlanForContent(doId: string): Promise<IUserCbpPlan | undefined> {
+    if (!doId) {
+      return undefined
+    }
+    const data = await this.userCbpPlansSvc.getUserCbpPlansAsync()
+    if (!data) {
+      return undefined
+    }
+    const plans = [...(data.aparPlanList || []), ...(data.cbpPlanList || []), ...(data.aiCbpPlanList || [])]
+    return plans.find((plan: IUserCbpPlan) =>
+      (plan.contentList || []).some((content: IUserCbpPlanContent) => content && content.identifier === doId))
+  }
+
   async findACPB() {
-    // CBP plan data now lives in IndexedDB (iGotAppDB/cbpPlans); getCBPData() reads the
-    // current plan year from that cache instead of localStorage['cbpData'].
-    const localCbp = await this.userServiceLib.getCBPData().toPromise()
-    if (localCbp && localCbp.length) {
-      const storeageCbp = localCbp
-      const cbp = this.filteredAcbpList(storeageCbp)
-      if (cbp.length) {
-        const acbp = 'cbPlan'
-        this.cbPlanEndDate = cbp[0].endDate
-        const sDate = dayjs(this.serverDate).format('YYYY-MM-DD')
-        const daysCount = dayjs(this.cbPlanEndDate).diff(this.serverDate, 'day')
-        this.cbPlanDuration = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
-          ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
-        if (acbp && this.cbPlanEndDate && acbp === 'cbPlan') {
-          this.isAcbpCourse = true
-          const eDate = dayjs(this.cbPlanEndDate).format('YYYY-MM-DD')
-          if (dayjs(sDate).isSameOrBefore(eDate)) {
-            const requestObj = {
-              request: {
-                filters: {
-                  contextType: 'Course',
-                  contextId: this.courseID,
-                },
+    // CBPlan V4: the plan holding this course, from UserCbpPlansService.
+    const plan = await this.getPlanForContent(this.courseID)
+    if (plan && plan?.endDate) {
+      // this.cbPlanEndDate = cbp[0].endDate
+      this.cbPlanEndDate = plan.endDate
+      const sDate = dayjs(this.serverDate).format('YYYY-MM-DD')
+      const daysCount = dayjs(this.cbPlanEndDate).diff(this.serverDate, 'day')
+      this.cbPlanDuration = daysCount < 0 ? NsCardContent.ACBPConst.OVERDUE : daysCount > 29
+        ? NsCardContent.ACBPConst.SUCCESS : NsCardContent.ACBPConst.UPCOMING
+      if (plan?.isApar) {
+        this.isAcbpCourse = true
+        const eDate = dayjs(this.cbPlanEndDate).format('YYYY-MM-DD')
+        if (dayjs(sDate).isSameOrBefore(eDate)) {
+          const requestObj = {
+            request: {
+              filters: {
+                contextType: 'Course',
+                contextId: this.courseID,
               },
-            }
-            this.contentSvc.getCourseKarmaPoints(requestObj).subscribe((res: any) => {
-              if (res && res.kpList) {
-                const row = res.kpList
-                if (row.addinfo) {
-                  if (JSON.parse(row.addinfo).ACBP) {
-                    this.isAcbpClaim = false
-                    this.isClaimed = true
-                  } else {
-                    this.isAcbpClaim = true
-                  }
-                } else {
-                  this.isAcbpClaim = true
-                }
+            },
+          }
+          this.contentSvc.getCourseKarmaPoints(requestObj).subscribe((res: any) => {
+            if (res && res.kpList && res.kpList.addinfo) {
+              if (JSON.parse(res.kpList.addinfo).ACBP) {
+                this.isAcbpClaim = false
+                this.isClaimed = true
               } else {
                 this.isAcbpClaim = true
               }
-            })
-          }
+            } else {
+              this.isAcbpClaim = true
+            }
+          })
         }
       }
     }
@@ -766,36 +778,72 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
 
 
-  public fetchUserWFForBlended() {
-    const applicationIds = (this.batchData && this.batchData.content && this.batchData.content.map(e => e.batchId)) || []
-    const req = {
-      applicationIds,
-      serviceName: 'blendedprogram',
-      limit: 100,
-      offset: 0,
+  private async fetchLatestBlendedWF(): Promise<any> {
+    if (!this.content || !this.content.identifier) {
+      return undefined
     }
+    const data: any = await this.contentSvc.fetchBlendedWFDetails(this.content.identifier)
+    return _.maxBy(_.get(data, 'result.data') || [], (wf: any) => wf.lastUpdatedOn)
+  }
 
-    this.contentSvc.fetchBlendedUserWF(req).then(
-      (data: any) => {
-        if (data && data.result && data.result.data.length) {
-          const latestWF = _.maxBy(data.result.data[0].wfInfo, (el: any) => {
-            return new Date(el.lastUpdatedOn).getTime()
-          })
-          // latestWF.currentStatus = this.WFBlendedProgramStatus.REJECTED
-          /* tslint:disable-next-line */
-          this.batchData!.workFlow = {
-            wfInitiated: true,
-            /* tslint:disable-next-line */
-            batch: this.batchData && this.batchData.content && this.batchData.content.find((e: any) => e.batchId === latestWF.applicationId),
-            wfItem: latestWF,
-          }
-          this.tocSvc.setWFData(this.batchData)
+  // attaches the latest workflow to the already loaded batch data (used when the user is enrolled)
+  public async fetchUserWFForBlended() {
+    try {
+      const latestWF = await this.fetchLatestBlendedWF()
+      if (latestWF && this.batchData) {
+        this.batchData.workFlow = {
+          wfInitiated: true,
+          batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === latestWF.applicationId),
+          wfItem: latestWF,
         }
+        this.tocSvc.setWFData(this.batchData)
+      }
+    } catch (error) {
+      this.loggerSvc.error('BLENDED WF DETAILS FETCH ERROR >', error)
+    }
+  }
 
-        this.loggerSvc.info('fetchBlendedUserWF data == ', data)
+  // not enrolled: an active request only needs its own batch, otherwise the user picks from the batch list
+  public async fetchBlendedProgramBatchDetails() {
+    let latestWF: any
+    try {
+      latestWF = await this.fetchLatestBlendedWF()
+    } catch (error) {
+      this.loggerSvc.error('BLENDED WF DETAILS FETCH ERROR >', error)
+    }
+    if (latestWF && !this.blendedReRequestStatuses.includes(latestWF.currentStatus)) {
+      this.fetchWFBatchDetails(latestWF)
+    } else {
+      this.fetchBatchDetails(latestWF)
+    }
+  }
+
+  private fetchWFBatchDetails(wfItem: any) {
+    this.contentSvc.fetchCourseBatch(wfItem.applicationId).subscribe(
+      (res: any) => {
+        const batch = _.get(res, 'result.response')
+        const isExpired = batch && wfItem.currentStatus !== this.WFBlendedProgramStatus.APPROVED
+          && !this.handleEnrollmentEndDate(batch)
+        if (!batch || isExpired) {
+          this.fetchBatchDetails()
+          return
+        }
+        this.batchData = {
+          content: [batch],
+          count: 1,
+          enrolled: false,
+          workFlow: {
+            wfInitiated: true,
+            batch,
+            wfItem,
+          },
+        }
+        this.tocSvc.setBatchData(this.batchData)
+        this.routerChangeHandler(false)
       },
       (error: any) => {
-        this.loggerSvc.error('CONTENT HISTORY FETCH ERROR >', error)
+        this.loggerSvc.error('BATCH READ ERROR > ', error)
+        this.fetchBatchDetails()
       },
     )
   }
@@ -851,11 +899,30 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     this.contentViewEventForNetCore('enroll')
   }
 
+  // stores the newly enrolled course in the IndexedDB enrolment dictionary
+  private addCourseToEnrolementDictionary(courseId?: string) {
+    if (!courseId) {
+      return
+    }
+    const record = {
+      [courseId]: {
+        active: true,
+        courseCategory: this.content?.courseCategory || this.baseContentReadData?.courseCategory,
+        primaryCategory: this.content?.primaryCategory || this.baseContentReadData?.primaryCategory,
+        status: 1,
+      },
+    }
+    this.enrolementDictionarySvc.addEnrolement(record).subscribe({
+      error: (err: any) => console.error('Failed to update enrolment dictionary', err),
+    })
+  }
+
   public autoEnrollLearningPathway(batchData: any) {
     let batchId = batchData?.batchId
     if (batchId) {
       this.contentSvc.autoEnrollLP(this.content?.identifier).subscribe((res: any) => {
         if (res) {
+          this.addCourseToEnrolementDictionary(this.content?.identifier)
           this.navigateToPlayerPage(batchId)
           this.enrollBtnLoading = false
         }
@@ -895,7 +962,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       this.contentSvc.autoAssignCuratedBatchApi(req, programType).subscribe(
         (data: NsContent.IBatchListResponse) => {
           if (data) {
-            if (programType === NsContent.ECourseCategory.MODERATED_PROGRAM && batchData.endDate) {
+            this.addCourseToEnrolementDictionary(this.content?.identifier)
+            if (programType ===NsContent.ECourseCategory.MODERATED_PROGRAM && batchData.endDate) {
               this.batchData = {
                 content: [batchData],
                 enrolled: true,
@@ -934,6 +1002,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             content: data.content,
             enrolled: true,
           }
+          this.addCourseToEnrolementDictionary(this.baseContentReadData?.identifier)
           const batchId = this.getBatchId()
           if (batchId) {
             this.navigateToPlayerPage(batchId)
@@ -970,18 +1039,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     }
   }
 
-  public fetchBatchDetails() {
+  public fetchBatchDetails(wfItem?: any) {
     if (this.content && this.content.identifier) {
-      const req = {
-        request: {
-          filters: {
-            courseId: this.content.identifier,
-            status: ['0', '1', '2'],
-            // createdBy: 'fca2925f-1eee-4654-9177-fece3fd6afc9',
-          },
-          sort_by: { createdDate: 'desc' },
-        },
-      }
+      const req = this.contentSvc.getCourseBatchesRequest(this.content.identifier)
       this.contentSvc.fetchCourseBatches(req).subscribe(
         (data: NsContent.IBatchListResponse) => {
           this.batchData = data
@@ -991,6 +1051,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               this.batchData.allBatchesExpired = this.batchData.content.every(
                 (batch: any) => !this.handleEnrollmentEndDate(batch)
               )
+            }
+          }
+          if (wfItem) {
+            this.batchData.workFlow = {
+              wfInitiated: true,
+              batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === wfItem.applicationId),
+              wfItem,
             }
           }
           this.tocSvc.setBatchData(this.batchData)
@@ -1395,8 +1462,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   withdrawOrEnroll(data: string) {
-    if (data === NsContent.WFBlendedProgramStatus.INITIATE) {
-      this.fetchUserWFForBlended()
+    if (data === NsContent.WFBlendedProgramStatus.INITIATE || data === NsContent.WFBlendedProgramStatus.WITHDRAW) {
+      this.fetchBlendedProgramBatchDetails()
     }
   }
 
@@ -1752,7 +1819,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           || this.content.primaryCategory !== this.primaryCategory.PROGRAM) {
           // Disabling auto enrollment to batch
           if (this.content.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
-            this.fetchBatchDetails()
+            this.fetchBlendedProgramBatchDetails()
           }
         } else {
           this.fetchBatchDetails()
@@ -1950,6 +2017,11 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               this.enrolledCourseData.active = false
               this.canUnenroll = false
               this.isUnEnrolled = true
+              if (requestBody.request.courseId) {
+                this.enrolementDictionarySvc.updateUnEnrolement(requestBody.request.courseId).subscribe({
+                  error: (err: any) => console.error('Failed to update enrolment dictionary', err),
+                })
+              }
               this.openSnackbar('You have been successfully un-enrolled from the course.')
             } else {
               this.openSnackbar('Un-enrollment failed. Please try again later.')
@@ -2272,6 +2344,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   private async processRouteData(data: Data) {
     this.courseID = data?.content?.data?.status === 'Retired' ? '' : data.content.data?.identifier
+    const aparCheck = this.isCourseInAparPlan(this.courseID)
     const initData = this.tocSvc.initData(data, true)
     // Get query parameters
     const queryParamsDataTemp = await this.getQueryParams()
@@ -2329,6 +2402,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     await this.handleContentPreviewOrEnrollment()
 
     this.initialrouteData = data
+    this.isAparCourse = await aparCheck
     this.loadBannerAndTocConfig(data)
     this.fetchPostAssessmentStatusIfNeeded()
     this.initData(data)
@@ -2456,16 +2530,78 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         {
           "displayButton": "Resume",
           "textBeforeIcon": "earn",
-          "points": "25",
+          "points": "10",
           "textAfterPoints": "karmaPoints",
           "textAfterIcon": "byCompletingLP",
           "toolTipText": "lpCompleteTip"
+        }
+      ]
+    } else if (this.contentReadData?.courseCategory === NsContent.ECourseCategory.CURATED_PROGRAM) {
+      this.kparray = this.tocConfig.karmaPointsCP || [
+        {
+          "displayButton": "Resume",
+          "textBeforeIcon": "earn",
+          "points": "10",
+          "textAfterPoints": "karmaPoints",
+          "textAfterIcon": "byCompletingCP",
+          "toolTipText": "cpCompleteTip"
         }
       ]
     } else {
       this.kparray = this.tocConfig.karmaPoints || []
 
     }
+    this.applyAparKarmaPoints()
+  }
+
+  /** Whether the course is in an APAR plan in the cached CBP plans. No API call. */
+  private async isCourseInAparPlan(courseId: string): Promise<boolean> {
+    const list = (value: any): any[] => (Array.isArray(value) ? value : [])
+    const entries = courseId ? await this.readCbpPlanCache() : []
+    return entries.some((entry: any) =>
+      list(entry?.aparPlanList).some((plan: any) => list(plan?.contentList).some((c: any) => c?.identifier === courseId))
+      || list(entry?.data).some((item: any) => item?.identifier === courseId && item?.isApar))
+  }
+
+  private readCbpPlanCache(): Promise<any[]> {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve([]), 2000)
+      try {
+        const req = indexedDB.open('iGotAppDB')
+        // No database yet: abort rather than create an empty one.
+        req.onupgradeneeded = () => req.transaction?.abort()
+        req.onerror = () => resolve([])
+        req.onsuccess = () => {
+          const db = req.result
+          try {
+            const getReq = db.transaction('cbpPlans', 'readonly').objectStore('cbpPlans').getAll()
+            getReq.onsuccess = () => resolve(getReq.result || [])
+            getReq.onerror = () => resolve([])
+          } catch (_err) {
+            resolve([])
+          }
+          // Closes once the read above has finished.
+          db.close()
+        }
+      } catch (_err) {
+        resolve([])
+      }
+    })
+  }
+
+  /** APAR: Enroll and Resume read "Earn 10 Karma Points by completing this course"; other 5-point slides earn 10. */
+  private applyAparKarmaPoints() {
+    if (!this.isAparCourse || !Array.isArray(this.kparray)) {
+      return
+    }
+    const resume = this.kparray.find((item: any) => item?.displayButton === 'Resume')
+    // Copies, not in-place edits: the items belong to tocConfig. aparCourseCompleteTip is in the portal i18n.
+    this.kparray = this.kparray.map((item: any) => {
+      if (item?.displayButton === 'Enroll' || item?.displayButton === 'Resume') {
+        return { ...item, points: '10', textAfterIcon: resume?.textAfterIcon ?? item.textAfterIcon, toolTipText: 'aparCourseCompleteTip' }
+      }
+      return Number(item?.points) === 5 ? { ...item, points: '10' } : item
+    })
   }
 
   private fetchPostAssessmentStatusIfNeeded() {
@@ -2502,14 +2638,16 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   private handleBatchUpdate() {
-    this.fetchBatchDetails()
     if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
-      this.fetchUserWFForBlended()
+      this.fetchBlendedProgramBatchDetails()
+    } else {
+      this.fetchBatchDetails()
     }
   }
 
+  // for non-enrolled users the workflow is resolved before the batch data is set
   private handleBlendedProgramUpdate() {
-    if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM) {
+    if (this.content?.primaryCategory === this.primaryCategory.BLENDED_PROGRAM && this.batchData?.enrolled) {
       this.fetchUserWFForBlended()
     }
   }
@@ -2686,7 +2824,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
       // If the found content is inactive(un-enrolled), we should not proceed with resume
       if(foundContent && !foundContent?.active){
-        return 
+        return
       }
 
       const urlData = await this.contentLibSvc.getResourseLink(
