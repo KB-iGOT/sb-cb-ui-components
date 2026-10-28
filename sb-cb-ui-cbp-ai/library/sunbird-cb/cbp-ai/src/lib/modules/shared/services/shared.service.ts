@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 //Injectable
 import { HostListener, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators'
+import { map, tap } from 'rxjs/operators'
 import { InitService } from './init.service';
 // import configuration from '../../../../assets/jsonfiles/configurations.json'
 
@@ -768,11 +768,12 @@ export class SharedService {
     const url = `${this.baseUrl}${endpoint}?state_center_id=${state_center_id}&language=${language}`;
     const headers = this.headers
 
+    // Returns an observable so the caller can keep the loader visible until the file is saved
     return this.http.get(url, {
       headers,
       observe: 'response',
       responseType: 'blob'
-    }).subscribe((res: any) => {
+    }).pipe(tap((res: any) => {
 
       const contentDisposition = res.headers.get('content-disposition');
       console.log('contentDisposition', res.headers)
@@ -795,7 +796,7 @@ export class SharedService {
       a.click();
 
       URL.revokeObjectURL(downloadUrl);
-    });
+    }));
   }
 
   downloadPdfForDepartment(state_center_id, department_id: string, context: string, language: string) {
@@ -806,11 +807,12 @@ export class SharedService {
     const url = `${this.baseUrl}${endpoint}?state_center_id=${state_center_id}&department_id=${department_id}&language=${language}`;
     const headers = this.headers
 
+    // Returns an observable so the caller can keep the loader visible until the file is saved
     return this.http.get(url, {
       headers,
       observe: 'response',
       responseType: 'blob'
-    }).subscribe((res: any) => {
+    }).pipe(tap((res: any) => {
 
       const contentDisposition = res.headers.get('content-disposition');
       console.log('contentDisposition', res.headers)
@@ -833,7 +835,7 @@ export class SharedService {
       a.click();
 
       URL.revokeObjectURL(downloadUrl);
-    });
+    }));
   }
 
   getCenterBasedDepartment(state_center_id, options?: { limit?: number, offset?: number, query?: string }) {
@@ -1029,7 +1031,7 @@ export class SharedService {
           "identifier",
           "avgRating"
         ],
-        "limit": 1000,
+        "limit": identifiers?.length || 0,
         "offset": 0,
         "sort_by": {}
       }

@@ -2142,6 +2142,16 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 16px;
+}
+
+.loader-message {
+  color: #1B4CA1;
+  font-family: Lato;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  padding: 0 16px;
 }
 
 .competencis-grid {
