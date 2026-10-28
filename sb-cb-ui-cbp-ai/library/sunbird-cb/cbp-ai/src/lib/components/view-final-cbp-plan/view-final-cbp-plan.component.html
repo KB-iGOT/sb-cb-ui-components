@@ -698,4 +698,7 @@
     </div>
     <div class="overlay-loader" *ngIf="loading">
         <mat-spinner diameter="50"></mat-spinner>
+        <div class="loader-message" *ngIf="downloadInProgress">
+            Download is in progress. Please wait, this may take a while for large files...
+        </div>
     </div>

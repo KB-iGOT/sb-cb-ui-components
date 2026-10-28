@@ -42,6 +42,7 @@ export class ViewFinalCbpPlanComponent {
   filteredLanguages = [...this.languages];
   @ViewChild('pdfContent', { static: false }) pdfContent!: ElementRef;
   loading = false
+  downloadInProgress = false
   designationData: any = []
   totalCompetencieObj = { total: 0, behavioral: 0, functional: 0, domain: 0 }
   pdfTrigger = false
@@ -980,8 +981,6 @@ export class ViewFinalCbpPlanComponent {
 
 
   generateExcel(jsonArray: any[], filename: string = "final.xlsx") {
-    this.loading = true
-
     if (!jsonArray || jsonArray.length === 0) return;
 
     const excelCellTextLimit = 32000;
@@ -1146,9 +1145,6 @@ export class ViewFinalCbpPlanComponent {
 
     // Export Excel
     XLSX.writeFile(wb, filename);
-    setTimeout(() => {
-      this.loading = false
-    }, 5000)
   }
 
 
@@ -1161,22 +1157,43 @@ export class ViewFinalCbpPlanComponent {
     } else {
       fileName = `CBP_Report_${this.sharedService?.cbpPlanFinalObj.ministry.identifier}.xlsx`
     }
-    this.generateExcel(this.jsonData, fileName);
+    this.loading = true
+    this.downloadInProgress = true
+    // Let the loader render before the synchronous Excel generation blocks the UI thread
+    setTimeout(() => {
+      try {
+        this.generateExcel(this.jsonData, fileName);
+      } finally {
+        this.loading = false
+        this.downloadInProgress = false
+      }
+    })
   }
 
   downloadPdfFromBE(context: string) {
     let selectedLanguage = this.filterForm.get('language')?.value || 'en';
     this.loading = true
+    this.downloadInProgress = true
     //  this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier)
-    if (!this.sharedService?.cbpPlanFinalObj.departments) {
-      this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier, context, selectedLanguage)
-    } else {
-      this.sharedService.downloadPdfForDepartment(this.sharedService?.cbpPlanFinalObj.ministry.identifier, this.sharedService?.cbpPlanFinalObj.departments, context, selectedLanguage)
-    }
+    const download$ = !this.sharedService?.cbpPlanFinalObj.departments
+      ? this.sharedService.downloadPdf(this.sharedService?.cbpPlanFinalObj.ministry.identifier, context, selectedLanguage)
+      : this.sharedService.downloadPdfForDepartment(this.sharedService?.cbpPlanFinalObj.ministry.identifier, this.sharedService?.cbpPlanFinalObj.departments, context, selectedLanguage)
 
-    setTimeout(() => {
-      this.loading = false
-    }, 5000)
+    // Keep the loader until the file has actually been received and saved
+    download$.subscribe({
+      next: () => {
+        this.loading = false
+        this.downloadInProgress = false
+      },
+      error: () => {
+        this.loading = false
+        this.downloadInProgress = false
+        this.snackBar.open('Unable to download PDF', 'X', {
+          duration: 3000,
+          panelClass: ['snackbar-error']
+        });
+      }
+    })
   }
   getSelectedCourses(department: any): any[] {
     if (!department?.cbp_plans?.length) {
