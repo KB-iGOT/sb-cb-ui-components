@@ -1,5 +1,5 @@
-<div class="dialog-reuse-user-group p-4">
-  <div class="flex justify-between items-start gap-4">
+<div class="dialog-reuse-user-group">
+  <div class="flex justify-between items-start gap-4 p-4 pb-0">
     <div>
       <div class="reuse-title">Reuse a saved user group</div>
       <div class="reuse-subtitle">Applying a group adds its conditions as a new OR group on this plan. The saved definition is not changed.</div>
@@ -9,6 +9,7 @@
     </button>
   </div>
 
+  <div class="reuse-scroll-area p-4 pt-0">
   <div class="mat-full-radius mt-4">
     <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
       <mat-icon matPrefix class="search-icon">search</mat-icon>
@@ -92,8 +93,9 @@
   @if (hasMoreThanLoaded()) {
     <div class="reuse-note mt-2">Showing the {{ groups().length }} most recently updated groups out of {{ totalCount() }}.</div>
   }
+  </div>
 
-  <div class="reuse-actions flex items-center justify-end gap-4 mt-4">
+  <div class="reuse-actions flex items-center justify-end gap-4 p-4">
     <button mat-flat-button class="mat-btn-outline gap-2 border-radius-4" (click)="cancel()">Cancel</button>
     <button mat-flat-button class="new-bg-color text-white" [disabled]="isApplyDisabled()" (click)="apply()">Apply group</button>
   </div>
