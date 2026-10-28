@@ -212,10 +212,24 @@ describe('ContentTocComponent', () => {
       expect(component['isEnabledForMinistryOrState']({ forMinistryOrStateId: ['ministry-2'] })).toBe(false)
     })
 
-    it('ignores the old forOrg list', () => {
+    it('enables a feature whose forOrg lists the user root org', () => {
       const component = withUserRootOrg({ ministryOrStateType: 'ministry', ministryOrStateId: 'ministry-1' })
 
-      expect(component['isEnabledForMinistryOrState']({ forOrg: ['org-1', 'ministry-1'] })).toBe(false)
+      expect(component['isEnabledForMinistryOrState']({ forOrg: ['org-1'] })).toBe(true)
+    })
+
+    it('enables a feature when either forOrg or forMinistryOrStateId matches', () => {
+      const component = withUserRootOrg({ ministryOrStateType: 'ministry', ministryOrStateId: 'ministry-1' })
+
+      expect(component['isEnabledForMinistryOrState']({ forOrg: ['org-1'], forMinistryOrStateId: ['ministry-2'] })).toBe(true)
+      expect(component['isEnabledForMinistryOrState']({ forOrg: ['org-2'], forMinistryOrStateId: ['ministry-1'] })).toBe(true)
+      expect(component['isEnabledForMinistryOrState']({ forOrg: ['org-2'], forMinistryOrStateId: ['ministry-2'] })).toBe(false)
+    })
+
+    it('does not match a ministry/state id listed under forOrg', () => {
+      const component = withUserRootOrg({ ministryOrStateType: 'ministry', ministryOrStateId: 'ministry-1' })
+
+      expect(component['isEnabledForMinistryOrState']({ forOrg: ['ministry-1'] })).toBe(false)
     })
 
     it('matches an spv on its own root org id', () => {
