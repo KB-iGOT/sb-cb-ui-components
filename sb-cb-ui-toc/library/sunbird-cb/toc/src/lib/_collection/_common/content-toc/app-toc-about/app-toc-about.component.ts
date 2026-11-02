@@ -793,6 +793,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   handleOpenReviewModal(): void {
     this.dialogRef = this.dialog.open(ReviewsContentComponent, {
       width: '400px',
+      maxHeight: 'calc(100vh - 32px)',
       data: { ratings: this.ratingSummaryProcessed, reviews: this.authReplies, latestReviews: this.ratingLookup },
       panelClass: 'ratings-modal-box',
       disableClose: true,
