@@ -3493,7 +3493,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   getServerDateTime() {
-    if (!this.isApiEnabled('getServerDate', '/apis/public/v8/systemDate')) {
+    if (this.forPreview || !this.isApiEnabled('getServerDate', '/apis/public/v8/systemDate')) {
       const clientTime = new Date().getTime()
       this.tocSvc.changeServerDate(clientTime)
       this.serverDate = clientTime
