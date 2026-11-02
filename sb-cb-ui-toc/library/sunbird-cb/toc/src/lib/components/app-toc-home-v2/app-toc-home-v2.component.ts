@@ -56,6 +56,7 @@ import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dia
 import { AppTocV2Service } from '../../services/app-toc-v2.service'
 import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
 import { IComprehensiveAssessmentAttempts, IComprehensiveAssessmentStatus } from '../../_models/common.model'
+import { isCategoryListed, karmaPointsDisabledCategories } from '../../_services/course-category-visibility'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -574,6 +575,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       return !this.configSvc.restrictedFeatures.has('tocAnalytics')
     }
     return false
+  }
+
+  /** Karma Points panel hidden for this course category (`disableKarmaPointsCourseCategories` in the TOC config) */
+  get karmaPointsHidden(): boolean {
+    const categories = karmaPointsDisabledCategories(this.tocConfig, this.configSvc?.instanceConfig)
+    return isCategoryListed(categories, this.contentReadData?.courseCategory || this.content?.courseCategory)
   }
 
   get isComprehensiveAssessment(): boolean {

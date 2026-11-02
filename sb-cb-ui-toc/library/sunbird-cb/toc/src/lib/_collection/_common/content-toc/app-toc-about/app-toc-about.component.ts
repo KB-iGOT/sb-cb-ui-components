@@ -28,6 +28,9 @@ import { DiscussUtilsService } from '../../../../services/discuss-utils.service'
 
 import { ReviewsContentComponent } from '../reviews-content/reviews-content.component'
 import { CertificateDialogComponent } from '../../certificate-dialog/certificate-dialog.component'
+import {
+  configuredCategories, DISABLE_CERTIFICATE_KEY, isCategoryListed, karmaPointsDisabledCategories,
+} from '../../../../_services/course-category-visibility'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
 
 interface IStripUnitContentData {
@@ -104,6 +107,14 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   @ViewChild('tagsElem') tagsElem !: ElementRef
   @ViewChild('searchTagElem') searchTagElem !: ElementRef
   disableCertificate = false
+  /**
+   * Certificate hidden by config: the course category is in `disableCertificateCourseCategories`
+   * (TOC page config, else the application config). Checked in addition to `disableCertificate`, which
+   * keeps its old rules (Case Study etc.). A getter, so it follows `config` / `content` whenever they arrive.
+   */
+  get certificateHiddenByConfig(): boolean {
+    return this.isCertificateDisabledFor(this.content?.courseCategory || this.contentReadData?.courseCategory)
+  }
   isExternalContent = false
   primaryCategory = NsContent.EPrimaryCategory
   stripsResultDataMap!: { [key: string]: IStripUnitContentData }
@@ -1066,6 +1077,24 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
     if (this.refreshratingSub) {
       this.refreshratingSub.unsubscribe()
     }
+  }
+
+
+  /**
+   * Course categories whose TOC shows no certificate: `disableCertificateCourseCategories` in the TOC
+   * page config, else in the application config (e.g. ["Case Study", "Baseline Assessment"]).
+   * Adds to the built-in rules (Case Study is still hidden by `disableCertificate`); none when the key is missing.
+   * Matching ignores case and surrounding spaces.
+   */
+  isCertificateDisabledFor(courseCategory?: string): boolean {
+    const categories = configuredCategories(DISABLE_CERTIFICATE_KEY, this.config, this.configService?.instanceConfig)
+    return isCategoryListed(categories, courseCategory)
+  }
+
+  /** Karma Points hidden for this course category (`disableKarmaPointsCourseCategories`); none by default */
+  get karmaPointsHidden(): boolean {
+    const categories = karmaPointsDisabledCategories(this.config, this.configService?.instanceConfig)
+    return isCategoryListed(categories, this.content?.courseCategory || this.contentReadData?.courseCategory)
   }
 
 }

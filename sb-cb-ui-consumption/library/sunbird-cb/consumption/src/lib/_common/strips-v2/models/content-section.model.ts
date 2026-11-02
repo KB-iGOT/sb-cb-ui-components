@@ -32,6 +32,13 @@ export enum ApiMethod {
 export interface ContentConfig {
   apiDetailsKey?: string
   contentIds?: string[]
+  // Content metadata written straight into the config (name, identifier, appIcon, duration,
+  // organisation, ...). Cards are built from it as-is: no dictionary lookup, no API call.
+  // Takes priority over contentIds and apiDetailsKey when it has entries.
+  contents?: Record<string, unknown>[]
+  // Only content whose courseCategory is in this list is shown (e.g. ["Case Study"]); applies to
+  // `contents` and to what `contentIds` resolve to. Empty or absent shows everything.
+  courseCategories?: string[]
   showNoData?: boolean
   noDataMessage?: string
   cardType: CardType
