@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing'
-import { provideHttpClient } from '@angular/common/http'
+import { HttpClient, provideHttpClient } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
+import { ConfigurationsService, IndexedDbService } from '@sunbird-cb/utils-v2'
 import { FormConfigService } from './form-config.service'
 import { FormLookup, FormRule } from './form-config.model'
 
@@ -32,6 +33,9 @@ const API_LOOKUP: FormLookup = {
 // a fresh copy per response, so a test's changes never leak into the next one
 const copyOf = (lookup: any): FormLookup => JSON.parse(JSON.stringify(lookup))
 
+// lets the IndexedDB reads (promises) run, so the HTTP request they lead to is made
+const settle = () => new Promise(resolve => setTimeout(resolve))
+
 // Shape of the real user read response
 const buildUser = (designation?: string, ministryOrStateType?: string, rootOrgId = ROOT_ORG_ID) => {
   const profileDetails: any = {
@@ -49,27 +53,46 @@ const buildUser = (designation?: string, ministryOrStateType?: string, rootOrgId
   }
 }
 
+/** IndexedDbService over a Map, with the same never-rejecting withTimeout */
+class MemoryDb {
+  stores = new Map<string, Map<string, any>>()
+  store(name: string) {
+    if (!this.stores.has(name)) {
+      this.stores.set(name, new Map())
+    }
+    return this.stores.get(name) as Map<string, any>
+  }
+  async get(name: string, key: string) { return this.store(name).get(key) }
+  async put(name: string, key: string, value: any) { this.store(name).set(key, value) }
+  async clear(name: string) { this.store(name).clear() }
+  withTimeout<T>(operation: Promise<T>) { return operation.catch(() => undefined) }
+}
+
 describe('FormConfigService', () => {
   let service: FormConfigService
   let httpMock: HttpTestingController
+  let appDb: MemoryDb
+  let configSvc: { globalConfig: any }
   // the lookup the readFormDetails/portal API returns in these tests
   let lookup: FormLookup
 
   // clears the service and answers its portal lookup read with `lookup`
-  const reloadLookup = () => {
+  const reloadLookup = async () => {
     service.clearCache()
     service.loadLookup('portal').subscribe()
+    await settle()
     httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: copyOf(lookup) })
+    await settle()
   }
 
-  const withTempForm = (form: FormRule, run: () => void) => {
+  const withTempForm = async (form: FormRule, run: () => void | Promise<void>) => {
     lookup.forms.push(form)
-    reloadLookup()
+    await reloadLookup()
     try {
-      run()
+      await run()
     } finally {
       lookup.forms.splice(lookup.forms.indexOf(form), 1)
-      reloadLookup()
+      await reloadLookup()
     }
   }
 
@@ -78,18 +101,27 @@ describe('FormConfigService', () => {
     return form ? form.id : null
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    localStorage.clear()
+    appDb = new MemoryDb()
+    configSvc = { globalConfig: undefined }
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: IndexedDbService, useValue: appDb },
+        { provide: ConfigurationsService, useValue: configSvc },
+      ],
     })
     service = TestBed.inject(FormConfigService)
     httpMock = TestBed.inject(HttpTestingController)
     lookup = copyOf(API_LOOKUP)
-    reloadLookup()
+    await reloadLookup()
   })
 
   afterEach(() => {
     httpMock.verify()
+    jest.restoreAllMocks()
   })
 
   describe('findForm portal home, clientVersion 2', () => {
@@ -121,21 +153,21 @@ describe('FormConfigService', () => {
   })
 
   describe('generic engine', () => {
-    it('a rootOrg specific form beats lower priority criteria, only for that org', () => {
+    it('a rootOrg specific form beats lower priority criteria, only for that org', async () => {
       const tempForm: FormRule = {
         id: 99, name: 'temp_root_org_form', subType: 'home', clientVersion: 2, criteria: { rootOrg: ROOT_ORG_ID },
       }
-      withTempForm(tempForm, () => {
+      await withTempForm(tempForm, () => {
         expect(pick(buildUser('Director', 'ministry'), 'home', 2)).toBe(99)
         expect(pick(buildUser('Director', 'ministry', 'other-org'), 'home', 2)).toBe(40)
       })
     })
 
-    it('a criterion name in another case ("ROOTORG") still counts as that criterion', () => {
+    it('a criterion name in another case ("ROOTORG") still counts as that criterion', async () => {
       const tempForm: FormRule = {
         id: 95, name: 'temp_upper_case_criterion', subType: 'home', clientVersion: 2, criteria: { ROOTORG: ROOT_ORG_ID },
       }
-      withTempForm(tempForm, () => {
+      await withTempForm(tempForm, () => {
         expect(pick(buildUser('Director', 'ministry'), 'home', 2)).toBe(95)
         expect(pick(buildUser('Director', 'ministry', 'other-org'), 'home', 2)).toBe(40)
       })
@@ -151,87 +183,194 @@ describe('FormConfigService', () => {
         id: 96, name: 'temp_both_sheets_ministry', subType: 'home', clientVersion: 2,
         criteria: { rootOrg: '*', designation: ['Both Sheets Officer'], ministryOrStateType: ['ministry'] },
       }
-      const pickBoth = (type?: string) => {
+      const pickBoth = async (type?: string) => {
         let id: number | null = null
-        withTempForm(stateForm, () => withTempForm(ministryForm, () => {
+        await withTempForm(stateForm, () => withTempForm(ministryForm, () => {
           id = pick(buildUser('Both Sheets Officer', type), 'home', 2)
         }))
         return id
       }
 
-      it('ministryOrStateType missing -> ministry form', () => {
-        expect(pickBoth()).toBe(96)
+      it('ministryOrStateType missing -> ministry form', async () => {
+        expect(await pickBoth()).toBe(96)
       })
 
-      it('ministryOrStateType matching neither sheet -> ministry form', () => {
-        expect(pickBoth('SPV')).toBe(96)
+      it('ministryOrStateType matching neither sheet -> ministry form', async () => {
+        expect(await pickBoth('SPV')).toBe(96)
       })
 
-      it('ministryOrStateType state -> state form', () => {
-        expect(pickBoth('state')).toBe(97)
+      it('ministryOrStateType state -> state form', async () => {
+        expect(await pickBoth('state')).toBe(97)
       })
 
-      it('ministryOrStateType ministry -> ministry form', () => {
-        expect(pickBoth('ministry')).toBe(96)
+      it('ministryOrStateType ministry -> ministry form', async () => {
+        expect(await pickBoth('ministry')).toBe(96)
       })
     })
   })
 
   describe('lookup from the readFormDetails API', () => {
-    it('uses the form ids of the lookup the API returns', () => {
+    it('uses the form ids of the lookup the API returns', async () => {
       expect(pick(buildUser(), 'global-web', 2)).toBe(28)
       expect(pick(buildUser(), 'globalenv', 1)).toBe(55)
 
       lookup.forms[0].id = 80
-      reloadLookup()
+      await reloadLookup()
       expect(pick(buildUser(), 'global-web', 2)).toBe(80)
     })
 
-    it('reads each portal\'s own lookup', () => {
+    it('reads each portal\'s own lookup', async () => {
       service.loadLookup('mobile').subscribe()
+      await settle()
       httpMock.expectOne(LOOKUP_URL('mobile')).flush({ result: { ...copyOf(lookup),
         forms: [{ id: 89, name: 'mobile-page-home_Public_v2', subType: 'home', clientVersion: 2, criteria: { rootOrg: '*' } }] } })
+      await settle()
 
       expect(service.findForm(buildUser(), 'mobile', 'home', 2)?.id).toBe(89)
       expect(service.findForm(buildUser(), 'portal', 'home', 2)?.id).toBe(30)
       expect(service.findForm(buildUser(), 'other', 'home', 2)).toBeNull()
     })
 
-    it('has no forms before the lookup has loaded, or when the response has no forms list', () => {
+    it('has no forms before the lookup has loaded, or when the response has no forms list', async () => {
       service.clearCache()
       expect(pick(buildUser(), 'global-web', 2)).toBeNull()
 
       service.loadLookup('portal').subscribe()
+      await settle()
       httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: {} })
+      await settle()
       expect(pick(buildUser(), 'global-web', 2)).toBeNull()
 
       // the old shape, forms grouped by role, is not a list
       service.clearCache()
       service.loadLookup('portal').subscribe()
+      await settle()
       httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: { ...copyOf(lookup), forms: { public: { portal: lookup.forms } } } })
+      await settle()
       expect(pick(buildUser(), 'global-web', 2)).toBeNull()
     })
 
-    it('reads the lookup once for all getForm calls', () => {
+    it('reads the lookup once for all getForm calls', async () => {
       service.clearCache()
       const user = buildUser()
       service.getForm(user, 'portal', 'globalenv', 1).subscribe()
       service.getForm(user, 'portal', 'globalenv', 1).subscribe()
+      await settle()
       httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: copyOf(lookup) })
+      await settle()
       httpMock.expectOne(READ_URL(55)).flush({})
     })
 
-    it('a failed lookup read errors getForm, and the next call reads it again', () => {
+    it('a failed lookup read errors getForm, and the next call reads it again', async () => {
       service.clearCache()
       const user = buildUser()
       let failed = false
       service.getForm(user, 'portal', 'globalenv', 1).subscribe({ error: () => { failed = true } })
+      await settle()
       httpMock.expectOne(LOOKUP_URL('portal')).flush(null, { status: 500, statusText: 'Server Error' })
+      await settle()
       expect(failed).toBe(true)
 
       service.getForm(user, 'portal', 'globalenv', 1).subscribe()
+      await settle()
       httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: copyOf(lookup) })
+      await settle()
       httpMock.expectOne(READ_URL(55)).flush({})
+    })
+  })
+
+  describe('IndexedDB cache', () => {
+    // a new service instance, as after a page reload: nothing in memory, the same IndexedDB
+    const reloadPage = () => {
+      service = new FormConfigService(TestBed.inject(HttpClient), configSvc as any, appDb as any)
+    }
+    const minutesAgo = (minutes: number) => Date.now() - minutes * 60 * 1000
+
+    it('stores the lookup per portal with the time it was read', () => {
+      const stored = appDb.store('forms').get('portal')
+      expect(stored.data.forms.length).toBe(API_LOOKUP.forms.length)
+      expect(Date.now() - stored.cachedAt).toBeLessThan(5000)
+    })
+
+    it('serves a fresh stored lookup without calling the API', async () => {
+      reloadPage()
+      await service.loadLookup('portal').toPromise()
+      httpMock.expectNone(LOOKUP_URL('portal'))
+      expect(pick(buildUser(), 'global-web', 2)).toBe(28)
+    })
+
+    it('calls the API when the stored lookup is older than apicache.formLookupTime', async () => {
+      configSvc.globalConfig = { apicache: { formLookupTime: 600 } }
+      appDb.store('forms').get('portal').cachedAt = minutesAgo(9)
+      reloadPage()
+      await service.loadLookup('portal').toPromise()
+      httpMock.expectNone(LOOKUP_URL('portal'))
+
+      appDb.store('forms').get('portal').cachedAt = minutesAgo(11)
+      reloadPage()
+      service.loadLookup('portal').subscribe()
+      await settle()
+      httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: copyOf(lookup) })
+      await settle()
+      expect(Date.now() - appDb.store('forms').get('portal').cachedAt).toBeLessThan(5000)
+    })
+
+    it('uses 5 minutes when no cache time is configured', async () => {
+      appDb.store('forms').get('portal').cachedAt = minutesAgo(4)
+      reloadPage()
+      await service.loadLookup('portal').toPromise()
+      httpMock.expectNone(LOOKUP_URL('portal'))
+
+      appDb.store('forms').get('portal').cachedAt = minutesAgo(6)
+      reloadPage()
+      service.loadLookup('portal').subscribe()
+      await settle()
+      httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: copyOf(lookup) })
+    })
+
+    it('before globalConfig loads, uses the cache time seen last', async () => {
+      configSvc.globalConfig = { apicache: { formLookupTime: 3600 } }
+      await service.loadLookup('portal').toPromise()
+      // next page load: the first lookup runs before globalConfig is read
+      configSvc.globalConfig = undefined
+      appDb.store('forms').get('portal').cachedAt = minutesAgo(30)
+      reloadPage()
+      await service.loadLookup('portal').toPromise()
+      httpMock.expectNone(LOOKUP_URL('portal'))
+    })
+
+    it('reads the API again once the lookup in memory has expired', async () => {
+      const now = Date.now()
+      jest.spyOn(Date, 'now').mockReturnValue(now + 6 * 60 * 1000)
+      service.loadLookup('portal').subscribe()
+      await settle()
+      httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: copyOf(lookup) })
+      await settle()
+    })
+
+    it('falls back to the expired stored lookup when the API fails', async () => {
+      appDb.store('forms').get('portal').cachedAt = minutesAgo(60)
+      reloadPage()
+      service.loadLookup('portal').subscribe()
+      await settle()
+      httpMock.expectOne(LOOKUP_URL('portal')).flush(null, { status: 500, statusText: 'Server Error' })
+      await settle()
+      expect(pick(buildUser(), 'global-web', 2)).toBe(28)
+    })
+
+    it('does not store a response without forms', async () => {
+      service.clearCache()
+      service.loadLookup('portal').subscribe()
+      await settle()
+      httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: {} })
+      await settle()
+      expect(appDb.store('forms').has('portal')).toBe(false)
+    })
+
+    it('clearCache empties the stored lookups', async () => {
+      service.clearCache()
+      await settle()
+      expect(appDb.store('forms').size).toBe(0)
     })
   })
 
@@ -241,31 +380,36 @@ describe('FormConfigService', () => {
     }
     const user = buildUser('Director', 'ministry')
 
-    it('calls the read API once per form id and returns the cached response after that', () => {
-      withTempForm(tempForm, () => {
+    it('calls the read API once per form id and returns the cached response after that', async () => {
+      await withTempForm(tempForm, async () => {
         const response = { result: { data: { homeSection: [] } } }
         const received: any[] = []
 
         service.getForm(user, 'portal', 'getFormTest', 1).subscribe(res => received.push(res))
+        await settle()
         const req = httpMock.expectOne(READ_URL(98))
         expect(req.request.method).toBe('GET')
         req.flush(response)
 
         service.getForm(user, 'portal', 'getFormTest', 1).subscribe(res => received.push(res))
+        await settle()
         httpMock.expectNone(READ_URL(98))
 
         expect(received).toEqual([response, response])
       })
     })
 
-    it('calls the read API again after clearCache', () => {
-      withTempForm(tempForm, () => {
+    it('calls the read API again after clearCache', async () => {
+      await withTempForm(tempForm, async () => {
         service.getForm(user, 'portal', 'getFormTest', 1).subscribe()
+        await settle()
         httpMock.expectOne(READ_URL(98)).flush({})
 
         service.clearCache()
         service.getForm(user, 'portal', 'getFormTest', 1).subscribe()
+        await settle()
         httpMock.expectOne(LOOKUP_URL('portal')).flush({ result: copyOf(lookup) })
+        await settle()
         httpMock.expectOne(READ_URL(98)).flush({})
       })
     })

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable, throwError } from 'rxjs'
+import { APP_DB_STORES, ConfigurationsService, IndexedDbService } from '@sunbird-cb/utils-v2'
+import { from, Observable, throwError } from 'rxjs'
 import { catchError, map, shareReplay, switchMap } from 'rxjs/operators'
 import { FormCriterionValue, FormLookup, FormRule } from './form-config.model'
 import { EMPTY_FORM_LOOKUP } from './form-lookup'
@@ -11,6 +12,22 @@ const API_END_POINTS = {
 }
 
 const ANY = '*'
+
+// APP_DB_STORES.FORMS (utils-v2 with APP_DB_VERSION 3). The fallback lets this build against an
+// older utils-v2: there the store doesn't exist, every read and write fails, and that is a cache miss
+const STORE_NAME: string = (APP_DB_STORES as { [store: string]: string }).FORMS || 'forms'
+
+/** Lookup cache lifetime in seconds when globalConfig.apicache.formLookupTime is not set */
+const DEFAULT_EXPIRY_SECONDS = 300
+
+// The last apicache.formLookupTime seen: a session's first lookup runs before globalConfig is loaded
+const EXPIRY_STORAGE_KEY = 'formLookupTime'
+
+/** What IndexedDB keeps per portal: the readFormDetails result and when it was read */
+interface StoredLookup {
+  cachedAt: number
+  data: any
+}
 
 /** A form with its specific (non-'*') criteria pre-normalized for O(1) matching */
 interface IndexedForm {
@@ -32,6 +49,7 @@ interface PriorityGroup {
 
 /** A portal's lookup, indexed by subType|clientVersion */
 interface PortalLookup {
+  cachedAt: number
   lookup: FormLookup
   index: Map<string, IndexedForm[]>
   // per bucket, only where its forms cover 2+ values of a valuePriority criterion
@@ -44,6 +62,9 @@ interface PortalLookup {
  *
  * Each portal's lookup is indexed once by subType|clientVersion, each bucket sorted most
  * specific first, so a request goes straight to its 1-3 candidates and stops at the first match.
+ *
+ * The lookup is kept in memory and in IndexedDB (iGotAppDB/forms, keyed by portal) for
+ * globalConfig.apicache.formLookupTime seconds; after that the next getForm reads it again.
  */
 @Injectable({
   providedIn: 'root',
@@ -52,9 +73,15 @@ export class FormConfigService {
   private readonly cache = new Map<string, Observable<any>>()
   // portal -> its lookup from the readFormDetails API; a portal not loaded yet has no forms
   private readonly lookups = new Map<string, PortalLookup>()
-  private readonly lookupRequests = new Map<string, Observable<PortalLookup>>()
+  private readonly lookupRequests = new Map<string, Promise<PortalLookup>>()
+  // the stored lookups being deleted by clearCache(), so a read right after it can't still see them
+  private clearing: Promise<unknown> = Promise.resolve()
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private configSvc: ConfigurationsService,
+    private appDb: IndexedDbService,
+  ) {}
 
   /** Loads the portal's lookup, finds the form for the user, reads it and returns the read API response (cached per form id) */
   getForm(user: any, portal: string, subType: string, clientVersion: number): Observable<any> {
@@ -71,28 +98,92 @@ export class FormConfigService {
     )
   }
 
-  /** Reads a portal's lookup once and shares it with every getForm call; a failed read is retried on the next call */
+  /**
+   * The portal's lookup, from memory or IndexedDB while it is younger than the cache time,
+   * otherwise from the API. Calls that miss together share one request; a failed request is
+   * retried by the next call, and falls back to an expired stored copy when there is one.
+   */
   loadLookup(portal: string): Observable<FormLookup> {
-    let request$ = this.lookupRequests.get(portal)
-    if (!request$) {
-      const lookup$: Observable<PortalLookup> = this.http.get<any>(API_END_POINTS.FORM_LOOKUP_READ(portal)).pipe(
-        map(response => {
-          const portalLookup = this.buildPortalLookup(response && response.result)
-          this.lookups.set(portal, portalLookup)
-          return portalLookup
-        }),
-        catchError(error => {
-          if (this.lookupRequests.get(portal) === lookup$) {
-            this.lookupRequests.delete(portal)
-          }
-          return throwError(error)
-        }),
-        shareReplay(1),
-      )
-      this.lookupRequests.set(portal, lookup$)
-      request$ = lookup$
+    return from(this.loadPortalLookup(portal)).pipe(map(portalLookup => portalLookup.lookup))
+  }
+
+  private loadPortalLookup(portal: string): Promise<PortalLookup> {
+    const current = this.lookups.get(portal)
+    if (current && this.isFresh(current.cachedAt)) {
+      return Promise.resolve(current)
     }
-    return request$.pipe(map(portalLookup => portalLookup.lookup))
+    let request = this.lookupRequests.get(portal)
+    if (!request) {
+      const pending = this.readPortalLookup(portal)
+      const done = () => {
+        if (this.lookupRequests.get(portal) === pending) {
+          this.lookupRequests.delete(portal)
+        }
+      }
+      pending.then(done, done)
+      this.lookupRequests.set(portal, pending)
+      request = pending
+    }
+    return request
+  }
+
+  private async readPortalLookup(portal: string): Promise<PortalLookup> {
+    await this.clearing
+    const stored = await this.appDb.withTimeout(this.appDb.get<StoredLookup>(STORE_NAME, portal), `${STORE_NAME} read`)
+    if (stored && this.isFresh(stored.cachedAt)) {
+      return this.setPortalLookup(portal, stored)
+    }
+    let response: any
+    try {
+      response = await this.http.get<any>(API_END_POINTS.FORM_LOOKUP_READ(portal)).toPromise()
+    } catch (error) {
+      // an expired lookup still picks the right forms far more often than every page's fallback
+      if (stored) {
+        return this.setPortalLookup(portal, stored)
+      }
+      throw error
+    }
+    const fresh: StoredLookup = { cachedAt: Date.now(), data: response && response.result }
+    // a response without forms is not stored, so the next call asks the API again
+    if (fresh.data && Array.isArray(fresh.data.forms)) {
+      // not awaited: the page doesn't wait for the write
+      this.appDb.withTimeout(this.appDb.put(STORE_NAME, portal, fresh), `${STORE_NAME} write`)
+    }
+    return this.setPortalLookup(portal, fresh)
+  }
+
+  private setPortalLookup(portal: string, stored: StoredLookup): PortalLookup {
+    const portalLookup = this.buildPortalLookup(stored.data, stored.cachedAt)
+    this.lookups.set(portal, portalLookup)
+    return portalLookup
+  }
+
+  private isFresh(cachedAt: number): boolean {
+    return !!cachedAt && (Date.now() - cachedAt) / 1000 < this.expirySeconds()
+  }
+
+  /** globalConfig.apicache.formLookupTime, else the value seen last time it was loaded, else the default */
+  private expirySeconds(): number {
+    const raw = this.configSvc.globalConfig?.apicache?.formLookupTime
+    const configured = raw === undefined || raw === null || raw === '' ? NaN : Number(raw)
+    try {
+      if (configured >= 0) {
+        if (localStorage.getItem(EXPIRY_STORAGE_KEY) !== String(configured)) {
+          localStorage.setItem(EXPIRY_STORAGE_KEY, String(configured))
+        }
+        return configured
+      }
+      const remembered = Number(localStorage.getItem(EXPIRY_STORAGE_KEY) ?? NaN)
+      if (remembered >= 0) {
+        return remembered
+      }
+    } catch {
+      // storage unavailable (private mode): the configured value still applies, otherwise the default
+      if (configured >= 0) {
+        return configured
+      }
+    }
+    return DEFAULT_EXPIRY_SECONDS
   }
 
   /** The portal's lookup must be loaded (loadLookup) first, until then nothing is found */
@@ -195,15 +286,16 @@ export class FormConfigService {
     return null
   }
 
-  /** Clears cached read responses and lookups, so the next getForm reads both again */
+  /** Clears cached read responses and lookups, in memory and IndexedDB, so the next getForm reads both again */
   clearCache(): void {
     this.cache.clear()
     this.lookups.clear()
     this.lookupRequests.clear()
+    this.clearing = this.appDb.withTimeout(this.appDb.clear(STORE_NAME), `${STORE_NAME} clear`)
   }
 
   /** A response without a forms list is treated as an empty lookup, so every page uses its fallback */
-  private buildPortalLookup(data: any): PortalLookup {
+  private buildPortalLookup(data: any, cachedAt: number): PortalLookup {
     const lookup = data && Array.isArray(data.forms) ? this.prepareLookup(data) : EMPTY_FORM_LOOKUP
     const index = new Map<string, IndexedForm[]>()
     lookup.forms.forEach(form => {
@@ -221,7 +313,7 @@ export class FormConfigService {
         priorityGroups.set(key, groups)
       }
     })
-    return { lookup, index, priorityGroups }
+    return { cachedAt, lookup, index, priorityGroups }
   }
 
   /** Fills in what the API leaves out, and spells criterion names as in rulePriority/userFields ("rootorg" -> rootOrg) */

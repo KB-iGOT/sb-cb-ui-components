@@ -2,8 +2,9 @@ import { FormLookup } from './form-config.model'
 
 /*
  * Form selection rules. FormConfigService reads them from the readFormDetails API
- * (/apis/proxies/v8/formsConfig/v1/readFormDetails/<portal>, the lookup in `result`), once per
- * portal per session and again after clearCache(). The server returns the forms for the logged-in
+ * (/apis/proxies/v8/formsConfig/v1/readFormDetails/<portal>, the lookup in `result`). It is kept in
+ * memory and IndexedDB (iGotAppDB/forms) for globalConfig.apicache.formLookupTime seconds (default
+ * 300), and read again after that or after clearCache(). The server returns the forms for the logged-in
  * user's role, so the client doesn't check roles. The shape is rulePriority, userFields,
  * valuePriority, forms (a list). FormConfigService is a generic engine that reads it.
  * This file only documents it.
