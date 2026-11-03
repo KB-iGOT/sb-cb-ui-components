@@ -18,6 +18,10 @@ const DICT_DB_KEY = 'all'
 })
 export class ContentDictionaryService {
 
+  // the dictionary request in flight, shared so callers that miss the cache together
+  // (a strip resolving every card at once) trigger one download, not one each
+  private dictionaryRequest: Promise<Record<string, any>> | null = null
+
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService,
@@ -89,7 +93,15 @@ export class ContentDictionaryService {
     return this.fetchAndCacheDictionary()
   }
 
-  private async fetchAndCacheDictionary(): Promise<Record<string, any>> {
+  private fetchAndCacheDictionary(): Promise<Record<string, any>> {
+    if (!this.dictionaryRequest) {
+      this.dictionaryRequest = this.requestDictionary()
+        .finally(() => { this.dictionaryRequest = null })
+    }
+    return this.dictionaryRequest
+  }
+
+  private async requestDictionary(): Promise<Record<string, any>> {
     const res: any = await this.http.get<any>(API_ENDPOINTS.DICTIONARY).toPromise()
     const dictionary: Record<string, any> = res?.result ?? {}
     await this.dbPut(DICT_DB_KEY, dictionary)
@@ -97,9 +109,30 @@ export class ContentDictionaryService {
     return dictionary
   }
 
+  private isDictionaryEnabled(): boolean {
+    return !!this.configSvc.globalConfig?.apis?.content?.dictionary?.enabled
+  }
+
+  /**
+   * The dictionary used to look a content up. Nothing preloads it, so the first lookup
+   * downloads it (when enabled via global-config apis.content.dictionary) and later lookups
+   * are served from IndexedDB until it expires. Disabled, or when the download fails,
+   * whatever is already cached is used and lookups fall through to content read.
+   */
+  private async lookupDictionary(): Promise<Record<string, any>> {
+    if (this.isDictionaryEnabled()) {
+      try {
+        return await this.getDictionaryAsync(false)
+      } catch (err) {
+        console.warn('ContentDictionaryService: dictionary fetch failed, using cached copy', err)
+      }
+    }
+    return (await this.dbGet<Record<string, any>>(DICT_DB_KEY)) ?? {}
+  }
+
   /**
    * Returns a single content item by do_id.
-   * Lookup order: dictionary cache → individual IndexedDB entry → content read API.
+   * Lookup order: dictionary (fetched on first use) → individual IndexedDB entry → content read API.
    * When fetched from the API the result is saved to IndexedDB and merged into the dictionary.
    */
   getContent(doId: string): Observable<any> {
@@ -107,12 +140,16 @@ export class ContentDictionaryService {
   }
 
   private async getContentAsync(doId: string): Promise<any> {
-    // 1. Check the full dictionary cache
-    const dictionary = await this.dbGet<Record<string, any>>(DICT_DB_KEY)
-    if (dictionary && dictionary[doId]) {
+    // 1. Check the full dictionary
+    const dictionary = await this.lookupDictionary()
+    if (dictionary[doId]) {
       return dictionary[doId]
     }
+    return this.resolveMissingContent(doId)
+  }
 
+  // steps 2–3 of getContent(), for an id the dictionary does not hold
+  private async resolveMissingContent(doId: string): Promise<any> {
     // 2. Check individual entry stored from a previous content read call
     const cached = await this.dbGet<any>(doId)
     if (cached) {
@@ -177,10 +214,10 @@ export class ContentDictionaryService {
       }
     })
 
-    // Sequential: getContentAsync() read-modify-writes the shared dictionary blob.
+    // Sequential: resolveMissingContent() read-modify-writes the shared dictionary blob.
     for (const id of missing) {
       try {
-        const content = await this.getContentAsync(id)
+        const content = await this.resolveMissingContent(id)
         if (content) {
           resolved[id] = content
         }
