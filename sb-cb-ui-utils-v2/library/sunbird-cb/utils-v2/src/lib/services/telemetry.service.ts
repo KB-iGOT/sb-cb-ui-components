@@ -26,6 +26,8 @@ export class TelemetryService {
   }
   environment: any
   private shouldSendEmptyInteractObject = false
+  private shouldSendEmptyImpressionObject = false
+  private isGlobalObejectReset = false
   private globalObjectBackup: any = null
   constructor(
     private configSvc: ConfigurationsService,
@@ -129,27 +131,46 @@ export class TelemetryService {
     this.shouldSendEmptyInteractObject = true
   }
 
+  sendEmptyObjectForNextImpression() {
+    this.shouldSendEmptyImpressionObject = true
+  }
+
   // Call before $t.interact(). If sendEmptyObjectForNextInteract() was requested and
   // the object being sent for this call is empty, backs up the SDK's persistent
   // _globalObject and blanks it out so it doesn't leak into this one event.
   resetGlobalObjectIfNeeded(object: any) {
     const isObjectEmpty = !object || Object.keys(object).length === 0
-    if (this.shouldSendEmptyInteractObject && isObjectEmpty) {
+    if ((this.shouldSendEmptyInteractObject || this.shouldSendEmptyImpressionObject) && isObjectEmpty && !this.isGlobalObejectReset) {
       const telemetrySdk = $t as any
       this.globalObjectBackup = telemetrySdk._globalObject
       telemetrySdk._globalObject = {}
+      this.isGlobalObejectReset = true
     }
   }
 
   // Call in the finally block after $t.interact(). Mirrors the same condition
   // resetGlobalObjectIfNeeded() used, so it only restores when a reset actually
   // happened, then clears the flag so it doesn't affect the next interact call.
-  restoreGlobalObjectIfNeeded(object: any) {
+  restoreGlobalObjectIfNeeded(object: any, fromInteract: boolean = true) {
     const isObjectEmpty = !object || Object.keys(object).length === 0
-    if (this.shouldSendEmptyInteractObject && isObjectEmpty) {
+    if ((this.shouldSendEmptyInteractObject || this.shouldSendEmptyImpressionObject) && isObjectEmpty) {
       const telemetrySdk = $t as any
       telemetrySdk._globalObject = this.globalObjectBackup
-      this.shouldSendEmptyInteractObject = false
+      this.isGlobalObejectReset = false
+      if (fromInteract) {
+        this.shouldSendEmptyInteractObject = false
+      } else {
+        this.shouldSendEmptyImpressionObject = false
+      }
+    }
+  }
+
+  // Call before every $t.interact()/$t.impression(). The SDK keeps _currentTags between events,
+  // so when this event has no tags, blank it so stale tags from an earlier event don't leak.
+  resetCurrentTagsIfNeeded(tags?: any) {
+    if (!tags || tags.length === 0) {
+      const telemetrySdk = $t as any
+      telemetrySdk._currentTags = []
     }
   }
 
@@ -271,6 +292,8 @@ export class TelemetryService {
 
   impression(data?: any, objectType?: any) {
     this.triggerNPSUpdate(data)
+    this.resetGlobalObjectIfNeeded(data.object)
+    this.resetCurrentTagsIfNeeded(data?.tags || [])
     try {
       const page = this.getPageDetails()
       if (data && data.pageContext) {
@@ -329,6 +352,9 @@ export class TelemetryService {
     } catch (e) {
       // tslint:disable-next-line: no-console
       console.log('Error in telemetry impression', e)
+    } finally {
+      const fromInteract = false
+      this.restoreGlobalObjectIfNeeded(data?.object, fromInteract)
     }
   }
 
@@ -343,6 +369,7 @@ export class TelemetryService {
     tags: string[] = [],
   ) {
     try {
+      this.resetCurrentTagsIfNeeded(tags)
       $t.interact(
         {
           type: edata.type,
@@ -392,6 +419,7 @@ export class TelemetryService {
             },
           },
         }
+        this.resetCurrentTagsIfNeeded([])
         $t.impression(impressionData.data, externalConfig)
       }
     } catch (e) {
@@ -438,6 +466,7 @@ export class TelemetryService {
         if (
           event.data.state === WsEvents.EnumTelemetrySubType.Interact
         ) {
+          this.resetCurrentTagsIfNeeded([])
           $t.interact(
             {
               type: event.data.edata.type,
@@ -501,6 +530,7 @@ export class TelemetryService {
         if (
           event.data.state === WsEvents.EnumTelemetrySubType.Interact
         ) {
+          this.resetCurrentTagsIfNeeded([])
           $t.interact(
             {
               type: event.data.edata.type,
@@ -564,6 +594,7 @@ export class TelemetryService {
         if (
           event.data.state === WsEvents.EnumTelemetrySubType.Interact
         ) {
+          this.resetCurrentTagsIfNeeded([])
           $t.interact(
             {
               type: event.data.edata.type,
@@ -761,6 +792,7 @@ export class TelemetryService {
             },
           }
           try {
+            this.resetCurrentTagsIfNeeded([])
             $t.interact(event.data, externalConfig)
           } catch (e) {
             // tslint:disable-next-line: no-console
@@ -773,6 +805,7 @@ export class TelemetryService {
           // }
           try {
             this.resetGlobalObjectIfNeeded(event.data.object)
+            this.resetCurrentTagsIfNeeded([])
             try {
               $t.interact(
                 {
