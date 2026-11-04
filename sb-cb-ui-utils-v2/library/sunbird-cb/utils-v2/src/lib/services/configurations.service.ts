@@ -121,6 +121,10 @@ export class ConfigurationsService {
   completionSurvey: any = {}
   globalConfig: any = {}
   globalConfigLoadFailed = false
+  // Latest server time (epoch ms) from an API response's `ts`, set by the portal's HTTP interceptor
+  serverTime: number | null = null
+  // serverTime minus the browser clock when it was received: the server's "now" is Date.now() + serverTimeOffset
+  serverTimeOffset = 0
 
   changeNavBarFullView = new Subject()
   openExploreMenuForMWeb = new Subject()
