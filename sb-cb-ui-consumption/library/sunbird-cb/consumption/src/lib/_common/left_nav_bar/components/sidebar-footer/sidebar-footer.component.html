@@ -1,3 +1,4 @@
+@if (itemsList?.length) {
 <div class="footer-content flex items-center py-1" [ngClass]="isOpen ? 'px-6' : 'justify-center'">
   @for (item of itemsList; track item.code) {
   <!-- Collapsed sidebar hides .item-text, so the tooltip is the only thing naming the icon.
@@ -34,3 +35,4 @@
   </a>
   }
 </div>
+}
