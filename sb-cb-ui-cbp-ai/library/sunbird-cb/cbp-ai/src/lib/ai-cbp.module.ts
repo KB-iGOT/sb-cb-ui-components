@@ -15,6 +15,7 @@ import { UploadDialogComponent } from './modules/upload-document-page/upload-dia
 import { InitialScreenComponent } from './modules/initial-screen/initial-screen.component';
 import { ProgressDialogComponent } from './modules/upload-document-page/progress-dialog/progress-dialog.component';
 import { DeleteRoleMappingPopupComponent } from './components/delete-role-mapping-popup/delete-role-mapping-popup.component';
+import { MarketplaceCoursesAlertComponent } from './components/marketplace-courses-alert/marketplace-courses-alert.component';
 import { ListPopupComponent } from './components/list-popup/list-popup.component';
 import { SuggestMoreCoursesComponent } from './components/suggest-more-courses/suggest-more-courses.component';
 import { AddDesignationComponent } from './components/add-designation/add-designation.component';
@@ -91,6 +92,7 @@ import { RejectRequestFormComponent } from './components/reject-request-form/rej
     InitialScreenComponent,
     ProgressDialogComponent,
     DeleteRoleMappingPopupComponent,
+    MarketplaceCoursesAlertComponent,
     ListPopupComponent,
     SuggestMoreCoursesComponent,
     AddDesignationComponent,
@@ -154,6 +156,7 @@ import { RejectRequestFormComponent } from './components/reject-request-form/rej
     InitialScreenComponent,
     ProgressDialogComponent,
     DeleteRoleMappingPopupComponent,
+    MarketplaceCoursesAlertComponent,
     ListPopupComponent,
     SuggestMoreCoursesComponent,
     AddDesignationComponent,

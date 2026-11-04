@@ -484,6 +484,7 @@
 
                                                             </div>
                                                         </div>
+                                                        <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                                                         <div class="ai-recommened-pill-orange mt-2"
                                                             *ngIf="item?.platform">
                                                             <div class="ai-recommened-pill-orange-text">
@@ -513,6 +514,7 @@
 
                                                             </div>
                                                         </div>
+                                                        <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                                                         <div class="ai-recommened-pill-orange mt-2"
                                                             *ngIf="item?.platform">
                                                             <div class="ai-recommened-pill-orange-text">
@@ -542,6 +544,7 @@
 
                                                             </div>
                                                         </div>
+                                                        <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                                                         <div class="ai-recommened-pill-orange mt-2"
                                                             *ngIf="item?.platform">
                                                             <div class="ai-recommened-pill-orange-text">
@@ -702,3 +705,11 @@
             Download is in progress. Please wait, this may take a while for large files...
         </div>
     </div>
+
+<!-- Marketplace tags (shown under the AI Recommended / Manually Suggested pill) -->
+<ng-template #marketplaceTags let-course>
+    <div class="marketplace-tags mt-2" *ngIf="sharedService.getMarketplaceCourseType(course) as marketplaceType">
+        <span class="marketplace-tag marketplace">Marketplace</span>
+        <span class="marketplace-tag" [ngClass]="marketplaceType">{{ marketplaceType === 'paid' ? 'Paid' : 'Free' }}</span>
+    </div>
+</ng-template>
