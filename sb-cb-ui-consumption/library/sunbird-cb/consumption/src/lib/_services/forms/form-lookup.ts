@@ -26,13 +26,18 @@ import { FormLookup } from './form-config.model'
  *      e.g. a designation on both the ministry and the state sheet, with no ministryOrStateType,
  *      gets the ministry form. A designation on only one sheet still needs the type to match.
  *
+ * A userFields entry can be a list of paths, tried in order: the user's value is the first one
+ * that some form's criteria or `valuePriority` use for that criterion, else the first one present.
+ *   e.g. "ministryOrStateType": ["rootOrg.ministryOrStateType", "rootOrg.sbOrgType"]
+ *   An org whose ministryOrStateType is "SPV" (no form uses it) is matched by its sbOrgType.
+ *
  * To add a form:
  *   Add { id, name, type, subType, clientVersion, criteria } to that portal's forms for the role(s)
  *   in the API. Its config is read from /apis/proxies/v8/formsConfig/v1/readById/<id>.
  *
  * To add a criterion (in every environment's lookup):
  *   1. Add its name to `rulePriority` at the right priority.
- *   2. Add its dot path in the user read response to `userFields`.
+ *   2. Add its dot path (or paths) in the user read response to `userFields`.
  *   3. Use it in the `criteria` of the forms that need it.
  *
  * Forms with the same subType, clientVersion and specificity: the first one in the response wins.

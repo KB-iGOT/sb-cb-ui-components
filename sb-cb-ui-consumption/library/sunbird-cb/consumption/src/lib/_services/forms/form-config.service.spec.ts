@@ -207,6 +207,36 @@ describe('FormConfigService', () => {
         expect(await pickBoth('ministry')).toBe(96)
       })
     })
+
+    describe('userFields with a list of paths', () => {
+      // the org's own type is the fallback when its ministryOrStateType is one no form uses (SPV)
+      const orgUser = (designation: string, rootOrg: any) => ({
+        rootOrgId: ROOT_ORG_ID,
+        rootOrg,
+        profileDetails: { professionalDetails: [{ designation }] },
+      })
+
+      beforeEach(async () => {
+        lookup.userFields.ministryOrStateType = ['rootOrg.ministryOrStateType', 'rootOrg.sbOrgType']
+        await reloadLookup()
+      })
+
+      const cases: [string, any, number | null][] = [
+        ['SPV org of type ministry', orgUser('Deputy Secretary', { ministryOrStateType: 'SPV', sbOrgType: 'ministry' }), 40],
+        ['SPV org of type state', orgUser('Principal Secretary', { ministryOrStateType: 'SPV', sbOrgType: 'state' }), 43],
+        ['SPV org of a type no form uses', orgUser('Deputy Secretary', { ministryOrStateType: 'SPV', sbOrgType: 'mdo' }), 30],
+        ['SPV org without a type', orgUser('Deputy Secretary', { ministryOrStateType: 'SPV' }), 30],
+        ['state org: the first known value wins', orgUser('Deputy Secretary', { ministryOrStateType: 'State', sbOrgType: 'ministry' }), 30],
+        ['ministryOrStateType missing, type ministry', orgUser('Director', { sbOrgType: 'ministry' }), 40],
+        ['no rootOrg', orgUser('Director', undefined), 30],
+      ]
+
+      cases.forEach(([label, user, expected]) => {
+        it(`${label} -> ${expected}`, () => {
+          expect(pick(user, 'home', 2)).toBe(expected)
+        })
+      })
+    })
   })
 
   describe('lookup from the readFormDetails API', () => {
