@@ -54,6 +54,8 @@ interface PortalLookup {
   index: Map<string, IndexedForm[]>
   // per bucket, only where its forms cover 2+ values of a valuePriority criterion
   priorityGroups: Map<string, PriorityGroup[]>
+  // criterion -> the values its forms and valuePriority use, to choose between a userFields list's paths
+  knownValues: Map<string, Set<string>>
 }
 
 /**
@@ -200,25 +202,24 @@ export class FormConfigService {
     if (!candidates) {
       return null
     }
-    const { lookup } = portalLookup
     // each user value is read at most once per call, and only if a candidate needs it
     const userValues: { [criterion: string]: string | null } = {}
 
     // candidates are sorted most specific first, so the first eligible one is the best
     let strict: IndexedForm | null = null
     for (const candidate of candidates) {
-      if (this.matches(lookup, candidate.checks, user, userValues)) {
+      if (this.matches(portalLookup, candidate.checks, user, userValues)) {
         strict = candidate
         break
       }
     }
     const groups = portalLookup.priorityGroups.get(key)
-    const match = (groups && this.findByValuePriority(lookup, groups, strict, user, userValues)) || strict
+    const match = (groups && this.findByValuePriority(portalLookup, groups, strict, user, userValues)) || strict
     return match ? match.form : null
   }
 
   private matches(
-    lookup: FormLookup,
+    portalLookup: PortalLookup,
     checks: FormCheck[],
     user: any,
     userValues: { [criterion: string]: string | null },
@@ -230,9 +231,7 @@ export class FormConfigService {
       }
       let value = userValues[check.criterion]
       if (value === undefined) {
-        const path = lookup.userFields[check.criterion]
-        const raw = path ? this.readPath(user, path) : undefined
-        value = raw === undefined || raw === null ? null : this.normalize(raw)
+        value = this.readUserValue(portalLookup, check.criterion, user)
         userValues[check.criterion] = value
       }
       if (value === null || !check.accepted.has(value)) {
@@ -242,13 +241,32 @@ export class FormConfigService {
     return true
   }
 
+  /** The user's normalized value for a criterion: of a userFields list, the first path with a known value, else the first present */
+  private readUserValue(portalLookup: PortalLookup, criterion: string, user: any): string | null {
+    const paths = ([] as string[]).concat(portalLookup.lookup.userFields[criterion] || [])
+    const known = portalLookup.knownValues.get(criterion)
+    let first: string | null = null
+    for (const path of paths) {
+      const raw = this.readPath(user, path)
+      if (raw === undefined || raw === null) {
+        continue
+      }
+      const value = this.normalize(raw)
+      if (paths.length === 1 || (known && known.has(value))) {
+        return value
+      }
+      first = first === null ? value : first
+    }
+    return first
+  }
+
   /**
    * For a criterion in the lookup's valuePriority that the strict match did not use: if the forms
    * matching every other criterion cover more than one of its values, the one whose value comes
    * first in the priority list wins, provided it is more specific than the strict match.
    */
   private findByValuePriority(
-    lookup: FormLookup,
+    portalLookup: PortalLookup,
     groups: PriorityGroup[],
     strict: IndexedForm | null,
     user: any,
@@ -258,13 +276,13 @@ export class FormConfigService {
       if (strict && strict.checks.some(check => check.criterion === criterion)) {
         continue
       }
-      const ranked = (lookup.valuePriority || {})[criterion].map(value => this.normalize(value))
+      const ranked = (portalLookup.lookup.valuePriority || {})[criterion].map(value => this.normalize(value))
       const values = new Set<string>()
       let best: IndexedForm | null = null
       let bestRank = Infinity
       forms.forEach(entry => {
         const own = entry.checks.find(check => check.criterion === criterion) as FormCheck
-        if (!this.matches(lookup, entry.checks, user, userValues, own)) {
+        if (!this.matches(portalLookup, entry.checks, user, userValues, own)) {
           return
         }
         let rank = Infinity
@@ -298,7 +316,15 @@ export class FormConfigService {
   private buildPortalLookup(data: any, cachedAt: number): PortalLookup {
     const lookup = data && Array.isArray(data.forms) ? this.prepareLookup(data) : EMPTY_FORM_LOOKUP
     const index = new Map<string, IndexedForm[]>()
+    const knownValues = new Map<string, Set<string>>()
+    const addKnown = (criterion: string, values: string[]) => {
+      const known = knownValues.get(criterion) || new Set<string>()
+      values.forEach(value => known.add(this.normalize(value)))
+      knownValues.set(criterion, known)
+    }
+    Object.keys(lookup.valuePriority || {}).forEach(criterion => addKnown(criterion, (lookup.valuePriority || {})[criterion]))
     lookup.forms.forEach(form => {
+      Object.keys(form.criteria).forEach(criterion => addKnown(criterion, ([] as string[]).concat(form.criteria[criterion])))
       const key = this.indexKey(form.subType, form.clientVersion)
       const bucket = index.get(key) || []
       bucket.push(this.indexForm(lookup, form))
@@ -313,7 +339,7 @@ export class FormConfigService {
         priorityGroups.set(key, groups)
       }
     })
-    return { cachedAt, lookup, index, priorityGroups }
+    return { cachedAt, lookup, index, priorityGroups, knownValues }
   }
 
   /** Fills in what the API leaves out, and spells criterion names as in rulePriority/userFields ("rootorg" -> rootOrg) */
