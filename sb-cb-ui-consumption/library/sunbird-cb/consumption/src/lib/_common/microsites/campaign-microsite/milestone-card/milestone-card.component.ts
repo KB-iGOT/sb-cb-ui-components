@@ -1,26 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core'
-import { TranslateModule } from '@ngx-translate/core'
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core'
+import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import dayjs from 'dayjs'
 import { NsCampaignMilestone } from '../campaign-microsite.model'
 import { isUsableUrl, parseDdMmYyyy } from '../campaign-microsite.utils'
 
 type TStatusTone = 'error' | 'warning' | 'success' | 'muted'
 
-const LABELS = {
-  availableNow: 'campaignMicrosite.milestoneCard.availableNow',
-  locked: 'campaignMicrosite.milestoneCard.locked',
-  due: 'campaignMicrosite.milestoneCard.due',
-  overdue: 'campaignMicrosite.milestoneCard.overdue',
-  inProgress: 'campaignMicrosite.milestoneCard.inProgress',
-  completed: 'campaignMicrosite.milestoneCard.completed',
-  resume: 'campaignMicrosite.milestoneCard.resume',
-  view: 'campaignMicrosite.milestoneCard.view',
-  start: {
-    assessment: 'campaignMicrosite.milestoneCard.startAssessment',
-    event: 'campaignMicrosite.milestoneCard.startEvent',
-    survey: 'campaignMicrosite.milestoneCard.startSurvey',
-  } as Record<NsCampaignMilestone.TMilestoneType, string>,
-}
+type TStatusKind = 'locked' | 'overdue' | 'inProgress' | 'completed' | 'due'
+type TCta = 'locked' | 'start' | 'resume' | 'view'
 
 @Component({
   selector: 'sb-uic-milestone-card',
@@ -38,7 +25,8 @@ export class MilestoneCardComponent {
 
   milestoneClick = output<NsCampaignMilestone.IMilestone>()
 
-  readonly labels = LABELS
+  private readonly translate = inject(TranslateService)
+
   readonly posterFailed = signal(false)
   readonly logoFailed = signal(false)
 
@@ -67,47 +55,51 @@ export class MilestoneCardComponent {
 
   readonly showProviderLogo = computed(() => isUsableUrl(this.milestone()?.provider?.logo) && !this.logoFailed())
 
-  /** `label` is a translation key, `params` its interpolation values */
-  readonly status = computed<{ label: string, params?: Record<string, string>, tone: TStatusTone } | null>(() => {
+  /** The template maps `kind` to its translation key */
+  readonly status = computed<{ kind: TStatusKind, tone: TStatusTone, date?: string } | null>(() => {
     if (this.isDisabled()) {
-      return { label: this.labels.locked, tone: 'muted' }
+      return { kind: 'locked', tone: 'muted' }
     }
     if (this.isOverdue()) {
-      return { label: this.labels.overdue, tone: 'error' }
+      return { kind: 'overdue', tone: 'error' }
     }
     switch (this.state()) {
       case 'locked':
-        return { label: this.labels.locked, tone: 'error' }
+        return { kind: 'locked', tone: 'error' }
       case 'inProgress':
-        return { label: this.labels.inProgress, tone: 'warning' }
+        return { kind: 'inProgress', tone: 'warning' }
       case 'completed':
-        return { label: this.labels.completed, tone: 'success' }
+        return { kind: 'completed', tone: 'success' }
       default: {
         const dueDate = parseDdMmYyyy(this.milestone()?.dueDate)
-        return dueDate
-          ? { label: this.labels.due, params: { date: dayjs(dueDate).format('D MMM') }, tone: 'warning' }
-          : null
+        return dueDate ? { kind: 'due', date: dayjs(dueDate).format('D MMM'), tone: 'warning' } : null
       }
     }
   })
 
-  /** Translation key; a disabled card keeps a greyed-out, non-clickable "Locked" button */
-  readonly ctaLabel = computed<string | null>(() => {
-    const m = this.milestone()
+  /** A disabled card keeps a greyed-out, non-clickable "Locked" button */
+  readonly cta = computed<TCta | null>(() => {
     if (this.isDisabled()) {
-      return this.labels.locked
+      return 'locked'
     }
     switch (this.state()) {
       case 'notStarted':
-        return (m && this.labels.start[m.type]) || null
+        return this.milestone() ? 'start' : null
       case 'inProgress':
-        return this.labels.resume
+        return 'resume'
       case 'completed':
-        return this.labels.view
+        return 'view'
       default:
         return null
     }
   })
+
+  constructor() {
+    if (!this.translate.currentLang) {
+      this.translate.setDefaultLang('en')
+      this.translate.use(localStorage.getItem('websiteLanguage') || 'en')
+    }
+  }
 
   onCardClick(): void {
     const m = this.milestone()

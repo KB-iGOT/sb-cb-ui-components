@@ -272,3 +272,43 @@ describe('MilestoneCardComponent', () => {
     })
   })
 })
+
+describe('MilestoneCardComponent translation', () => {
+  afterEach(() => localStorage.removeItem('websiteLanguage'))
+
+  function create() {
+    TestBed.configureTestingModule({
+      imports: [
+        MilestoneCardComponent,
+        TranslateModule.forRoot({ loader: { provide: TranslateLoader, useValue: { getTranslation: () => of(EN) } } }),
+      ],
+    })
+    const fixture = TestBed.createComponent(MilestoneCardComponent)
+    fixture.componentRef.setInput('milestone', { ...baseMilestone, dueDate: '' })
+    fixture.componentRef.setInput('state', 'notStarted')
+    fixture.detectChanges()
+    return fixture
+  }
+
+  it('sets the website language when the host left the service without one', () => {
+    localStorage.setItem('websiteLanguage', 'hi')
+    const fixture = create()
+    expect(TestBed.inject(TranslateService).currentLang).toBe('hi')
+    expect(fixture.nativeElement.querySelector('.mc-card__available')?.textContent.trim()).toBe('Available now')
+  })
+
+  it('falls back to English without a website language', () => {
+    create()
+    expect(TestBed.inject(TranslateService).currentLang).toBe('en')
+  })
+
+  it('leaves a language the host already set', () => {
+    localStorage.setItem('websiteLanguage', 'hi')
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot({ loader: { provide: TranslateLoader, useValue: { getTranslation: () => of(EN) } } })],
+    })
+    TestBed.inject(TranslateService).use('en')
+    TestBed.createComponent(MilestoneCardComponent)
+    expect(TestBed.inject(TranslateService).currentLang).toBe('en')
+  })
+})

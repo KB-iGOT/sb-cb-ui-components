@@ -5,6 +5,14 @@ $mc-orange: linear-gradient(142.89deg, #f99a33 14.29%, #d2601a 85.71%);
 :host {
   display: block;
   height: 100%;
+
+  --mc-disabled-text: var(--text-disabled, #9aa3b2);
+  --mc-disabled-fill: var(--environment-button-disabled, #e4e8ef);
+}
+
+:host-context([data-theme='dark']) {
+  --mc-disabled-text: rgba(255, 255, 255, 0.4);
+  --mc-disabled-fill: var(--surface-tertiary, #333d4c);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -133,7 +141,7 @@ $mc-orange: linear-gradient(142.89deg, #f99a33 14.29%, #d2601a 85.71%);
 }
 
 .mc-card__provider-name {
-  color: var(--environment-all-fills-black-o-black-o-64-40, rgba(0, 0, 0, 0.64));
+  color: var(--text-bandw-black-captions, rgba(0, 0, 0, 0.72));
 }
 
 .mc-card__status {
@@ -150,7 +158,7 @@ $mc-orange: linear-gradient(142.89deg, #f99a33 14.29%, #d2601a 85.71%);
   }
 
   &--muted {
-    color: var(--text-disabled, #9aa3b2);
+    color: var(--mc-disabled-text);
   }
 }
 
@@ -186,12 +194,12 @@ $mc-orange: linear-gradient(142.89deg, #f99a33 14.29%, #d2601a 85.71%);
   .mc-card__category,
   .mc-card__tag {
     background: var(--surface-tertiary, #f1f3f6);
-    color: var(--text-disabled, #9aa3b2);
+    color: var(--mc-disabled-text);
   }
 
   .mc-card__title,
   .mc-card__provider-name {
-    color: var(--text-disabled, #9aa3b2);
+    color: var(--mc-disabled-text);
   }
 
   .mc-card__provider-logo {
@@ -201,8 +209,8 @@ $mc-orange: linear-gradient(142.89deg, #f99a33 14.29%, #d2601a 85.71%);
 
   .mc-card__cta,
   .mc-card__cta:hover {
-    background: var(--environment-button-disabled, #e4e8ef);
-    color: var(--text-disabled, #9aa3b2);
+    background: var(--mc-disabled-fill);
+    color: var(--mc-disabled-text);
     cursor: not-allowed;
   }
 }
