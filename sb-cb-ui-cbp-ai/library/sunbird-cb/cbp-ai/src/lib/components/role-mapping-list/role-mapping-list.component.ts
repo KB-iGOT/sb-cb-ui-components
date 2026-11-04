@@ -12,6 +12,7 @@ import { ListPopupComponent } from '../list-popup/list-popup.component';
 import { AddDesignationComponent } from '../add-designation/add-designation.component';
 import { SelectionModel } from '@angular/cdk/collections';
 import { ApprovalRequestFormComponent } from '../approval-request-form/approval-request-form.component';
+import { MARKETPLACE_ALERT_PANEL_CLASS, MarketplaceCoursesAlertComponent } from '../marketplace-courses-alert/marketplace-courses-alert.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
 import { DesignationApprovalRequestFormComponent } from '../designation-approval-request-form/designation-approval-request-form.component';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -886,6 +887,34 @@ export class RoleMappingListComponent {
   }
 
   sendForApprovalForm() {
+    if (!this.selection.selected.length) {
+      return
+    }
+    // Same plan the Final CBP shows: the latest cbp_plan of each designation
+    const rows = this.selection.selected.map(row => ({
+      name: row?.designation_name,
+      ...this.sharedService.countMarketplaceCourses(row?.cbp_plans?.at(-1)?.selected_courses)
+    }))
+    if (!rows.some(row => row.marketplace > 0)) {
+      this.openApprovalRequestForm()
+      return
+    }
+    const alertRef = this.dialog.open(MarketplaceCoursesAlertComponent, {
+      width: '680px',
+      maxWidth: '95vw',
+      data: { rows, confirmLabel: 'Proceed' },
+      panelClass: MARKETPLACE_ALERT_PANEL_CLASS,
+      maxHeight: '90vh',
+      disableClose: true
+    });
+    alertRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.openApprovalRequestForm()
+      }
+    });
+  }
+
+  openApprovalRequestForm() {
     console.log('this.selection--', this.selection.selected)
     if (this.selection.selected.length) {
       const dialogRef = this.dialog.open(ApprovalRequestFormComponent, {

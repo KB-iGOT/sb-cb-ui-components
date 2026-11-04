@@ -121,6 +121,31 @@ export class SharedService {
     });
   }
 
+  /**
+   * Marketplace courses come with course_type 'Paid' or 'Free'.
+   * Any other value (null, 'User Added', etc.) means it is not a marketplace course.
+   */
+  getMarketplaceCourseType(course: any): 'paid' | 'free' | null {
+    const type = course?.course_type?.toString().trim().toLowerCase()
+    return type === 'paid' || type === 'free' ? type : null
+  }
+
+  isMarketplaceCourse(course: any): boolean {
+    return this.getMarketplaceCourseType(course) !== null
+  }
+
+  countMarketplaceCourses(courses: any[]): { marketplace: number, free: number, paid: number } {
+    const counts = { marketplace: 0, free: 0, paid: 0 }
+    ;(courses || []).forEach(course => {
+      const type = this.getMarketplaceCourseType(course)
+      if (type) {
+        counts.marketplace++
+        counts[type]++
+      }
+    })
+    return counts
+  }
+
   setConfiDetails(configDetails: any = null) {
     if (configDetails) {
       this.configDetails = configDetails

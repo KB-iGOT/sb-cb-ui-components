@@ -261,27 +261,50 @@
                                           (click)="$event.stopPropagation()"
                                           (keydown)="$event.stopPropagation()"
                                           (keyup)="filterList($any($event.target).value, 'provider')" />
-                                  
+
                                       <!-- Values -->
                                       <mat-option
                                         *ngFor="let r of filteredProviders"
                                         [value]="r">
                                         {{ r }}
                                       </mat-option>
-                                  
+
                                     </mat-select>
                                   </mat-form-field>
                             </div>
                         </div>
-                        <div style="margin-top: 45px;margin-left: 20px;">
-                            <input class="btn-active" type="button" value="Reset All Filters"
-                                (click)="resetFilters()" />
+                        <div class="search-and-buttons-container">
+                            <div style="margin-left: 10px;">
+                                <label>Select Source</label>
+                            </div>
+                            <div>
+                                <mat-form-field appearance="outline">
+                                    <mat-select
+                                      formControlName="source"
+                                      panelClass="select-search-panel"
+                                      (selectionChange)="applyFilters()">
+                                      <mat-option *ngFor="let s of sourceOptions" [value]="s.value">
+                                        {{ s.label }}
+                                      </mat-option>
+                                    </mat-select>
+                                  </mat-form-field>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-4 filtered-count-row">
                         <div style="font-size:16px;font-weight:bold;color:#000">
                             Filtered Course Count : {{filterdCourses?.length}}
                         </div>
+                        <ng-container *ngIf="sharedService.countMarketplaceCourses(filterdCourses) as marketplaceCount">
+                            <span class="marketplace-count" *ngIf="marketplaceCount.marketplace">
+                                Marketplace : {{ marketplaceCount.marketplace }}
+                                <span class="marketplace-tag free">{{ marketplaceCount.free }} Free</span>
+                                <span class="marketplace-tag paid">{{ marketplaceCount.paid }} Paid</span>
+                            </span>
+                        </ng-container>
+                        <span class="filtered-count-spacer"></span>
+                        <input class="btn-active" type="button" value="Reset All Filters"
+                            (click)="resetFilters()" />
                     </div>
                     <div class="mt-5 sub-heading select-all-container" *ngIf="filterdCourses?.length">
                         <div style="margin-left: 16px;">
@@ -301,11 +324,12 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <div class="disclaimer-container mt-2" *ngIf="filterdCourses?.length">
+                    <div class="disclaimer-container mt-2" *ngIf="filterdCourses?.length">
                         <div class="disclaimer-message mt-4">
-                            <strong>Disclaimer:</strong> Please verify the public course URL before adding it to the plan.
+                            <strong>Disclaimer:</strong> Please verify the public courses before adding them to the plan.
+                            Marketplace courses need a licence; availability is confirmed by Karmayogi Bharat.
                         </div>
-                    </div> -->
+                    </div>
                     <div class="mt-2">
 
                         <div class="course-list-container">
@@ -436,6 +460,7 @@
 
                                                         </div>
                                                     </div>
+                                                    <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                                                     <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                                         <div class="ai-recommened-pill-orange-text">
                                                             <span class="ai-loader-icon"><img
@@ -463,6 +488,7 @@
 
                                                         </div>
                                                     </div>
+                                                    <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                                                     <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                                         <div class="ai-recommened-pill-orange-text">
                                                             <span class="ai-loader-icon"><img
@@ -490,6 +516,7 @@
 
                                                         </div>
                                                     </div>
+                                                    <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                                                     <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                                         <div class="ai-recommened-pill-orange-text">
                                                             <span class="ai-loader-icon"><img
@@ -1009,3 +1036,11 @@
         </div>
     </div>
 </div>
+
+<!-- Marketplace tags (shown under the AI Recommended / Manually Suggested pill) -->
+<ng-template #marketplaceTags let-course>
+    <div class="marketplace-tags mt-2" *ngIf="sharedService.getMarketplaceCourseType(course) as marketplaceType">
+        <span class="marketplace-tag marketplace">Marketplace</span>
+        <span class="marketplace-tag" [ngClass]="marketplaceType">{{ marketplaceType === 'paid' ? 'Paid' : 'Free' }}</span>
+    </div>
+</ng-template>

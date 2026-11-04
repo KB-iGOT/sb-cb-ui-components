@@ -9,6 +9,7 @@ import html2pdf from 'html2pdf.js';
 import { concat, interval, of } from 'rxjs';
 import { switchMap, takeWhile, tap, catchError, finalize } from 'rxjs/operators';
 import { DeleteRoleMappingPopupComponent } from '../delete-role-mapping-popup/delete-role-mapping-popup.component';
+import { MARKETPLACE_ALERT_PANEL_CLASS, MarketplaceCoursesAlertComponent } from '../marketplace-courses-alert/marketplace-courses-alert.component';
 import { SharedService } from '../../modules/shared/services/shared.service';
 @Component({
   selector: 'app-generate-course-recommendation',
@@ -98,6 +99,14 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
   languages = ['English', 'Hindi', 'Tamil', 'Kannada', 'Telugu', 'Malayalam', 'Assamese', 'Bengali', 'Gujarati', 'Marathi', 'Odia', 'Punjabi', 'Konkani', 'Bodo', 'Dogri', 'Kashmiri', 'Maithili', 'Manipuri', 'Nepali', 'Sanskrit', 'Santali', 'Sindhi', 'Urdu'];
   durations = ['< 1 Hour', '1-5 Hours', '5+ Hours'];
   providers = [];
+  sourceOptions = [
+    { value: 'all', label: 'All sources' },
+    { value: 'igot', label: 'iGOT' },
+    { value: 'public', label: 'Public' },
+    { value: 'marketplace', label: 'Marketplace (all)' },
+    { value: 'free', label: 'Marketplace - Free' },
+    { value: 'paid', label: 'Marketplace - Paid' }
+  ];
   filteredCompetency = [...this.competenciesType];
   filteredRatings = [...this.ratings];
   filteredLanguages = [...this.languages];
@@ -123,7 +132,8 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
       rating: [[]],
       language: [[]],
       duration: [[]],
-      provider: [[]]
+      provider: [[]],
+      source: ['all']
     });
     this.loadComponentData();
   }
@@ -179,6 +189,39 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
   }
 
   saveCourses() {
+    // Read-only lookup (getAllAvailableCourses() mutates courses/provider filters)
+    const countedIdentifiers = new Set()
+    const selectedMarketplaceCourses = [...(this.originalData || []), ...(this.suggestedCourses || []), ...(this.userAddedCourses || [])].filter(course => {
+      const courseId = course?.identifier || course?.id
+      if (!courseId || countedIdentifiers.has(courseId) || !this.selectFilterCourses.includes(courseId)) {
+        return false
+      }
+      countedIdentifiers.add(courseId)
+      return this.sharedService.isMarketplaceCourse(course)
+    })
+    if (!selectedMarketplaceCourses.length) {
+      this.persistCourses()
+      return
+    }
+    const dialogRef = this.dialog.open(MarketplaceCoursesAlertComponent, {
+      width: '620px',
+      maxWidth: '95vw',
+      data: {
+        rows: [{ name: this.planData?.designation_name, ...this.sharedService.countMarketplaceCourses(selectedMarketplaceCourses) }],
+        confirmLabel: this.mode === 'add' ? 'Save Courses' : 'Update Courses'
+      },
+      panelClass: MARKETPLACE_ALERT_PANEL_CLASS,
+      maxHeight: '90vh',
+      disableClose: true
+    });
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.persistCourses()
+      }
+    });
+  }
+
+  persistCourses() {
     this.loading = true
     console.log('this.planData', this.planData)
     let reqBody = {
@@ -2286,7 +2329,8 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
       rating: [],
       language: [],
       duration: [],
-      provider: []
+      provider: [],
+      source: 'all'
     });
 
     // Reset filtered dropdown lists
@@ -2349,7 +2393,8 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
       rating = [],
       language = [],
       duration = [],
-      provider = []
+      provider = [],
+      source = 'all'
     } = this.filterForm.value;
 
     console.log('this.fullCourseList--', this.fullCourseList)
@@ -2401,16 +2446,33 @@ export class GenerateCourseRecommendationComponent implements OnDestroy {
           course.organisation?.includes(p)
         );
 
+      /* ---------------- Source ---------------- */
+      const sourceMatch = this.matchSource(course, source);
+
       return (
         competencyMatch &&
         ratingMatch &&
         languageMatch &&
         durationMatch &&
-        providerMatch
+        providerMatch &&
+        sourceMatch
       );
     });
 
     this.filterdCourses = this.sortCoursesByCategoryAndRelevancy(this.filterdCourses);
+  }
+
+  // iGOT / Public exclude marketplace courses so the source options don't overlap
+  matchSource(course: any, source: string): boolean {
+    const marketplaceType = this.sharedService.getMarketplaceCourseType(course);
+    switch (source) {
+      case 'igot': return !marketplaceType && !course?.is_public;
+      case 'public': return !marketplaceType && !!course?.is_public;
+      case 'marketplace': return !!marketplaceType;
+      case 'free':
+      case 'paid': return marketplaceType === source;
+      default: return true;
+    }
   }
 
   matchRating(course: any, selectedRatings: string[]): boolean {
