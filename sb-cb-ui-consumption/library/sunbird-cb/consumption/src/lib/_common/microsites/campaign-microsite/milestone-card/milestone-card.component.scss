@@ -119,6 +119,11 @@ $mc-orange: linear-gradient(142.89deg, #f99a33 14.29%, #d2601a 85.71%);
 
 .mc-card__available {
   color: var(--environment-all-fills-system-success, #1d8923);
+
+  // "Available from {date}": upcoming, still actionable
+  &--upcoming {
+    color: var(--mc-disabled-text);
+  }
 }
 
 .mc-card__title {
@@ -133,6 +138,27 @@ $mc-orange: linear-gradient(142.89deg, #f99a33 14.29%, #d2601a 85.71%);
 .mc-card__tag {
   background: var(--surface-secondary, #f3f5f9);
   color: var(--environment-all-fills-black-gray-300-200, #545454);
+}
+
+.mc-card__tag--more {
+  &:hover {
+    background: var(--surface-tertiary, #e8ecf3);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus, #6687c0);
+    outline-offset: 1px;
+  }
+}
+
+// Off-screen copy of the tags, measured to decide how many fit on one row
+.mc-card__tags-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* ── Footer ─────────────────────────────────────────────── */

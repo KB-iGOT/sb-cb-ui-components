@@ -11,9 +11,15 @@ export namespace NsCampaignMilestone {
     enabled?: boolean
     /** `true` shows the card as Locked; availability comes from config, not from `order` */
     locked?: boolean
+    /** `true` keeps the card closed until `eventDetails.startDate` */
+    lockUntilEventStart?: boolean
     type: TMilestoneType
     identifier?: string
     batchId?: string
+    /** Assessment only: sent as `?language=` to the auto-enrollment API and fills `{language}` in the player route */
+    language?: string
+    /** Assessment only: player route opened after enrollment */
+    player?: IPlayerRoute
     formId?: string
     milestoneLabel: string
     headline?: string
@@ -28,6 +34,16 @@ export namespace NsCampaignMilestone {
     /** DD-MM-YYYY */
     dueDate?: string
     redirectUrl?: string
+  }
+
+  /**
+   * Player route split into path + query params. Tokens in braces are filled at click time:
+   * `{resourceId}`, `{identifier}`, `{name}`, `{batchId}`, `{language}`.
+   */
+  export interface IPlayerRoute {
+    path: string
+    resourceId: string
+    queryParams?: Record<string, string>
   }
 
   export interface IProvider {

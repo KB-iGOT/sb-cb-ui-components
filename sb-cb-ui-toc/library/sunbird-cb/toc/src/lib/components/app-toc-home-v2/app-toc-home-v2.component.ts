@@ -93,6 +93,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   content: NsContent.IContent | null = null
   contentReadData: NsContent.IContent | null = null
   baseContentReadData: NsContent.IContent | null = null
+  /** Identifier for which viewer data was last sent to the mobile app (avoids re-sending on every change detection) */
+  private viewerDataSentFor: string | null = null
   badgeTooltipText = ''
   errorCode: NsAppToc.EWsTocErrorCode | null = null
   resumeData: any = null
@@ -643,7 +645,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         || this.content.primaryCategory === NsContent.EPrimaryCategory.COMP_ASSESSMENT
         || this.content.primaryCategory === NsContent.EPrimaryCategory.OFFLINE_SESSION
         || !(this.content.children && this.content.children.length)
-      if (isResource) {
+      // This getter is bound in the template and runs on every change-detection cycle,
+      // so only notify the mobile app once per content.
+      if (isResource && this.viewerDataSentFor !== this.content.identifier) {
+        this.viewerDataSentFor = this.content.identifier
         this.mobileAppsSvc.sendViewerData(this.content)
       }
       return isResource
