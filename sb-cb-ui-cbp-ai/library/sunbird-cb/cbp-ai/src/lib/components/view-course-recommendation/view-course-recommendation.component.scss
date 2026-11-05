@@ -1523,3 +1523,36 @@ background: #f8f9fa;
   flex-direction: row   ;
   gap: 16px
 }
+
+.marketplace-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.marketplace-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.marketplace-tag.marketplace {
+  background: #3F51B51F;
+  color: #1A237E;
+}
+
+.marketplace-tag.free {
+  background: #0080001C;
+  color: #006400;
+}
+
+.marketplace-tag.paid {
+  background: #D32F2F1C;
+  color: #8B1A1A;
+}

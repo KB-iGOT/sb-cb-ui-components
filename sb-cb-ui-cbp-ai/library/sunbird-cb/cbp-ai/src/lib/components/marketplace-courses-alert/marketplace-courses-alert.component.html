@@ -1,0 +1,72 @@
+<div class="mkt-alert" role="alertdialog" aria-modal="true" aria-labelledby="mkt-alert-title" aria-describedby="mkt-alert-msg">
+    <div class="mkt-alert-header">
+        <span class="mkt-alert-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </span>
+        <h2 id="mkt-alert-title" class="mkt-alert-title">Marketplace courses included</h2>
+        <button type="button" class="mkt-alert-close" aria-label="Close" (click)="cancel()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="mkt-alert-body">
+        <p id="mkt-alert-msg" class="mkt-alert-msg">
+            This plan includes
+            <strong class="mkt-strong">{{ total.marketplace }} marketplace {{ total.marketplace === 1 ? 'course' : 'courses' }}</strong>
+            (<strong class="mkt-free-text">{{ total.free }} Free</strong> and
+            <strong class="mkt-paid-text">{{ total.paid }} Paid</strong>).
+            The availability of enrolment licences is subject to availability and confirmation by Karmayogi Bharat.
+            Do you want to proceed?
+        </p>
+
+        <div class="mkt-table-wrap" *ngIf="rows.length">
+            <table class="mkt-table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-left">Designation</th>
+                        <th scope="col">Marketplace</th>
+                        <th scope="col">Free</th>
+                        <th scope="col">Paid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let row of rows">
+                        <td class="text-left">{{ row.name || '-' }}</td>
+                        <td class="mkt-count">{{ row.marketplace }}</td>
+                        <td><ng-container *ngTemplateOutlet="countBadge; context: { count: row.free, type: 'free' }"></ng-container></td>
+                        <td><ng-container *ngTemplateOutlet="countBadge; context: { count: row.paid, type: 'paid' }"></ng-container></td>
+                    </tr>
+                </tbody>
+                <tfoot *ngIf="rows.length > 1">
+                    <tr>
+                        <th scope="row" class="text-left">Total ({{ rows.length }} designations)</th>
+                        <td class="mkt-count">{{ total.marketplace }}</td>
+                        <td><ng-container *ngTemplateOutlet="countBadge; context: { count: total.free, type: 'free' }"></ng-container></td>
+                        <td><ng-container *ngTemplateOutlet="countBadge; context: { count: total.paid, type: 'paid' }"></ng-container></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <label class="mkt-ack" [class.checked]="acknowledged">
+            <input type="checkbox" [(ngModel)]="acknowledged">
+            <span>I acknowledge that licence availability for marketplace courses is subject to confirmation by Karmayogi Bharat.</span>
+        </label>
+    </div>
+
+    <div class="mkt-alert-footer">
+        <span class="mkt-hint">{{ acknowledged ? '' : 'Tick the acknowledgement to continue' }}</span>
+        <button type="button" class="mkt-btn mkt-btn-cancel" (click)="cancel()">Cancel</button>
+        <button type="button" class="mkt-btn mkt-btn-confirm" [disabled]="!acknowledged" (click)="confirm()">{{ confirmLabel }}</button>
+    </div>
+</div>
+
+<ng-template #countBadge let-count="count" let-type="type">
+    <span *ngIf="count > 0" class="mkt-badge" [ngClass]="type">{{ count }}</span>
+    <span *ngIf="!count" class="mkt-zero">0</span>
+</ng-template>

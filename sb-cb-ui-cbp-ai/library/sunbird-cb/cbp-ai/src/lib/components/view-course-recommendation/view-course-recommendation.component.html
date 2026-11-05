@@ -88,6 +88,7 @@
 
                                 </div>
                             </div>
+                            <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                 <div class="ai-recommened-pill-orange-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
@@ -111,6 +112,7 @@
 
                                 </div>
                             </div>
+                            <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                 <div class="ai-recommened-pill-orange-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
@@ -134,6 +136,7 @@
 
                                 </div>
                             </div>
+                            <ng-container *ngTemplateOutlet="marketplaceTags; context: { $implicit: item }"></ng-container>
                             <div class="ai-recommened-pill-orange mt-2" *ngIf="item?.platform">
                                 <div class="ai-recommened-pill-orange-text">
                                     <span class="ai-loader-icon"><img src="assets/icons/ai-loader.gif"></span>
@@ -294,3 +297,11 @@
 <div class="overlay-loader" *ngIf="loading">
     <mat-spinner diameter="50"></mat-spinner>
 </div>
+
+<!-- Marketplace tags (shown under the AI Recommended / Manually Suggested pill) -->
+<ng-template #marketplaceTags let-course>
+    <div class="marketplace-tags mt-2" *ngIf="sharedService.getMarketplaceCourseType(course) as marketplaceType">
+        <span class="marketplace-tag marketplace">Marketplace</span>
+        <span class="marketplace-tag" [ngClass]="marketplaceType">{{ marketplaceType === 'paid' ? 'Paid' : 'Free' }}</span>
+    </div>
+</ng-template>

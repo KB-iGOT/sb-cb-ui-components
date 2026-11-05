@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ViewCourseRecommendationComponent } from '../view-course-recommendation/view-course-recommendation.component';
 import { RejectItemRequestFormComponent } from '../reject-item-request-form/reject-item-request-form.component';
 import { PublishApproveRequestFormComponent } from '../publish-request-form/publish-approve-request-form.component';
+import { MARKETPLACE_ALERT_PANEL_CLASS, MarketplaceCoursesAlertComponent } from '../marketplace-courses-alert/marketplace-courses-alert.component';
 import { RejectRequestFormComponent } from '../reject-request-form/reject-request-form.component';
 import { ListPopupComponent } from '../list-popup/list-popup.component';
 import { finalize } from 'rxjs/operators';
@@ -370,6 +371,31 @@ export class ReviewRequestComponent {
   }
 
   approveAndPublish() {
+    // Same courses the View Course Recommendation popup shows for each designation
+    const rows = (this.requestData?.items || []).map(item => ({
+      name: item?.designation_name,
+      ...this.sharedService.countMarketplaceCourses(item?.cbp_plan_data?.[0]?.selected_courses)
+    }))
+    if (!rows.some(row => row.marketplace > 0)) {
+      this.openPublishApproveRequestForm()
+      return
+    }
+    const alertRef = this.dialog.open(MarketplaceCoursesAlertComponent, {
+      width: '680px',
+      maxWidth: '95vw',
+      data: { rows, confirmLabel: 'Proceed' },
+      panelClass: MARKETPLACE_ALERT_PANEL_CLASS,
+      maxHeight: '90vh',
+      disableClose: true
+    });
+    alertRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.openPublishApproveRequestForm()
+      }
+    });
+  }
+
+  openPublishApproveRequestForm() {
     console.log('approveAndPublish clicked', this.requestData);
     const dialogRef = this.dialog.open(PublishApproveRequestFormComponent, {
       width: '750px',
