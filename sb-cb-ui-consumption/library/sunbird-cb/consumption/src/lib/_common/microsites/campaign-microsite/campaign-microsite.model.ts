@@ -24,7 +24,9 @@ export namespace NsCampaignMilestone {
     milestoneLabel: string
     headline?: string
     bigNumber?: string
+    /** Header gradient, used when there is no usable `posterImage` */
     theme: TMilestoneTheme
+    /** Header image for any card type. When it is set and loads, it replaces the gradient, headline and big number */
     posterImage?: string
     durationLabel: string
     categoryLabel: string

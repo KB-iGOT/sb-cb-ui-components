@@ -206,6 +206,28 @@ $mc-orange: linear-gradient(142.89deg, #f99a33 14.29%, #d2601a 85.71%);
     outline: 2px solid var(--border-focus, #6687c0);
     outline-offset: 2px;
   }
+
+  // host-disabled (e.g. "Event yet to start", certificate not ready)
+  &:disabled,
+  &:disabled:hover {
+    background: var(--mc-disabled-fill);
+    color: var(--mc-disabled-text);
+    cursor: not-allowed;
+  }
+}
+
+// green "Completed" in the button's place; same height as the button so cards stay aligned
+.mc-card__completed {
+  // width includes the padding (no global border-box reset here), so it lines up with the button
+  box-sizing: border-box;
+  background: var(--color-success-green-o-16, rgba(29, 137, 35, 0.12));
+  color: var(--environment-all-fills-system-success, #1d8923);
+}
+
+.mc-card__completed-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
 }
 
 .mc-card--disabled {
