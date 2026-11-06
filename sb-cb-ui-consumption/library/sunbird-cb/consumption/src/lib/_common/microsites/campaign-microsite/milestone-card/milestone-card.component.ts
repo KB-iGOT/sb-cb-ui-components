@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy, Component, ElementRef, afterRenderEffect, computed, inject, input, output, signal, viewChild,
 } from '@angular/core'
+import { MatIconModule } from '@angular/material/icon'
 import { MatMenuModule } from '@angular/material/menu'
+import { MatTooltipModule } from '@angular/material/tooltip'
 import { TranslateModule, TranslateService } from '@ngx-translate/core'
 import dayjs from 'dayjs'
 import { NsCampaignMilestone } from '../campaign-microsite.model'
@@ -18,7 +20,7 @@ type TCta = 'locked' | 'start' | 'resume' | 'view'
   styleUrls: ['./milestone-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [TranslateModule, MatMenuModule],
+  imports: [TranslateModule, MatMenuModule, MatIconModule, MatTooltipModule],
 })
 export class MilestoneCardComponent {
 
@@ -36,6 +38,15 @@ export class MilestoneCardComponent {
    * "Available now". Informational only: the button and clicks stay as usual. Ignored once completed.
    */
   availableFrom = input<string | null>(null)
+  /**
+   * Host-provided text (e.g. "Completed"). When set on a completed card, a green tick + this text replaces
+   * the button and the footer "Completed" status is dropped (it would say the same thing twice).
+   */
+  completedLabel = input<string | null>(null)
+  /** Tooltip on the button, shown on hover even while it is disabled (e.g. why a certificate is not ready) */
+  ctaTooltip = input<string | null>(null)
+  /** Current time (epoch ms) from the host, e.g. server time; `null` uses the device clock. Drives "Overdue" */
+  now = input<number | null>(null)
 
   milestoneClick = output<NsCampaignMilestone.IMilestone>()
 
@@ -61,25 +72,26 @@ export class MilestoneCardComponent {
   /** Waiting for a host-provided date (see `availableFrom`) */
   readonly isWaiting = computed(() => !!this.availableFrom() && !this.isDisabled() && this.state() !== 'completed')
   readonly isInactive = computed(() => this.isDisabled() || this.state() === 'locked')
+  /** Completed indicator in place of the button */
+  readonly showCompleted = computed(() => this.state() === 'completed' && !this.isDisabled() && !!this.completedLabel())
 
-  readonly showPoster = computed(() => {
-    const m = this.milestone()
-    return m?.theme === 'image' && isUsableUrl(m.posterImage) && !this.posterFailed()
-  })
+  /** Any card with a usable `posterImage` shows it, whatever its `theme`; a missing or broken image falls back to the theme */
+  readonly showPoster = computed(() => isUsableUrl(this.milestone()?.posterImage) && !this.posterFailed())
 
+  /** Poster -> 'image'; otherwise the configured gradient ('image' with no usable poster falls back to 'blue') */
   readonly headerTheme = computed<NsCampaignMilestone.TMilestoneTheme>(() => {
-    const theme = this.milestone()?.theme || 'blue'
-    if (theme === 'image') {
-      return this.showPoster() ? 'image' : 'blue'
+    if (this.showPoster()) {
+      return 'image'
     }
-    return theme
+    const theme = this.milestone()?.theme || 'blue'
+    return theme === 'image' ? 'blue' : theme
   })
 
   /** Open (enabled, not locked, not completed) and the due date is before today */
   readonly isOverdue = computed(() => {
     const dueDate = parseDdMmYyyy(this.milestone()?.dueDate)
     const open = this.state() === 'notStarted' || this.state() === 'inProgress'
-    return open && !this.isDisabled() && !!dueDate && dayjs().isAfter(dueDate, 'day')
+    return open && !this.isDisabled() && !!dueDate && dayjs(this.now() ?? Date.now()).isAfter(dueDate, 'day')
   })
 
   readonly showProviderLogo = computed(() => isUsableUrl(this.milestone()?.provider?.logo) && !this.logoFailed())
@@ -98,7 +110,7 @@ export class MilestoneCardComponent {
       case 'inProgress':
         return { kind: 'inProgress', tone: 'warning' }
       case 'completed':
-        return { kind: 'completed', tone: 'success' }
+        return this.showCompleted() ? null : { kind: 'completed', tone: 'success' }
       default: {
         const dueDate = parseDdMmYyyy(this.milestone()?.dueDate)
         return dueDate ? { kind: 'due', date: dayjs(dueDate).format('D MMM'), tone: 'warning' } : null

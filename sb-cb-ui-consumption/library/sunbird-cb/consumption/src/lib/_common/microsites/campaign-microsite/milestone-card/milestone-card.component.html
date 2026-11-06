@@ -30,7 +30,7 @@
     [attr.aria-label]="m.name"
     [class.mc-card--locked]="isInactive()"
     [class.mc-card--disabled]="isDisabled()"
-    [class.cursor-pointer]="!isInactive()"
+    [class.cursor-pointer]="!isInactive() && !ctaDisabled()"
     [attr.aria-disabled]="isInactive()"
     [attr.tabindex]="isInactive() ? null : 0"
     (click)="onCardClick()"
@@ -201,7 +201,16 @@
       </div>
       <!-- └────────────────────────────────────────────────────────┘ -->
 
-      @if (cta(); as action) {
+      @if (showCompleted()) {
+        <div class="mc-card__completed box-border flex items-center justify-center gap-1.5 w-full px-4 py-1 rounded text-base font-semibold leading-snug"
+          role="status">
+          <mat-icon class="mc-card__completed-icon" aria-hidden="true">check_circle</mat-icon>
+          {{ completedLabel() }}
+        </div>
+      } @else if (cta(); as action) {
+        <!-- the wrapper carries the tooltip: a disabled button gets no hover events -->
+        <span class="block w-full" [matTooltip]="ctaTooltip() || ''" [matTooltipDisabled]="!ctaTooltip()"
+          matTooltipPosition="above">
         <button
           type="button"
           class="mc-card__cta w-full px-4 py-1 border-0 rounded text-base font-normal leading-snug"
@@ -241,6 +250,7 @@
             }
           }
         </button>
+        </span>
       }
     </div>
   </div>

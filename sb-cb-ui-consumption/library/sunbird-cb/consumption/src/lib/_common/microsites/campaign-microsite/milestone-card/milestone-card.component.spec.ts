@@ -310,6 +310,20 @@ describe('MilestoneCardComponent', () => {
       expect(el.querySelector('.mc-card__poster')?.getAttribute('src')).toBe('https://host/poster.jpg')
     })
 
+    it('any theme shows the poster when one is set; the gradient, headline and number give way to it', () => {
+      render('notStarted', { theme: 'purple', posterImage: 'https://host/endline.jpg' })
+      expect(el.querySelector('.mc-card__header--image')).toBeTruthy()
+      expect(el.querySelector('.mc-card__poster')?.getAttribute('src')).toBe('https://host/endline.jpg')
+      expect(el.querySelector('.mc-card__headline')).toBeNull()
+    })
+
+    it('no poster keeps the configured theme with headline and number', () => {
+      render('notStarted', { theme: 'purple', posterImage: '' })
+      expect(el.querySelector('.mc-card__poster')).toBeNull()
+      expect(el.querySelector('.mc-card__header--purple')).toBeTruthy()
+      expect(el.querySelector('.mc-card__headline')).toBeTruthy()
+    })
+
     it('image theme falls back to gradient for a placeholder poster', () => {
       render('locked', { theme: 'image', posterImage: '<NATIONAL_WORKSHOP_POSTER_URL>' })
       expect(el.querySelector('.mc-card__poster')).toBeNull()
