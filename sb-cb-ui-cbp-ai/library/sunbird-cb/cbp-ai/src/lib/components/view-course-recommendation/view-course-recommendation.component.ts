@@ -127,6 +127,11 @@ export class ViewCourseRecommendationComponent {
       }
 
 
+    } else if (this.data?.fromRequestPage) {
+      // Opened from the View Request page: the approval request response already
+      // carries the plan (items[n].cbp_plan_data[0].selected_courses), so do not
+      // call cbp-plan?role_mapping_id=... again.
+      this.loadCoursesFromRequestData()
     } else {
       let id = this.planData.source_role_mapping_id ? this.planData.source_role_mapping_id : this.planData.id
       this.sharedService.getUserRecommendationCourse(id).subscribe({
@@ -134,37 +139,7 @@ export class ViewCourseRecommendationComponent {
           this.loading = false
           console.log('res', res)
           this.recommended_course_id = res.id
-          let allCourses = []
-          if (res && res.selected_courses && res.selected_courses.length) {
-            res.selected_courses.forEach((item) => {
-              // if(item?.relevancy >= 85) {
-              allCourses.push(item)
-              // }
-            })
-          }
-          this.filterdCourses = this.sortCoursesByCategoryAndRelevancy(allCourses)
-          let identifiersArr = []
-          console.log('this.filterdCourses', this.filterdCourses)
-          this.filterdCourses.map((item) => {
-            identifiersArr.push(item?.identifier)
-          })
-          this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response) => {
-            if (response && response.result && response.result.content && response.result.content.length) {
-              for (let i = 0; i < response.result.content.length; i++) {
-                for (let j = 0; j < this.filterdCourses.length; j++) {
-                  if (this.filterdCourses[j]['identifier'] === response.result.content[i]['identifier']) {
-                    this.filterdCourses[j]['language'] = response.result.content[i]['language']
-                    this.filterdCourses[j]['avgRating'] = response.result.content[i]['avgRating']
-                    this.filterdCourses[j]['course'] = response.result.content[i]['name']
-                    break;
-                  }
-                }
-
-              }
-            }
-
-          })
-          this.updateCompetencyCounts()
+          this.applySelectedCourses(res?.selected_courses || [])
           // this.getSuggestedCourse()
           // this.getUserCourse()
         },
@@ -179,6 +154,40 @@ export class ViewCourseRecommendationComponent {
     }
 
 
+  }
+
+  loadCoursesFromRequestData() {
+    const planData = this.reviewRequestPlanData
+    this.recommended_course_id = planData?.id || ''
+    // Copy each course so the request row passed in as dialog data is not mutated.
+    // Manually suggested iGOT courses carry `name` instead of `course`; the
+    // non-MDO template renders the title from `course`, so fall back to `name`.
+    const selectedCourses = (planData?.selected_courses || []).map((item: any) => ({
+      ...item,
+      course: item?.course || item?.name
+    }))
+    this.applySelectedCourses(selectedCourses)
+    this.loading = false
+  }
+
+  applySelectedCourses(courses: any[]) {
+    this.filterdCourses = this.sortCoursesByCategoryAndRelevancy(courses)
+    const identifiersArr = this.filterdCourses.map((item) => item?.identifier)
+    this.sharedService.getAdditionalParameterforSuggestedCourses(identifiersArr).subscribe((response) => {
+      if (response && response.result && response.result.content && response.result.content.length) {
+        for (let i = 0; i < response.result.content.length; i++) {
+          for (let j = 0; j < this.filterdCourses.length; j++) {
+            if (this.filterdCourses[j]['identifier'] === response.result.content[i]['identifier']) {
+              this.filterdCourses[j]['language'] = response.result.content[i]['language']
+              this.filterdCourses[j]['avgRating'] = response.result.content[i]['avgRating']
+              this.filterdCourses[j]['course'] = response.result.content[i]['name']
+              break;
+            }
+          }
+        }
+      }
+    })
+    this.updateCompetencyCounts()
   }
 
   updateCompetencyCounts() {
