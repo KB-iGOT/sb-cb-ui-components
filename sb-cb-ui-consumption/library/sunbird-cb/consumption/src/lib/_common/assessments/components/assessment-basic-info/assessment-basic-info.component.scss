@@ -236,10 +236,13 @@
 
   .difficulty-table {
     width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
 
     .table-header {
       display: flex;
       width: 100%;
+      min-width: 480px;
       font-weight: 600;
       font-size: 14px;
       color: #333;
@@ -251,6 +254,7 @@
     .table-row {
       display: flex;
       width: 100%;
+      min-width: 480px;
       margin-bottom: 10px;
     }
 
@@ -263,6 +267,7 @@
 
     .input-col {
       flex: 1;
+      min-width: 70px;
     }
 
     .multiply-col,
