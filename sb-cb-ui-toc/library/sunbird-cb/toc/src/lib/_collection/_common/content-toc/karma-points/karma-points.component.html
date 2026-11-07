@@ -1,4 +1,4 @@
-<ng-container *ngIf="!disableKarmaPoints">
+<ng-container *ngIf="!disableKarmaPoints && !hiddenForCategory">
     <ws-widget-sliders-dynamic [widgetData]="karmaPointsSlider" [baseContentReadData] = "baseContentReadData"></ws-widget-sliders-dynamic>
 
     <ng-container *ngIf="btnCategory === 'claim'">
