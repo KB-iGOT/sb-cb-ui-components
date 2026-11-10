@@ -660,7 +660,8 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
         this.batchData.workFlow = {
           wfInitiated: true,
           batch: this.selectedBatch,
-          wfItem: { currentStatus: data.result.data.status },
+          wfItem: { currentStatus: data.result.data.status, applicationId: this.selectedBatch.batchId },
+          wfItems: this.batchData.workFlow && this.batchData.workFlow.wfItems,
         }
         this.withdrawOrEnroll.emit(action)
         this.getBatchUserCount(this.selectedBatch)
@@ -722,20 +723,33 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       (dayjs(enrollmentEndDate).isSame(systemDate, 'day') || dayjs(enrollmentEndDate).isAfter(systemDate)) : false
   }
 
-  public checkRejected(batch: any) {
-    if (
-      batch &&
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      // tslint:disable-next-line:max-line-length
-      if (batch.batchId === this.batchData.workFlow.wfItem.applicationId && (this.batchData.workFlow.wfItem.currentStatus === this.WFBlendedProgramStatus.REJECTED || this.batchData.workFlow.wfItem.currentStatus === this.WFBlendedProgramStatus.REMOVED)) {
-        return true
-      }
-      return false
+  public getBatchWFItem(batch: any) {
+    const workFlow = this.batchData && this.batchData.workFlow
+    if (!batch || !workFlow) {
+      return undefined
     }
-    return false
+    const batchWFItems = (workFlow.wfItems || []).filter((wf: any) => wf.applicationId === batch.batchId)
+    if (batchWFItems.length) {
+      return lodash.maxBy(batchWFItems, (wf: any) => wf.lastUpdatedOn)
+    }
+    return workFlow.wfItem && workFlow.wfItem.applicationId === batch.batchId ? workFlow.wfItem : undefined
+  }
+
+  // workflow item to show the status for: while the user can pick a batch again, use the selected batch's own workflow
+  get displayWFItem() {
+    const wfItem = this.batchData && this.batchData.workFlow && this.batchData.workFlow.wfItem
+    if (wfItem && this.selectedBatch && (wfItem.currentStatus === this.WFBlendedProgramStatus.REJECTED ||
+      wfItem.currentStatus === this.WFBlendedProgramStatus.WITHDRAWN ||
+      wfItem.currentStatus === this.WFBlendedProgramStatus.REMOVED)) {
+      return this.getBatchWFItem(this.selectedBatch)
+    }
+    return wfItem
+  }
+
+  public checkRejected(batch: any) {
+    const batchWFItem = this.getBatchWFItem(batch)
+    return !!batchWFItem && (batchWFItem.currentStatus === this.WFBlendedProgramStatus.REJECTED ||
+      batchWFItem.currentStatus === this.WFBlendedProgramStatus.REMOVED)
   }
 
   public checkWithdrawn(batch: any) {
@@ -910,24 +924,18 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get getWFMsg() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       const msg = this.WFSTATUS_MSG_MAPPING[status]
       return this.tocConfig[msg]
     }
   }
 
   get showIcon() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       if (status === this.WFBlendedProgramStatus.APPROVED ||
         status === this.WFBlendedProgramStatus.SEND_FOR_MDO_APPROVAL ||
         status === this.WFBlendedProgramStatus.SEND_FOR_PC_APPROVAL ||
@@ -941,12 +949,9 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get showMsg() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       if (status === this.WFBlendedProgramStatus.APPROVED ||
         status === this.WFBlendedProgramStatus.SEND_FOR_MDO_APPROVAL ||
         status === this.WFBlendedProgramStatus.SEND_FOR_PC_APPROVAL ||
@@ -960,12 +965,9 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get WFIcon() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       if (status === this.WFBlendedProgramStatus.APPROVED ||
         status === this.WFBlendedProgramStatus.SEND_FOR_MDO_APPROVAL ||
         status === this.WFBlendedProgramStatus.SEND_FOR_PC_APPROVAL ||
@@ -982,12 +984,9 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get iconColor() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       if (status === this.WFBlendedProgramStatus.APPROVED || status === this.WFBlendedProgramStatus.WITHDRAWN) {
         return 'ws-mat-green-text'
       } if (status === this.WFBlendedProgramStatus.SEND_FOR_MDO_APPROVAL ||
