@@ -2332,7 +2332,13 @@ export class ContentStripWithTabsLibComponent extends WidgetBaseComponent
             }
             identifiersResponse = await this.searchV6Request(identifierStrip, identifierStrip.request, calculateParentStatus)
             if (_.get(identifiersResponse, 'results.result.events') && _.get(strip, 'request.searchV6.request.filters')) {
-              strip.request.searchV6.request.filters['identifier'] = _.get(identifiersResponse, 'results.result.events', [])
+              // If a numeric limit is configured, pass only that many identifiers; otherwise pass all
+              const allEventIds: any[] = _.get(identifiersResponse, 'results.result.events', [])
+              const limit = _.get(strip, 'request.searchV6.request.limit')
+              const limitedEventIds = (typeof limit === 'number' && limit > 0) ? allEventIds.slice(0, limit) : allEventIds
+              // keep the response in sync so the ordering/matching below uses the same limited list
+              identifiersResponse.results.result.events = limitedEventIds
+              strip.request.searchV6.request.filters['identifier'] = limitedEventIds
               response = await this.searchV6Request(strip, strip.request, calculateParentStatus)
             } else {
               response = identifiersResponse
