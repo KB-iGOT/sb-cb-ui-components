@@ -133,6 +133,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   primaryCategory = NsContent.EPrimaryCategory
   courseCategory = NsContent.ECourseCategory
   WFBlendedProgramStatus = NsContent.WFBlendedProgramStatus
+  blendedWFItems: any[] = []
   blendedReRequestStatuses: string[] = [
     NsContent.WFBlendedProgramStatus.REJECTED,
     NsContent.WFBlendedProgramStatus.WITHDRAWN,
@@ -783,7 +784,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       return undefined
     }
     const data: any = await this.contentSvc.fetchBlendedWFDetails(this.content.identifier)
-    return _.maxBy(_.get(data, 'result.data') || [], (wf: any) => wf.lastUpdatedOn)
+    // keep every workflow item so the banner can resolve the status of each batch individually
+    this.blendedWFItems = _.get(data, 'result.data') || []
+    return _.maxBy(this.blendedWFItems, (wf: any) => wf.lastUpdatedOn)
   }
 
   // attaches the latest workflow to the already loaded batch data (used when the user is enrolled)
@@ -795,6 +798,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           wfInitiated: true,
           batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === latestWF.applicationId),
           wfItem: latestWF,
+          wfItems: this.blendedWFItems,
         }
         this.tocSvc.setWFData(this.batchData)
       }
@@ -836,6 +840,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             wfInitiated: true,
             batch,
             wfItem,
+            wfItems: this.blendedWFItems,
           },
         }
         this.tocSvc.setBatchData(this.batchData)
@@ -1058,6 +1063,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               wfInitiated: true,
               batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === wfItem.applicationId),
               wfItem,
+              wfItems: this.blendedWFItems,
             }
           }
           this.tocSvc.setBatchData(this.batchData)

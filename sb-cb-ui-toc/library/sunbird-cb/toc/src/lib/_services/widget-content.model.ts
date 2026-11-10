@@ -193,6 +193,7 @@ export namespace NsContent {
       wfInitiated?: boolean
       batch?: any
       wfItem?: any
+      wfItems?: any[]
     },
     totalApprovedCount?: any,
     totalPendingCount?: any,
