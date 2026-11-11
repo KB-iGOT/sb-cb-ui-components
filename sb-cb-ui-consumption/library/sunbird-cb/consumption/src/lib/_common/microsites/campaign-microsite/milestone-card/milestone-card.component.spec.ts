@@ -219,6 +219,79 @@ describe('MilestoneCardComponent', () => {
       el.querySelector<HTMLElement>('.mc-card__cta')?.click()
       expect(emitted.length).toBe(0)
     })
+
+    it('does not emit while busy', () => {
+      fixture.componentRef.setInput('isBusy', true)
+      render('notStarted')
+      card().click()
+      expect(emitted.length).toBe(0)
+      expect(el.querySelector<HTMLButtonElement>('.mc-card__cta')?.disabled).toBe(true)
+    })
+  })
+
+  describe('availableFrom (waiting for a date)', () => {
+    const cta = () => el.querySelector<HTMLButtonElement>('.mc-card__cta')
+
+    it('replaces "Available now" next to the category chip; button and clicks stay', () => {
+      const emitted: NsCampaignMilestone.IMilestone[] = []
+      component.milestoneClick.subscribe(m => emitted.push(m))
+      fixture.componentRef.setInput('availableFrom', 'Available from 17th Nov')
+      render('notStarted')
+      expect(text('.mc-card__available')).toBe('Available from 17th Nov')
+      expect(el.querySelector('.mc-card__available--upcoming')).not.toBeNull()
+      expect(cta()).not.toBeNull()
+      card().click()
+      expect(emitted.length).toBe(1)
+    })
+
+    it('is ignored once the milestone is completed', () => {
+      fixture.componentRef.setInput('availableFrom', 'Available from 17th Nov')
+      render('completed')
+      expect(el.querySelector('.mc-card__available')).toBeNull()
+      expect(text('.mc-card__status')).toBe('Completed')
+    })
+
+    it('is not shown on a locked card', () => {
+      fixture.componentRef.setInput('availableFrom', 'Available from 17th Nov')
+      render('locked')
+      expect(el.querySelector('.mc-card__available')).toBeNull()
+    })
+  })
+
+  describe('host-provided CTA', () => {
+    const cta = () => el.querySelector<HTMLButtonElement>('.mc-card__cta')
+
+    it('ctaLabel replaces the default button text in any open state', () => {
+      fixture.componentRef.setInput('ctaLabel', 'Join event')
+      render('notStarted', { type: 'event' })
+      expect(cta()?.textContent?.trim()).toBe('Join event')
+      render('completed', { type: 'event' })
+      expect(cta()?.textContent?.trim()).toBe('Join event')
+    })
+
+    it('ctaLabel does not show a button on a locked card', () => {
+      fixture.componentRef.setInput('ctaLabel', 'Join event')
+      render('locked', { type: 'event' })
+      expect(cta()).toBeNull()
+    })
+
+    it('ctaLabel does not replace the greyed-out "Locked" button of a disabled card', () => {
+      fixture.componentRef.setInput('ctaLabel', 'Join event')
+      render('notStarted', { enabled: false })
+      expect(cta()?.textContent?.trim()).toBe('Locked')
+    })
+
+    it('ctaDisabled shows the button but blocks clicks', () => {
+      const emitted: NsCampaignMilestone.IMilestone[] = []
+      component.milestoneClick.subscribe(m => emitted.push(m))
+      fixture.componentRef.setInput('ctaLabel', 'Event yet to start')
+      fixture.componentRef.setInput('ctaDisabled', true)
+      render('notStarted', { type: 'event' })
+      expect(cta()?.disabled).toBe(true)
+      expect(cta()?.textContent?.trim()).toBe('Event yet to start')
+      card().click()
+      expect(emitted.length).toBe(0)
+    })
   })
 
   describe('header', () => {
@@ -235,6 +308,20 @@ describe('MilestoneCardComponent', () => {
       render('locked', { theme: 'image', posterImage: 'https://host/poster.jpg', headline: '' })
       expect(el.querySelector('.mc-card__header--image')).toBeTruthy()
       expect(el.querySelector('.mc-card__poster')?.getAttribute('src')).toBe('https://host/poster.jpg')
+    })
+
+    it('any theme shows the poster when one is set; the gradient, headline and number give way to it', () => {
+      render('notStarted', { theme: 'purple', posterImage: 'https://host/endline.jpg' })
+      expect(el.querySelector('.mc-card__header--image')).toBeTruthy()
+      expect(el.querySelector('.mc-card__poster')?.getAttribute('src')).toBe('https://host/endline.jpg')
+      expect(el.querySelector('.mc-card__headline')).toBeNull()
+    })
+
+    it('no poster keeps the configured theme with headline and number', () => {
+      render('notStarted', { theme: 'purple', posterImage: '' })
+      expect(el.querySelector('.mc-card__poster')).toBeNull()
+      expect(el.querySelector('.mc-card__header--purple')).toBeTruthy()
+      expect(el.querySelector('.mc-card__headline')).toBeTruthy()
     })
 
     it('image theme falls back to gradient for a placeholder poster', () => {

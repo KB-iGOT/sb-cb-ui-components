@@ -56,6 +56,7 @@ import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dia
 import { AppTocV2Service } from '../../services/app-toc-v2.service'
 import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
 import { IComprehensiveAssessmentAttempts, IComprehensiveAssessmentStatus } from '../../_models/common.model'
+import { isCategoryListed, karmaPointsDisabledCategories } from '../../_services/course-category-visibility'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -93,6 +94,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   content: NsContent.IContent | null = null
   contentReadData: NsContent.IContent | null = null
   baseContentReadData: NsContent.IContent | null = null
+  /** Identifier for which viewer data was last sent to the mobile app (avoids re-sending on every change detection) */
+  private viewerDataSentFor: string | null = null
   badgeTooltipText = ''
   errorCode: NsAppToc.EWsTocErrorCode | null = null
   resumeData: any = null
@@ -575,6 +578,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return false
   }
 
+  /** Karma Points panel hidden for this course category (`disableKarmaPointsCourseCategories` in the TOC config) */
+  get karmaPointsHidden(): boolean {
+    const categories = karmaPointsDisabledCategories(this.tocConfig, this.configSvc?.instanceConfig)
+    return isCategoryListed(categories, this.contentReadData?.courseCategory || this.content?.courseCategory)
+  }
+
   get isComprehensiveAssessment(): boolean {
     return this.contentReadData?.courseCategory === this.comprehensiveAssessmentCategory
       || this.content?.courseCategory === this.comprehensiveAssessmentCategory
@@ -644,7 +653,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         || this.content.primaryCategory === NsContent.EPrimaryCategory.COMP_ASSESSMENT
         || this.content.primaryCategory === NsContent.EPrimaryCategory.OFFLINE_SESSION
         || !(this.content.children && this.content.children.length)
-      if (isResource) {
+      // This getter is bound in the template and runs on every change-detection cycle,
+      // so only notify the mobile app once per content.
+      if (isResource && this.viewerDataSentFor !== this.content.identifier) {
+        this.viewerDataSentFor = this.content.identifier
         this.mobileAppsSvc.sendViewerData(this.content)
       }
       return isResource

@@ -30,7 +30,7 @@
     [attr.aria-label]="m.name"
     [class.mc-card--locked]="isInactive()"
     [class.mc-card--disabled]="isDisabled()"
-    [class.cursor-pointer]="!isInactive()"
+    [class.cursor-pointer]="!isInactive() && !ctaDisabled()"
     [attr.aria-disabled]="isInactive()"
     [attr.tabindex]="isInactive() ? null : 0"
     (click)="onCardClick()"
@@ -98,11 +98,14 @@
       <!-- ┌─── BODY ────────────────────────────────────────────┐ -->
       <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-2.5">
-          <!-- Row 1 – category chip + availability -->
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="mc-card__category px-2 py-0.5 rounded-2xl text-xs font-medium">{{ m.categoryLabel }}</span>
-            @if (state() === 'notStarted' && !isDisabled()) {
-              <span class="mc-card__available text-xs font-medium">{{
+          <!-- Row 1 – category chip + availability; one line so every card's body lines up -->
+          <div class="flex flex-nowrap items-center gap-2 min-w-0">
+            <span class="mc-card__category flex-shrink-0 px-2 py-0.5 rounded-2xl text-xs font-medium whitespace-nowrap">{{ m.categoryLabel }}</span>
+            @if (isWaiting() && state() !== 'locked') {
+              <span class="mc-card__available mc-card__available--upcoming min-w-0 truncate text-xs font-medium"
+                [title]="availableFrom()">{{ availableFrom() }}</span>
+            } @else if (state() === 'notStarted' && !isDisabled()) {
+              <span class="mc-card__available min-w-0 truncate text-xs font-medium">{{
                 'campaignMicrosite.milestoneCard.availableNow' | translate
               }}</span>
             }
@@ -112,20 +115,52 @@
           <h3 class="mc-card__title h-11 m-0 text-base font-semibold leading-snug" [title]="m.name">{{ m.name }}</h3>
         </div>
 
-        <!-- Row 3 – tags -->
+        <!-- Row 3 – tags: one row with as many as fit, then "+N" which opens a popover with the rest -->
         @if (m.tags?.length) {
-          <ul class="flex flex-wrap gap-x-1 gap-y-2 m-0 p-0 list-none">
-            @for (tag of m.tags; track $index) {
-              <li class="mc-card__tag px-1.5 py-0.5 rounded-xl text-xs font-medium leading-4">{{ tag }}</li>
-            }
-          </ul>
+          <div class="relative min-w-0">
+            <ul #tagRow class="mc-card__tags flex flex-nowrap gap-x-1 h-5 overflow-hidden m-0 p-0 list-none">
+              @for (tag of visibleTags(); track $index) {
+                <li class="mc-card__tag flex-shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-xl text-xs font-medium leading-4">{{ tag }}</li>
+              }
+              @if (hiddenTags().length) {
+                <li class="flex-shrink-0">
+                  <button
+                    type="button"
+                    class="mc-card__tag mc-card__tag--more block border-0 px-1.5 py-0.5 rounded-xl text-xs font-semibold leading-4 cursor-pointer"
+                    [matMenuTriggerFor]="moreTags"
+                    [attr.aria-label]="'+' + hiddenTags().length + ': ' + hiddenTags().join(', ')"
+                    (click)="$event.stopPropagation()"
+                    (keydown.enter)="$event.stopPropagation()"
+                    (keydown.space)="$event.stopPropagation()"
+                  >+{{ hiddenTags().length }}</button>
+                </li>
+              }
+            </ul>
+
+            <!-- Invisible copy of every tag + a "+N" sample, only for measuring widths -->
+            <ul #tagMeasure class="mc-card__tags-measure flex flex-nowrap gap-x-1 m-0 p-0 list-none" aria-hidden="true">
+              @for (tag of m.tags; track $index) {
+                <li class="mc-card__tag flex-shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-xl text-xs font-medium leading-4">{{ tag }}</li>
+              }
+              <li class="mc-card__tag flex-shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-xl text-xs font-semibold leading-4">+{{ m.tags.length }}</li>
+            </ul>
+          </div>
+
+          <mat-menu #moreTags="matMenu" class="mc-card__tags-menu">
+            <ul class="flex flex-wrap gap-1 m-0 px-3 py-2 list-none" (click)="$event.stopPropagation()">
+              @for (tag of hiddenTags(); track $index) {
+                <li class="mc-card__tag whitespace-nowrap px-1.5 py-0.5 rounded-xl text-xs font-medium leading-4">{{ tag }}</li>
+              }
+            </ul>
+          </mat-menu>
         }
       </div>
       <!-- └────────────────────────────────────────────────────────┘ -->
 
       <!-- ┌─── FOOTER: provider + status ───────────────────────┐ -->
-      <div class="mc-card__footer flex items-center justify-between gap-2 pt-3">
-        <div class="flex items-center gap-1 min-w-0">
+      <!-- mt-auto pins footer + button to the bottom so they line up across cards of different content -->
+      <div class="mc-card__footer flex items-center justify-between gap-2 pt-3 mt-auto">
+        <div class="flex items-center gap-1 h-5 min-w-0">
           @if (showProviderLogo()) {
             <img
               class="mc-card__provider-logo w-5 h-5 rounded-full object-contain flex-shrink-0"
@@ -166,41 +201,56 @@
       </div>
       <!-- └────────────────────────────────────────────────────────┘ -->
 
-      @if (cta(); as action) {
+      @if (showCompleted()) {
+        <div class="mc-card__completed box-border flex items-center justify-center gap-1.5 w-full px-4 py-1 rounded text-base font-semibold leading-snug"
+          role="status">
+          <mat-icon class="mc-card__completed-icon" aria-hidden="true">check_circle</mat-icon>
+          {{ completedLabel() }}
+        </div>
+      } @else if (cta(); as action) {
+        <!-- the wrapper carries the tooltip: a disabled button gets no hover events -->
+        <span class="block w-full" [matTooltip]="ctaTooltip() || ''" [matTooltipDisabled]="!ctaTooltip()"
+          matTooltipPosition="above">
         <button
           type="button"
           class="mc-card__cta w-full px-4 py-1 border-0 rounded text-base font-normal leading-snug"
           [class.cursor-pointer]="!isDisabled()"
-          [disabled]="isDisabled()"
+          [disabled]="isDisabled() || isBusy() || ctaDisabled()"
+          [attr.aria-busy]="isBusy()"
           (click)="onCtaClick($event)"
           (keydown.enter)="$event.stopPropagation()"
           (keydown.space)="$event.stopPropagation()"
         >
-          @switch (action) {
-            @case ('locked') {
-              {{ 'campaignMicrosite.milestoneCard.locked' | translate }}
-            }
-            @case ('resume') {
-              {{ 'campaignMicrosite.milestoneCard.resume' | translate }}
-            }
-            @case ('view') {
-              {{ 'campaignMicrosite.milestoneCard.view' | translate }}
-            }
-            @case ('start') {
-              @switch (m.type) {
-                @case ('assessment') {
-                  {{ 'campaignMicrosite.milestoneCard.startAssessment' | translate }}
-                }
-                @case ('event') {
-                  {{ 'campaignMicrosite.milestoneCard.startEvent' | translate }}
-                }
-                @case ('survey') {
-                  {{ 'campaignMicrosite.milestoneCard.startSurvey' | translate }}
+          @if (ctaLabel() && action !== 'locked') {
+            {{ ctaLabel() }}
+          } @else {
+            @switch (action) {
+              @case ('locked') {
+                {{ 'campaignMicrosite.milestoneCard.locked' | translate }}
+              }
+              @case ('resume') {
+                {{ 'campaignMicrosite.milestoneCard.resume' | translate }}
+              }
+              @case ('view') {
+                {{ 'campaignMicrosite.milestoneCard.view' | translate }}
+              }
+              @case ('start') {
+                @switch (m.type) {
+                  @case ('assessment') {
+                    {{ 'campaignMicrosite.milestoneCard.startAssessment' | translate }}
+                  }
+                  @case ('event') {
+                    {{ 'campaignMicrosite.milestoneCard.startEvent' | translate }}
+                  }
+                  @case ('survey') {
+                    {{ 'campaignMicrosite.milestoneCard.startSurvey' | translate }}
+                  }
                 }
               }
             }
           }
         </button>
+        </span>
       }
     </div>
   </div>
