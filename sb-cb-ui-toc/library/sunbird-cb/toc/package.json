@@ -13,7 +13,7 @@
     "@ngx-translate/core": "^15.0.0",
     "@sunbird-cb/consumption": "0.1.0-cbrelease-4.8.42",
     "@sunbird-cb/design-system": "0.0.3",
-    "@sunbird-cb/discussion-v2": "0.2.1-cbrelease-4.8.41.3",
+    "@sunbird-cb/discussion-v2": "0.1.0-cbrelease-4.8.42",
     "@sunbird-cb/micro-surveys": "0.0.1-ang-17-20",
     "@sunbird-cb/notification": "0.0.3-ang-17-20",
     "@sunbird-cb/rain-dashboards": "0.0.1-ang-17-20",
