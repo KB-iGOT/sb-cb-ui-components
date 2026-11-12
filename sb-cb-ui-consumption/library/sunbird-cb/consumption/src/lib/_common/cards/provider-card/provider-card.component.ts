@@ -25,6 +25,11 @@ export class ProviderCardComponent implements OnInit {
     this.setRandomColor()
   }
 
+  get showKarmaCoinsBadge(): boolean {
+    const content: any = this.widgetData?.content
+    return `${content?.licenseType || ''}`.trim().toLowerCase() === 'course' && content?.addKarmaPointEnabled === true
+  }
+
   setRandomColor(){
     if(this.widgetData && this.widgetData.content) {
       if(this.randomColorApply){

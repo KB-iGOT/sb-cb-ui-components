@@ -1289,3 +1289,140 @@ ul {
     }
   }
 }
+
+.karma-coins-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background-color: var(--color-primary-50);
+
+  &__coin {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__amount {
+    margin: 0;
+    font-family: Lato-Bold, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 24px;
+    color: var(--text-bandw-black-title);
+  }
+
+  &__tnc {
+    width: fit-content;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: "Lato-Regular", sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--text-button-text-link);
+    text-decoration: underline;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__info {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    color: var(--text-bandw-black-captions);
+    cursor: pointer;
+  }
+}
+
+.karma-coins-tnc {
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: var(--environment-all-fills-overlay-backdrop);
+  }
+
+  &__panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10002;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 600px;
+    max-width: 92vw;
+    padding: 32px 24px 28px;
+    border-radius: 8px;
+    background: var(--surface-primary);
+    box-shadow:
+      0 11px 15px -7px rgba(0, 0, 0, 0.2),
+      0 24px 38px 3px rgba(0, 0, 0, 0.14),
+      0 9px 46px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  &__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--text-bandw-black-captions);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-black-opacity-8);
+    }
+  }
+
+  &__coin {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 16px;
+  }
+
+  &__title {
+    margin: 0 0 8px;
+    font-family: Lato-Bold, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 26px;
+    color: var(--text-bandw-black-title);
+  }
+
+  &__message {
+    margin: 0;
+    max-width: 520px;
+    font-family: "Lato-Regular", sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--text-bandw-black-body);
+  }
+
+  @media screen and (max-width: 480px) {
+    &__panel {
+      padding: 32px 16px 24px;
+    }
+  }
+}

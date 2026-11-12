@@ -82,6 +82,14 @@ export class CardLandscapeComponent implements OnInit {
       : { label: 'In Progress', cssClass: 'enrolment-status-in-progress' }
   }
 
+  get requiredKarmaCoins(): number {
+    if (!this.isCardElementEnabled('karmaCoins')) {
+      return 0
+    }
+    const points = Number(_.get(this.widgetData, 'content.requiredKarmaPoints'))
+    return points > 0 ? points : 0
+  }
+
   ngOnInit() {
     const instanceConfig = this.configSvc.instanceConfig
     if (instanceConfig) {

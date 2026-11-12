@@ -193,6 +193,55 @@ describe('CardLandscapeComponent', () => {
     })
   })
 
+  describe('requiredKarmaCoins', () => {
+    it('should return the required karma points when positive', () => {
+      component.widgetData = { content: { requiredKarmaPoints: 250 } } as any
+      expect(component.requiredKarmaCoins).toBe(250)
+    })
+
+    it('should read a numeric string value', () => {
+      component.widgetData = { content: { requiredKarmaPoints: '250' } } as any
+      expect(component.requiredKarmaCoins).toBe(250)
+    })
+
+    it('should check the karmaCoins card element in config', () => {
+      component.widgetData = { content: { requiredKarmaPoints: 250 } } as any
+      expect(component.requiredKarmaCoins).toBe(250)
+      expect(domainConfSvcMock.isConfigEnabled).toHaveBeenCalledWith('components.cards', 'karmaCoins')
+    })
+
+    it('should return 0 when the config has switched the element off', () => {
+      domainConfSvcMock.isConfigEnabled.mockReturnValue(false)
+      component.widgetData = { content: { requiredKarmaPoints: 250 } } as any
+      expect(component.requiredKarmaCoins).toBe(0)
+    })
+
+    it('should return 0 when the points are zero', () => {
+      component.widgetData = { content: { requiredKarmaPoints: 0 } } as any
+      expect(component.requiredKarmaCoins).toBe(0)
+    })
+
+    it('should return 0 when the points are negative', () => {
+      component.widgetData = { content: { requiredKarmaPoints: -10 } } as any
+      expect(component.requiredKarmaCoins).toBe(0)
+    })
+
+    it('should return 0 when the points are missing', () => {
+      component.widgetData = { content: {} } as any
+      expect(component.requiredKarmaCoins).toBe(0)
+    })
+
+    it('should return 0 when the points are not numeric', () => {
+      component.widgetData = { content: { requiredKarmaPoints: 'abc' } } as any
+      expect(component.requiredKarmaCoins).toBe(0)
+    })
+
+    it('should return 0 when there is no widget data', () => {
+      component.widgetData = undefined as any
+      expect(component.requiredKarmaCoins).toBe(0)
+    })
+  })
+
   describe('ngOnInit', () => {
     it('should read the thumbnails and source logos from the instance config', () => {
       configSvcMock.instanceConfig = {
