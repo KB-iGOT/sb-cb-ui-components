@@ -86,7 +86,7 @@ export class CardLandscapeComponent implements OnInit {
     if (!this.isCardElementEnabled('karmaCoins')) {
       return 0
     }
-    const points = Number(_.get(this.widgetData, 'content.requiredKarmaPoints'))
+    const points = Number(_.get(this.widgetData, 'content.requiredKarmaCoins'))
     return points > 0 ? points : 0
   }
 
