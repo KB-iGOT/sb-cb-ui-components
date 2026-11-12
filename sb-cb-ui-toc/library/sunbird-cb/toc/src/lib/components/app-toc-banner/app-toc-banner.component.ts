@@ -730,6 +730,13 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public handleEnrollmentEndDate(batch: any) {
+    if (
+      this.content &&
+      this.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM &&
+      lodash.get(batch, 'enrollmentType') === 'open'
+    ) {
+      return true
+    }
     const enrollmentEndDate = dayjs(lodash.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
     const systemDate = dayjs(this.serverDate || new Date()).format('YYYY-MM-DD')
     return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
