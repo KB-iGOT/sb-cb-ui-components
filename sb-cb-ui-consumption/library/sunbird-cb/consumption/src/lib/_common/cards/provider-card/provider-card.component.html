@@ -37,6 +37,11 @@
           <p class="provider-name" [title]="widgetData?.content?.name">{{ widgetData?.content?.name }}</p>
           <div class="view-provider-button flex items-center" (click)="redirectTo(widgetData.content)">View Provider 
             <mat-icon class="" color="accent">navigate_next</mat-icon></div>
+          <div
+            *ngIf="widgetData?.content?.name?.toLowerCase() === 'simplilearn'"
+            class="redeem-karma-coins">
+            Redeem Karma Coins
+          </div>
         </div>
       </div>
     </div>

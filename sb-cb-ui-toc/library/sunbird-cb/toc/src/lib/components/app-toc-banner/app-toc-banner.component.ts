@@ -1,4 +1,5 @@
-import { Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, Output, SimpleChanges, ViewChild } from '@angular/core'
+import { Component, ElementRef, EventEmitter, Inject, Injector, Input, OnChanges, OnDestroy, OnInit, Optional, Output, SimpleChanges, ViewChild, inject } from '@angular/core'
+import { createCloseScrollStrategy } from '@angular/cdk/overlay'
 // import { MatAutocomplete, MatAutocompleteSelectedEvent, MatChipInputEvent, MatDialog, MatSnackBar } from '@angular/material'
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser'
 import { ActivatedRoute, Event, NavigationEnd, Router } from '@angular/router'
@@ -8,7 +9,7 @@ import { viewerRouteGenerator } from '../../_services/viewer-route-util'
 import { TFetchStatus, UtilityService, ConfigurationsService, LoggerService, WsEvents, EventService, MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
 import { ConfirmDialogComponent } from '../../_collection/_common/confirm-dialog/confirm-dialog.component'
 import { AccessControlService } from '../../services/access-control.service'
-import { Subscription } from 'rxjs'
+import { Subscription, fromEvent } from 'rxjs'
 import { NsAnalytics } from '../../models/app-toc-analytics.model'
 import { NsAppToc } from '../../models/app-toc.model'
 import { NsPlaylist } from '../../models/playlist.model'
@@ -30,14 +31,14 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { EnrollQuestionnaireComponent } from '../enroll-questionnaire/enroll-questionnaire.component'
 import { TranslateService } from '@ngx-translate/core'
 import { ENTER } from '@angular/cdk/keycodes'
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators'
+import { debounceTime, distinctUntilChanged, throttleTime } from 'rxjs/operators'
 import { TimerService } from '../../services/timer.service'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { MatAutocomplete as MatAutocomplete, MatAutocompleteSelectedEvent as MatAutocompleteSelectedEvent } from '@angular/material/autocomplete'
 import { MatChipInputEvent as MatChipInputEvent } from '@angular/material/chips'
 import { MatDialog as MatDialog } from '@angular/material/dialog'
 import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
-import { MatSelect } from '@angular/material/select'
+import { MAT_SELECT_SCROLL_STRATEGY, MatSelect } from '@angular/material/select'
 import { EnrollProfileFormComponent } from '../enroll-profile-form/enroll-profile-form.component'
 
 dayjs.extend(isSameOrBefore)
@@ -47,7 +48,17 @@ dayjs.extend(isSameOrAfter)
   selector: 'ws-app-toc-banner',
   templateUrl: './app-toc-banner.component.html',
   styleUrls: ['./app-toc-banner.component.scss'],
-  providers: [AccessControlService, DatePipe],
+  providers: [
+    AccessControlService,
+    DatePipe,
+    {
+      provide: MAT_SELECT_SCROLL_STRATEGY,
+      useFactory: () => {
+        const injector = inject(Injector)
+        return () => createCloseScrollStrategy(injector)
+      },
+    },
+  ],
   standalone: false
 })
 
@@ -147,6 +158,8 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   showLoader = false
   batchListLoading = false
   allBatchesLoaded = false
+  batchPanel: HTMLElement | null = null
+  batchPanelScrollSubscription: Subscription | null = null
   constructor(
     private sanitizer: DomSanitizer,
     private router: Router,
@@ -660,7 +673,8 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
         this.batchData.workFlow = {
           wfInitiated: true,
           batch: this.selectedBatch,
-          wfItem: { currentStatus: data.result.data.status },
+          wfItem: { currentStatus: data.result.data.status, applicationId: this.selectedBatch.batchId },
+          wfItems: this.batchData.workFlow && this.batchData.workFlow.wfItems,
         }
         this.withdrawOrEnroll.emit(action)
         this.getBatchUserCount(this.selectedBatch)
@@ -716,26 +730,46 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public handleEnrollmentEndDate(batch: any) {
+    if (
+      this.content &&
+      this.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM &&
+      lodash.get(batch, 'enrollmentType') === 'open'
+    ) {
+      return true
+    }
     const enrollmentEndDate = dayjs(lodash.get(batch, 'enrollmentEndDate')).format('YYYY-MM-DD')
     const systemDate = dayjs(this.serverDate || new Date()).format('YYYY-MM-DD')
     return (enrollmentEndDate && enrollmentEndDate !== 'Invalid Date') ?
       (dayjs(enrollmentEndDate).isSame(systemDate, 'day') || dayjs(enrollmentEndDate).isAfter(systemDate)) : false
   }
 
-  public checkRejected(batch: any) {
-    if (
-      batch &&
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      // tslint:disable-next-line:max-line-length
-      if (batch.batchId === this.batchData.workFlow.wfItem.applicationId && (this.batchData.workFlow.wfItem.currentStatus === this.WFBlendedProgramStatus.REJECTED || this.batchData.workFlow.wfItem.currentStatus === this.WFBlendedProgramStatus.REMOVED)) {
-        return true
-      }
-      return false
+  public getBatchWFItem(batch: any) {
+    const workFlow = this.batchData && this.batchData.workFlow
+    if (!batch || !workFlow) {
+      return undefined
     }
-    return false
+    const batchWFItems = (workFlow.wfItems || []).filter((wf: any) => wf.applicationId === batch.batchId)
+    if (batchWFItems.length) {
+      return lodash.maxBy(batchWFItems, (wf: any) => wf.lastUpdatedOn)
+    }
+    return workFlow.wfItem && workFlow.wfItem.applicationId === batch.batchId ? workFlow.wfItem : undefined
+  }
+
+  // workflow item to show the status for: while the user can pick a batch again, use the selected batch's own workflow
+  get displayWFItem() {
+    const wfItem = this.batchData && this.batchData.workFlow && this.batchData.workFlow.wfItem
+    if (wfItem && this.selectedBatch && (wfItem.currentStatus === this.WFBlendedProgramStatus.REJECTED ||
+      wfItem.currentStatus === this.WFBlendedProgramStatus.WITHDRAWN ||
+      wfItem.currentStatus === this.WFBlendedProgramStatus.REMOVED)) {
+      return this.getBatchWFItem(this.selectedBatch)
+    }
+    return wfItem
+  }
+
+  public checkRejected(batch: any) {
+    const batchWFItem = this.getBatchWFItem(batch)
+    return !!batchWFItem && (batchWFItem.currentStatus === this.WFBlendedProgramStatus.REJECTED ||
+      batchWFItem.currentStatus === this.WFBlendedProgramStatus.REMOVED)
   }
 
   public checkWithdrawn(batch: any) {
@@ -910,24 +944,18 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get getWFMsg() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       const msg = this.WFSTATUS_MSG_MAPPING[status]
       return this.tocConfig[msg]
     }
   }
 
   get showIcon() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       if (status === this.WFBlendedProgramStatus.APPROVED ||
         status === this.WFBlendedProgramStatus.SEND_FOR_MDO_APPROVAL ||
         status === this.WFBlendedProgramStatus.SEND_FOR_PC_APPROVAL ||
@@ -941,12 +969,9 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get showMsg() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       if (status === this.WFBlendedProgramStatus.APPROVED ||
         status === this.WFBlendedProgramStatus.SEND_FOR_MDO_APPROVAL ||
         status === this.WFBlendedProgramStatus.SEND_FOR_PC_APPROVAL ||
@@ -960,12 +985,9 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get WFIcon() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       if (status === this.WFBlendedProgramStatus.APPROVED ||
         status === this.WFBlendedProgramStatus.SEND_FOR_MDO_APPROVAL ||
         status === this.WFBlendedProgramStatus.SEND_FOR_PC_APPROVAL ||
@@ -982,12 +1004,9 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get iconColor() {
-    if (
-      this.batchData &&
-      this.batchData.workFlow &&
-      this.batchData.workFlow.wfItem
-    ) {
-      const status = this.batchData.workFlow.wfItem.currentStatus
+    const wfItem = this.displayWFItem
+    if (wfItem) {
+      const status = wfItem.currentStatus
       if (status === this.WFBlendedProgramStatus.APPROVED || status === this.WFBlendedProgramStatus.WITHDRAWN) {
         return 'ws-mat-green-text'
       } if (status === this.WFBlendedProgramStatus.SEND_FOR_MDO_APPROVAL ||
@@ -1606,7 +1625,11 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onBatchDropdownToggle(opened: boolean, batchSelect: MatSelect) {
-    if (!opened || !batchSelect) {
+    if (!opened) {
+      this.detachBatchPanel()
+      return
+    }
+    if (!batchSelect) {
       return
     }
     setTimeout(() => {
@@ -1614,16 +1637,32 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       if (!panel) {
         return
       }
-      panel.addEventListener('scroll', () => {
-        if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 50) {
-          this.fetchMoreBatches(panel)
-        }
-      })
+      this.detachBatchPanel()
+      this.batchPanel = panel
+      this.batchPanelScrollSubscription = fromEvent(panel, 'scroll')
+        .pipe(throttleTime(200, undefined, { leading: true, trailing: true }))
+        .subscribe(() => {
+          if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 50) {
+            this.fetchMoreBatches(panel)
+          }
+        })
       this.fillBatchPanel(panel)
     })
   }
 
+  detachBatchPanel() {
+    if (this.batchPanelScrollSubscription) {
+      this.batchPanelScrollSubscription.unsubscribe()
+      this.batchPanelScrollSubscription = null
+    }
+    this.batchPanel = null
+  }
+
   fillBatchPanel(panel: HTMLElement) {
+    // the panel is destroyed on close; a detached element measures 0 <= 0 and would page forever
+    if (panel !== this.batchPanel || !panel.isConnected) {
+      return
+    }
     if (panel.scrollHeight <= panel.clientHeight) {
       this.fetchMoreBatches(panel)
     }
@@ -1634,10 +1673,13 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       return
     }
     this.batchListLoading = true
-    const req = this.contentSvc.getCourseBatchesRequest(this.content.identifier, this.batchData.content.length)
+    // batchData is shared by every banner on the page, so the offset lives on it rather than on this instance
+    const offset = this.batchData.nextOffset || this.batchData.content.length
+    const req = this.contentSvc.getCourseBatchesRequest(this.content.identifier, offset)
     this.contentSvc.fetchCourseBatches(req).subscribe(
       (data: NsContent.IBatchListResponse) => {
         const newBatches = (data && data.content) || []
+        this.batchData.nextOffset = offset + newBatches.length
         const loadedBatchIds = this.batchData.content.map((batch: any) => batch.batchId)
         const uniqueBatches = newBatches.filter((batch: any) => !loadedBatchIds.includes(batch.batchId))
         this.batchData.content.push(...uniqueBatches)
@@ -1658,6 +1700,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.detachBatchPanel()
     this.tocSvc.analyticsFetchStatus = 'none'
     if (this.routerParamSubscription) {
       this.routerParamSubscription.unsubscribe()
