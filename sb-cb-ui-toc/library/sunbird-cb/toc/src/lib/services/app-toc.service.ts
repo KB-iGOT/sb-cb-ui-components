@@ -676,9 +676,13 @@ export class AppTocService {
                   firstUncompleteCourse = (parentChild.completionPercentage === 0 || !parentChild.completionPercentage) &&
                     !firstUncompleteCourse ? parentChild : firstUncompleteCourse
                   inprogressDataCheck = inprogressDataCheck
-                  await this.fetchContentHistoryV2(req).toPromise().then((progressdata: any) => {
+                  // A failed progress read must not reject the whole mapping: the hashmap, module data and
+                  // loader below would never be set and the player page breaks. Carry on with no progress.
+                  await this.fetchContentHistoryV2(req).toPromise()
+                    .catch((error: any) => { this.logProgressReadError(req, error); return null })
+                    .then((progressdata: any) => {
                     const data: any = progressdata
-                    if (data.result && data?.result?.contentList?.length > 0) {
+                    if (data?.result?.contentList?.length > 0) {
                       const completedCount = data.result.contentList.filter((ele: any) => ele.progress === 100)
                       this.checkCompletedLeafnodes(completedLeafNodes, completedCount)
                       totalCount = completedLeafNodes.length
@@ -751,9 +755,13 @@ export class AppTocService {
               ],
             },
           }
-          await this.fetchContentHistoryV2(req).toPromise().then((progressdata: any) => {
+          // A failed progress read must not reject the whole mapping: the hashmap, module data and
+          // loader below would never be set and the player page breaks. Carry on with no progress.
+          await this.fetchContentHistoryV2(req).toPromise()
+            .catch((error: any) => { this.logProgressReadError(req, error); return null })
+            .then((progressdata: any) => {
             const data: any = progressdata
-            if (data && data.result && data.result.contentList.length > 0) {
+            if (data?.result?.contentList?.length > 0) {
               const completedCount = data.result.contentList.filter((ele: any) => ele.progress === 100)
               this.checkCompletedLeafnodes(completedLeafNodes, completedCount)
               totalCount = completedLeafNodes.length
@@ -1616,6 +1624,11 @@ export class AppTocService {
     item['completionPercentage'] = Number(((completedItems.length / totalCount) * 100).toFixed())
     item['completionStatus'] = (item.completionPercentage >= 100) ? 2 : 1
     return item
+  }
+
+  private logProgressReadError(req: NsContent.IContinueLearningDataReq, error: any) {
+    // tslint:disable-next-line: no-console
+    console.error('[TOC] progress read failed for course', req && req.request && req.request.courseId, error)
   }
 
   fetchContentHistoryV2(req: NsContent.IContinueLearningDataReq): Observable<NsContent.IContinueLearningData> {

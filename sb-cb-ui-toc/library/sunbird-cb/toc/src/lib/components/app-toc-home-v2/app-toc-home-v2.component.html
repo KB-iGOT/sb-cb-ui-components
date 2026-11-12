@@ -937,7 +937,7 @@
                 </ng-container>
               </div>
 
-              <div class="karma-points-div" *ngIf="tocConfig?.uiVisibility?.rightPanel?.karmaPoints !== false && !isComprehensiveAssessment">
+              <div class="karma-points-div" *ngIf="tocConfig?.uiVisibility?.rightPanel?.karmaPoints !== false && !isComprehensiveAssessment && !karmaPointsHidden">
                 <ws-widget-karma-points [data]="kparray" (clickClaimKarmaPoints)="onClickOfClaim($event)"
                   [content]="content" [baseContentReadData]="baseContentReadData"
                   [condition]="{isPostAssessment: isPostAssessment, content: content, isAcbpCourse: isAcbpCourse, isClaimed: isClaimed, monthlyCapExceed: monthlyCapExceed, isCompletedThisMonth: isCompletedThisMonth, showTakeAssessment: showTakeAssessment, userEnrollmentList: userEnrollmentList, resumeData: resumeData, userRating: userRating, enrollBtnLoading: enrollBtnLoading, primaryCategory: primaryCategory, currentCourseBatchId: currentCourseBatchId, isAcbpClaim: isAcbpClaim}"></ws-widget-karma-points>
@@ -1085,7 +1085,7 @@
   <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !allBatchesAreFull) && batchData?.content?.length > 0 "
     [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
     <ng-container *ngIf="content && contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
-      <div class="mb-2" *ngIf="mobile1200 && !forPreview || isInIFrame; else authViewBtn">
+      <div class="mb-2" *ngIf="mobile1200 && (!forPreview || isInIFrame); else authViewBtn">
         <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content" [userEnrollmentList]="userEnrollmentList"
           (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics" [resumeData]="resumeData" [batchData]="batchData"
           [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
@@ -1120,7 +1120,7 @@
   <ng-container *ngIf="contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
     <div class="mobile-enroll-div" *ngIf="(!batchData?.allBatchesExpired && !allBatchesAreFull) && batchData?.content?.length > 0"
       [ngClass]="{'bg-white': contentReadData?.primaryCategory === primaryCategory.BLENDED_PROGRAM }">
-      <div class="mb-2" *ngIf="mobile1200 && !forPreview || isInIFrame; else authViewBtn">
+      <div class="mb-2" *ngIf="mobile1200 && (!forPreview || isInIFrame); else authViewBtn">
         <ws-app-toc-banner role="banner" [banners]="banners" [forPreview]="forPreview" [content]="content" [userEnrollmentList]="userEnrollmentList"
           (withdrawOrEnroll)="withdrawOrEnroll($event)" [analytics]="analytics" [resumeData]="resumeData" [batchData]="batchData"
           [contentReadData]="contentReadData" [fullBatcheIds]="fullBatcheIds">
