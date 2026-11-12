@@ -209,6 +209,7 @@
                         </ng-container>
                     </a>
                 </ng-container>
+                <ng-container [ngTemplateOutlet]="karmaCoinsStripTpl"></ng-container>
                 <!-- <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && userExtCourseEnroll?.issued_certificates?.length > 0
                     && userExtCourseEnroll?.progress === 100">
                     <button class="flex action-button justify-center flex-middle resume" type="button" (click)="downloadCert()">
@@ -371,6 +372,7 @@
                                 </ng-container>
                             </a>
                         </ng-container>
+                        <ng-container [ngTemplateOutlet]="karmaCoinsStripTpl"></ng-container>
                         <!-- <ng-container *ngIf="(userExtCourseEnroll | json) !== '{}' && userExtCourseEnroll?.issued_certificates?.length > 0
                         && userExtCourseEnroll?.progress === 100">
                         <button class="flex action-button justify-center flex-middle resume" type="button" (click)="downloadCert()">
@@ -412,6 +414,19 @@
 <ws-app-share-toc *ngIf="enableShare" [contentLink]="contentLink" [rootOrgId]="rootOrgId" [content]="extContentReadData"
     (resetEnableShare)="resetEnableShare($event)"></ws-app-share-toc>
 
+<ng-template #karmaCoinsStripTpl>
+    <div class="karma-coins-strip" *ngIf="requiredKarmaCoins > 0">
+        <img class="karma-coins-strip__coin" src="/assets/icons/karmawallet-v2/karmacoin.svg" alt="" aria-hidden="true" />
+        <div class="karma-coins-strip__body">
+            <p class="karma-coins-strip__amount">{{ requiredKarmaCoins }} {{ requiredKarmaCoins === 1 ? 'Karma Coin' : 'Karma Coins' }}</p>
+            <button type="button" class="karma-coins-strip__tnc" aria-haspopup="dialog"
+                (click)="openKarmaCoinsTnc()">{{ karmaCoinsStrip.tncText }}</button>
+        </div>
+        <mat-icon class="karma-coins-strip__info" [matTooltip]="karmaCoinsStrip.infoText"
+            matTooltipPosition="above" aria-label="Karma Coins info">info_outline</mat-icon>
+    </div>
+</ng-template>
+
 <ng-template #inProgressInfo>
     <ng-container *ngIf="showProviderTips">
         <div class="no-certificate-found mt-6 mb-4 mx-2 p-2" >
@@ -419,6 +434,18 @@
         </div>
     </ng-container>
 </ng-template>
+
+<div class="karma-coins-tnc" *ngIf="karmaCoinsTncOpen">
+  <div class="karma-coins-tnc__backdrop" (click)="closeKarmaCoinsTnc()" aria-hidden="true"></div>
+  <div class="karma-coins-tnc__panel" role="dialog" aria-modal="true" aria-labelledby="karma-coins-tnc-title">
+    <button type="button" class="karma-coins-tnc__close" aria-label="Close" (click)="closeKarmaCoinsTnc()">
+      <mat-icon>close</mat-icon>
+    </button>
+    <img class="karma-coins-tnc__coin" src="/assets/icons/karmawallet-v2/karmacoin.svg" alt="" aria-hidden="true" />
+    <p class="karma-coins-tnc__title" id="karma-coins-tnc-title">{{ karmaCoinsStrip.tncHeader }}</p>
+    <p class="karma-coins-tnc__message">{{ karmaCoinsStrip.tncMessage }}</p>
+  </div>
+</div>
 
 <div class="insufficient-coins" *ngIf="insufficientCoins">
   <div class="insufficient-coins__backdrop" aria-hidden="true"></div>
