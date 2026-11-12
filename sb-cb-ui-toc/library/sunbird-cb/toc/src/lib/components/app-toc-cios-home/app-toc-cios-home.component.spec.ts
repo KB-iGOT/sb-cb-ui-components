@@ -276,13 +276,13 @@ describe('AppTocCiosHomeComponent', () => {
       expect(created.requiredKarmaCoins).toBe(30)
     })
 
-    it('should leave the karma coins at zero for an already enrolled user', () => {
+    it('should read the karma coins off the content for an enrolled user too', () => {
       routeMock.data = of({
         extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' }, requiredKarmaCoins: 30 } } },
         userEnrollContent: { data: { result: { progress: 40 } } },
       })
       const created = createComponent()
-      expect(created.requiredKarmaCoins).toBe(0)
+      expect(created.requiredKarmaCoins).toBe(30)
     })
   })
 
@@ -292,58 +292,44 @@ describe('AppTocCiosHomeComponent', () => {
       extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' }, ...content } } },
     })
 
-    it('should fetch the required karma points on load when the user is not enrolled', async () => {
-      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 250 } }))
-      routeMock.data = notEnrolledRoute()
-      const created = createComponent()
-      await flushPromises()
-      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledWith('c1', 'p1')
-      expect(created.requiredKarmaCoins).toBe(250)
-    })
-
-    it('should read the required karma points off a payment required error', async () => {
-      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(throwError({
-        status: 402,
-        error: { responseCode: 'PAYMENT_REQUIRED', result: { requiredKarmaPoints: 1000 } },
-      }))
-      routeMock.data = notEnrolledRoute()
-      const created = createComponent()
-      await flushPromises()
-      expect(created.requiredKarmaCoins).toBe(1000)
-    })
-
-    it('should keep the content value when the api returns no points', async () => {
+    it('should not call the deduction rule api on load', async () => {
       routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 30 })
-      const created = createComponent()
+      createComponent()
       await flushPromises()
-      expect(created.requiredKarmaCoins).toBe(30)
+      expect(certSvcMock.getKarmaPointsDeductionRule).not.toHaveBeenCalled()
     })
 
-    it('should stay at zero when the api fails for another reason', async () => {
-      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(throwError({ status: 500 }))
+    it('should take the strip value from the content read only', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 250 } }))
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 6 })
+      const created = createComponent()
+      await flushPromises()
+      expect(created.requiredKarmaCoins).toBe(6)
+    })
+
+    it('should hide the strip when the content has no karma coins', () => {
       routeMock.data = notEnrolledRoute()
-      const created = createComponent()
-      await flushPromises()
-      expect(created.requiredKarmaCoins).toBe(0)
+      expect(createComponent().requiredKarmaCoins).toBe(0)
     })
 
-    it('should fetch the karma points for an enrolled user too', async () => {
-      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 50 } }))
-      routeMock.data = of({
-        extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' } } } },
-        userEnrollContent: { data: { result: { progress: 40 } } },
-      })
-      const created = createComponent()
-      await flushPromises()
-      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledWith('c1', 'p1')
-      expect(created.requiredKarmaCoins).toBe(50)
+    it('should hide the strip when the content karma coins are zero', () => {
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 0 })
+      expect(createComponent().requiredKarmaCoins).toBe(0)
     })
 
-    it('should reuse the page load request when enrolling', async () => {
+    it('should hide the strip for a negative or non numeric value', () => {
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: -5 })
+      expect(createComponent().requiredKarmaCoins).toBe(0)
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 'abc' })
+      expect(createComponent().requiredKarmaCoins).toBe(0)
+    })
+
+    it('should call the deduction rule api once when enrolling', async () => {
       certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 250 } }))
       routeMock.data = notEnrolledRoute()
       const created = createComponent()
       created.config = {}
+      await created.enRollToExtCourse(created.extContentReadData)
       await created.enRollToExtCourse(created.extContentReadData)
       expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledTimes(1)
       expect(created.karmaRedeemData.requiredKarmaCoins).toBe(250)
