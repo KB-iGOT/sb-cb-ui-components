@@ -22,7 +22,7 @@
         [selectedIndex]="selectedTabIndex" [ngClass]="{'content-tabs':!fromViewer,'contentSticky': forPreview}">
 
     <!-- Transcription Tab -->
-    <mat-tab label="Transcription"
+    <mat-tab #transcriptionTab label="Transcription"
       *ngIf="viewerPage && enableTranscriptionFlag && vttLangArr?.length && subTitles?.length">
       <ng-template mat-tab-label>
         <div class="flex flex-row">
@@ -150,7 +150,7 @@
     </mat-tab>
 
     <!-- About Tab -->
-    <mat-tab label="{{ 'apptocsinglepage.about' | translate }}" *ngIf="config?.uiVisibility?.tabs?.aboutTab !== false">
+    <mat-tab #aboutTab label="{{ 'apptocsinglepage.about' | translate }}" *ngIf="config?.uiVisibility?.tabs?.aboutTab !== false">
       <ng-template matTabContent>
         <div class="ai-tutor-get-started-mobile my-2 ml-2" *ngIf="!viewerPage && enableAITutorFlag && isMobile">
           <div class="flex flex-row align-items-center w-98">
@@ -192,7 +192,7 @@
 
     <!-- Content Tab -->
     <ng-container *ngIf="content?.children?.length">
-      <mat-tab label="{{ 'apptocsinglepage.content' | translate }}"
+      <mat-tab #contentTab label="{{ 'apptocsinglepage.content' | translate }}"
         *ngIf="contentTabFlag && config?.uiVisibility?.tabs?.contentTab !== false">
         <ng-template matTabContent>
           <ws-widget-app-toc-content [batchId]="batchId" [componentName]="componentName" [pathSet]="pathSet"
@@ -205,7 +205,7 @@
     </ng-container>
 
     <ng-container *ngIf="config?.commentsTab && !forPreview && config?.uiVisibility?.tabs?.discussionTab !== false && isCommentApiEnabled()">
-      <mat-tab label="{{ 'apptocsinglepage.startDiscussion' | translate }}">
+      <mat-tab #discussionTab label="{{ 'apptocsinglepage.startDiscussion' | translate }}">
         <ng-template matTabContent>
           <div class="flex flex-col ratings-div mt-5" id="commentsDiv"
             *ngIf="discussWidgetData && discussWidgetData?.newCommentSection?.commentTreeData?.entityId">

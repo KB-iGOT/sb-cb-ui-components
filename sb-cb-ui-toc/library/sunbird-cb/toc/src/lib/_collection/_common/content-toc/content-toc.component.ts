@@ -47,6 +47,13 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() hierarchyMapData: any = {}
   @ViewChild('stickyMenu') tabElement!: MatTabGroup
   @ViewChildren(MatTab) tabs!: QueryList<MatTab>
+  // Named tabs, so the player page's default tab can be picked by name: the tab indexes shift
+  // with whichever tabs are shown (the Content tab is hidden in the desktop player, for one)
+  @ViewChild('transcriptionTab') transcriptionTabRef?: MatTab
+  @ViewChild('aboutTab') aboutTabRef?: MatTab
+  @ViewChild('contentTab') contentTabRef?: MatTab
+  @ViewChild('discussionTab') discussionTabRef?: MatTab
+  private viewerDefaultTabApplied = false
   @Input() condition: any
   @Input() kparray: any
   @Input() selectedBatchData: any
@@ -259,7 +266,10 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     const batchId = this.route.snapshot.queryParams.batchId ?
       this.route.snapshot.queryParams.batchId : ''
     this.batchId = batchId
-    if (batchId) {
+    // TOC page: an enrolled learner lands on the Content tab (index 1). The player page picks
+    // its tab by name instead (applyViewerDefaultTab) - there index 1 is the Discussion tab,
+    // and opening it on load fires the comment APIs
+    if (batchId && !this.viewerPage) {
       this.selectedTabIndex = 1
     }
     this.commentId = this.route.snapshot.queryParams.commentId ? this.route.snapshot.queryParams.commentId : ''
@@ -278,6 +288,12 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
     }
     this.menuPosition =
       this.tabElement._elementRef.nativeElement.offsetTop || 0;
+
+    if (this.viewerPage) {
+      this.applyViewerDefaultTab()
+      // tabs come and go as config and data arrive (e.g. Discussion needs config.commentsTab)
+      this.tabs.changes.subscribe(() => this.applyViewerDefaultTab())
+    }
 
     this.route.queryParamMap.subscribe(async (params: any) => {
 
@@ -314,6 +330,11 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
     if (changes['contentReadData'] || changes['content']) {
       this.loadComprehensiveAssessmentStatus()
+    }
+
+    if (changes['config'] && this.viewerPage) {
+      // after this change's render, so the tabs the new config shows are in place
+      setTimeout(() => this.applyViewerDefaultTab())
     }
 
     this.resourceIdentifier = this.viewerDataSvc.resourceId
@@ -501,6 +522,37 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
       this.sticky = true
     } else {
       this.sticky = false
+    }
+  }
+
+  /**
+   * Player page only: selects the tab named by toc config playerUiConfig.defaultTab
+   * ('about' | 'content' | 'discussion' | 'transcription', default 'about'). Runs until that tab
+   * is shown and selected once, so it never overrides a tab the learner picked afterwards.
+   */
+  private applyViewerDefaultTab(): void {
+    // config (toc.json) loads after the first render in the player; until then index 0 stays,
+    // which is About unless the Transcription tab is shown
+    if (this.viewerDefaultTabApplied || this.commentId || this.fromAISelectedTabIndex || !this.tabs || !this.config) {
+      return
+    }
+    // playerUiConfig is the player-only section of toc.json: the TOC page never reads it
+    const name = (this.config?.playerUiConfig?.defaultTab || 'about').toString().toLowerCase()
+    const refs: { [name: string]: MatTab | undefined } = {
+      transcription: this.transcriptionTabRef,
+      about: this.aboutTabRef,
+      content: this.contentTabRef,
+      discussion: this.discussionTabRef,
+    }
+    const index = refs[name] ? this.tabs.toArray().indexOf(refs[name] as MatTab) : -1
+    if (index < 0) {
+      // not shown (yet): leave the current tab, try again when the tabs change
+      return
+    }
+    this.viewerDefaultTabApplied = true
+    if (index !== this.selectedTabIndex) {
+      // next tick: this runs during change detection (after view init / tabs.changes)
+      setTimeout(() => this.selectedTabIndex = index)
     }
   }
 
