@@ -125,6 +125,10 @@ export class ContentStripsComponent implements OnInit {
   }
 
   async fetchContent(config: ContentConfig | undefined = this.contentConfig()): Promise<void> {
+    if (config?.contents?.length) {
+      this.loadFromConfig(config)
+      return
+    }
     if (config?.contentIds?.length) {
       this.loadFromDictionary(config)
       return
@@ -159,6 +163,27 @@ export class ContentStripsComponent implements OnInit {
       })
   }
 
+  /** Keeps only content whose courseCategory is in config.courseCategories, when that is set */
+  private byCourseCategory<T>(contents: T[], config: ContentConfig): T[] {
+    const allowed = (config.courseCategories ?? []).filter(Boolean)
+    if (!allowed.length) {
+      return contents
+    }
+    return contents.filter((content: any) => allowed.includes(content?.courseCategory))
+  }
+
+  /** Cards straight from the metadata in the config (`contents`) - nothing is fetched */
+  private loadFromConfig(config: ContentConfig): void {
+    const contents = this.byCourseCategory((config.contents ?? []).filter(Boolean), config)
+    const transformed = this.cardTransformer.transformCards(contents, config.cardType)
+    const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
+    this.cards.set(limited)
+    this.loading.set(false)
+    if (!limited.length && this.sectionKey()) {
+      this.apiService.reportEmptySection(this.sectionKey())
+    }
+  }
+
   private loadFromDictionary(config: ContentConfig): void {
     this.loading.set(true)
     const ids = (config.contentIds ?? []).filter(Boolean)
@@ -174,7 +199,7 @@ export class ContentStripsComponent implements OnInit {
       .pipe(catchError(() => of([])))
       .subscribe({
         next: (contents) => {
-          const enriched = (contents ?? []).filter(Boolean)
+          const enriched = this.byCourseCategory((contents ?? []).filter(Boolean), config)
           const transformed = this.cardTransformer.transformCards(enriched, config.cardType)
           const limited = transformed.slice(0, config.maxCardsToShow ?? 4)
           this.cards.set(limited)

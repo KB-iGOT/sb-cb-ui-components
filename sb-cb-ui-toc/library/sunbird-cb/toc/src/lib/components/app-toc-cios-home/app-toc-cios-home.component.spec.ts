@@ -286,6 +286,98 @@ describe('AppTocCiosHomeComponent', () => {
     })
   })
 
+  describe('karma coins strip', () => {
+    const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0))
+    const notEnrolledRoute = (content: any = {}) => of({
+      extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' }, ...content } } },
+    })
+
+    it('should fetch the required karma points on load when the user is not enrolled', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 250 } }))
+      routeMock.data = notEnrolledRoute()
+      const created = createComponent()
+      await flushPromises()
+      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledWith('c1', 'p1')
+      expect(created.requiredKarmaCoins).toBe(250)
+    })
+
+    it('should read the required karma points off a payment required error', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(throwError({
+        status: 402,
+        error: { responseCode: 'PAYMENT_REQUIRED', result: { requiredKarmaPoints: 1000 } },
+      }))
+      routeMock.data = notEnrolledRoute()
+      const created = createComponent()
+      await flushPromises()
+      expect(created.requiredKarmaCoins).toBe(1000)
+    })
+
+    it('should keep the content value when the api returns no points', async () => {
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 30 })
+      const created = createComponent()
+      await flushPromises()
+      expect(created.requiredKarmaCoins).toBe(30)
+    })
+
+    it('should stay at zero when the api fails for another reason', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(throwError({ status: 500 }))
+      routeMock.data = notEnrolledRoute()
+      const created = createComponent()
+      await flushPromises()
+      expect(created.requiredKarmaCoins).toBe(0)
+    })
+
+    it('should fetch the karma points for an enrolled user too', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 50 } }))
+      routeMock.data = of({
+        extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' } } } },
+        userEnrollContent: { data: { result: { progress: 40 } } },
+      })
+      const created = createComponent()
+      await flushPromises()
+      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledWith('c1', 'p1')
+      expect(created.requiredKarmaCoins).toBe(50)
+    })
+
+    it('should reuse the page load request when enrolling', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 250 } }))
+      routeMock.data = notEnrolledRoute()
+      const created = createComponent()
+      created.config = {}
+      await created.enRollToExtCourse(created.extContentReadData)
+      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledTimes(1)
+      expect(created.karmaRedeemData.requiredKarmaCoins).toBe(250)
+    })
+
+    it('should default the strip text when nothing is configured', () => {
+      component.config = {}
+      expect(component.karmaCoinsStrip).toEqual({
+        tncText: 'T&C Apply',
+        tncHeader: 'Terms and Conditions',
+        tncMessage: 'Enrolment eligibility and Karma Coin pricing for this course are at Karmayogi Bharat’s discretion and may change without notice.',
+        infoText: 'Karma Coins will be deducted from your Karma Wallet if you proceed with enrolment.',
+      })
+    })
+
+    it('should take the strip text from config', () => {
+      component.config = { karmaCoinsStrip: { tncText: 'Terms', tncHeader: 'Head', tncMessage: 'Body', infoText: 'Info' } }
+      expect(component.karmaCoinsStrip).toEqual({ tncText: 'Terms', tncHeader: 'Head', tncMessage: 'Body', infoText: 'Info' })
+    })
+
+    it('should open and close the T&C popup', () => {
+      expect(component.karmaCoinsTncOpen).toBe(false)
+      component.openKarmaCoinsTnc()
+      expect(component.karmaCoinsTncOpen).toBe(true)
+      component.closeKarmaCoinsTnc()
+      expect(component.karmaCoinsTncOpen).toBe(false)
+    })
+
+    it('should tolerate a null strip config', () => {
+      component.config = { karmaCoinsStrip: null }
+      expect(component.karmaCoinsStrip.tncText).toBe('T&C Apply')
+    })
+  })
+
   describe('constructor - language handling', () => {
     it('should not touch the translate service when no website language is stored', () => {
       expect(translateMock.setDefaultLang).not.toHaveBeenCalled()

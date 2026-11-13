@@ -20,6 +20,10 @@ const KARMA_REDEEM_CANCEL = 'redeem-karma-coins-cancel'
 const KARMA_WALLET_ROUTE = '/app/person-profile/karma-wallet'
 const PAYMENT_REQUIRED = 'PAYMENT_REQUIRED'
 const PAYMENT_REQUIRED_STATUS = 402
+const DEFAULT_KARMA_COINS_INFO = 'Karma Coins will be deducted from your Karma Wallet if you proceed with enrolment.'
+const DEFAULT_KARMA_COINS_TNC_HEADER = 'Terms and Conditions'
+const DEFAULT_KARMA_COINS_TNC_MESSAGE =
+  'Enrolment eligibility and Karma Coin pricing for this course are at Karmayogi Bharat’s discretion and may change without notice.'
 const ENROL_STATUS_PENDING = 3
 const ENROLLED_NOTICE_WINDOW_MS = 60 * 60 * 1000
 const ENROL_SUCCESS_MESSAGE = 'Successfully enrolled in the course.'
@@ -72,6 +76,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   private enrolAttempt = 0
   insufficientCoins = false
   insufficientCoinsContent: any = null
+  karmaCoinsTncOpen = false
   private karmaRedeemContent: any = null
   private karmaCoinsRequest: Promise<number> | null = null
   private coinShortfall = false
@@ -135,6 +140,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       } else {
         this.validateEnrollmentEligibility()
       }
+      this.prefetchRequiredKarmaCoins()
       this.requiredKarmaCoins = this.readRequiredKarmaCoins(this.extContentReadData)
 
     })
@@ -287,6 +293,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
           this.coinShortfall = this.isInsufficientCoinsError(err)
           if (this.coinShortfall) {
             this.insufficientCoinsMessage = this.readApiMessage(err)
+            return Number(_.get(err, 'error.result.requiredKarmaPoints')) || 0
           }
           return 0
         })
@@ -294,8 +301,38 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     return this.karmaCoinsRequest
   }
 
+  private prefetchRequiredKarmaCoins() {
+    const content = this.extContentReadData
+    this.karmaCoinsRequest = null
+    this.coinShortfall = false
+    this.loadRequiredKarmaCoins(content).then((coins: number) => {
+      if (coins > 0 && content === this.extContentReadData) {
+        this.requiredKarmaCoins = coins
+      }
+    })
+  }
+
   private readRequiredKarmaCoins(content: any): number {
     return Number(_.get(content, 'requiredKarmaCoins', 0)) || 0
+  }
+
+  get karmaCoinsStrip(): { tncText: string, tncHeader: string, tncMessage: string, infoText: string } {
+    const stripConfig = _.get(this.config, 'karmaCoinsStrip', {}) || {}
+    return {
+      tncText: stripConfig.tncText || 'T&C Apply',
+      tncHeader: stripConfig.tncHeader || DEFAULT_KARMA_COINS_TNC_HEADER,
+      tncMessage: stripConfig.tncMessage || DEFAULT_KARMA_COINS_TNC_MESSAGE,
+      infoText: stripConfig.infoText || DEFAULT_KARMA_COINS_INFO,
+    }
+  }
+
+  openKarmaCoinsTnc() {
+    this.karmaCoinsTncOpen = true
+  }
+
+  @HostListener('document:keydown.escape')
+  closeKarmaCoinsTnc() {
+    this.karmaCoinsTncOpen = false
   }
 
   private buildKarmaRedeemMessage(popupConfig: any, coins: number): string {

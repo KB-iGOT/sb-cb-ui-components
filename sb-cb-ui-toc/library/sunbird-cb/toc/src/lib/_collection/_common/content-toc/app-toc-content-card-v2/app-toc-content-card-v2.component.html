@@ -19,8 +19,11 @@
             !isContentUnlocked">
                 <div class="content-locking flex w-full flex-middle mb-2 gap-3">
                     <mat-icon class="lock-icon">lock</mat-icon>
-                    <span class="lock-message mat-body-2">
+                    <span class="lock-message mat-body-2" *ngIf="isComprehensiveAssessmentProgram">
                         Kindly ensure that you have enrolled in the Comprehensive Assessment Program and completed all the required courses to unlock the Final Assessment.
+                    </span>
+                    <span class="lock-message mat-body-2" *ngIf="!isComprehensiveAssessmentProgram">
+                        The Final Assessment is currently locked. Please complete all the required courses in this Curated Program to unlock the Final Assessment.
                     </span>
                 </div>
             </ng-container>

@@ -27,9 +27,11 @@ import { Injectable } from '@angular/core'
 export const APP_DB_NAME = 'iGotAppDB'
 
 /** Bump whenever APP_DB_STORES gains an entry. */
-export const APP_DB_VERSION = 2
+export const APP_DB_VERSION = 3
 
 export const APP_DB_STORES = {
+  /** readFormDetails lookups (which form to read for a page), keyed by portal. */
+  FORMS: 'forms',
   /** Content metadata keyed by do_id, plus the `all` dictionary blob. */
   DICTIONARY: 'dictionary',
   /** CBP/CVP plan entries keyed by financial year. */
@@ -38,6 +40,7 @@ export const APP_DB_STORES = {
   ENROLMENT: 'enrollmentDetails',
   /** Identifiers of the comprehensive assessments shown on the home strips. */
   COMPREHENSIVE_ASSESSMENT: 'comprehensiveAssessment',
+  PLANS_MAP: 'allPlansMap',
 }
 
 /** Databases this service replaced; dropped once, on first successful open. */

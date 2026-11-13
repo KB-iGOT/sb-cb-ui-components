@@ -73,7 +73,8 @@ export class FrameworkService {
           const originalFrameworkResponse = frameworkResponse;
           return this.getSelectedStateOrg(_orgData).pipe(
             switchMap((orgListData: any) => {
-              this.additionalData = orgListData?.result?.response?.content || [];
+              const orgList = orgListData?.result?.response?.content || [];
+              this.additionalData = orgList.filter((org: any) => !org.isNgo);
               return this.getUserPerOrg().pipe(
                 map(() => {
                   return originalFrameworkResponse
@@ -506,32 +507,35 @@ export class FrameworkService {
 
   private getSelectedStateOrg(_orgData?: any): Observable<any> {
     const requestBody = {
-        request: {
-          filters: {
-            status: 1,
-            ministryOrStateType: (_orgData) ?
-              _orgData.sbOrgType : '',
-            ministryOrStateId: (_orgData?.identifier) ? 
-              _orgData?.identifier : (_orgData?.rootOrgId) ? _orgData.rootOrgId : ''
-          },
-          sort_by: {
-            createdDate: "desc"
-          },
-          limit: 9999,
-          offset: 0,
-          fields: [
-            'identifier',
-            'orgName',
-            'description',
-            'parentOrgName',
-            'ministryOrStateId',
-            'ministryOrStateType',
-            'ministryOrStateName', 
-            'sbOrgSubType',
-            'rootOrgId'
-          ]
-        }
-      }    
+      request: {
+        filters: {
+          status: 1,
+          ministryOrStateType: _orgData ? _orgData.sbOrgType : "",
+          ministryOrStateId: _orgData?.identifier
+            ? _orgData?.identifier
+            : _orgData?.rootOrgId
+              ? _orgData.rootOrgId
+              : "",
+        },
+        sort_by: {
+          createdDate: "desc",
+        },
+        limit: 9999,
+        offset: 0,
+        fields: [
+          "identifier",
+          "orgName",
+          "description",
+          "parentOrgName",
+          "ministryOrStateId",
+          "ministryOrStateType",
+          "ministryOrStateName",
+          "sbOrgSubType",
+          "rootOrgId",
+          "isNgo",
+        ],
+      },
+    };    
     return this.http.post(`${API_ENDPOINT.ORG_V1_SEARCH}`, requestBody).pipe(
       catchError(error => {
         console.error('Error fetching Org data:', error);

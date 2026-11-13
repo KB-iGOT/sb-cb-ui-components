@@ -1,5 +1,5 @@
 <ng-template #certificateCard>
-    <ng-container *ngIf="!disableCertificate">
+    <ng-container *ngIf="!disableCertificate && !certificateHiddenByConfig">
         <ng-container *ngIf="!lockCertificate; else certificateLock">
             <div class="certificate-outer-div">
                 <div class="certificate-card">
@@ -194,7 +194,7 @@
 
 <div class="flex flex-col my-4 px-4 toc-about" [ngClass]="isMobile ? '' : 'gap-10'">
     <ng-container
-        *ngIf="(content?.completionStatus === 2 || content?.certificateObj?.certId) && !fromMarketPlace && !disableCertificate && config?.uiVisibility?.about?.certificate !== false">
+        *ngIf="(content?.completionStatus === 2 || content?.certificateObj?.certId) && !fromMarketPlace && !disableCertificate && !certificateHiddenByConfig && config?.uiVisibility?.about?.certificate !== false">
         <div class="certificate-container" *ngIf="!skeletonLoader">
             <div class="flex flex-row earned-certificate-container">
                 <div class="ribbon"></div>
@@ -223,7 +223,7 @@
         </div>
     </ng-container>
     <ng-container
-        *ngIf="showMarketPlaceCertificate && fromMarketPlace && config?.uiVisibility?.about?.certificate !== false">
+        *ngIf="showMarketPlaceCertificate && fromMarketPlace && !certificateHiddenByConfig && config?.uiVisibility?.about?.certificate !== false">
         <div class="certificate-container" *ngIf="!skeletonLoader && !disableCertificate">
             <div class="flex flex-row earned-certificate-container">
                 <div class="ribbon"></div>
@@ -645,7 +645,7 @@
         </div>
     </ng-container> -->
 
-    <div class="mobile-karma-points">
+    <div class="mobile-karma-points" *ngIf="!karmaPointsHidden">
         <ws-widget-karma-points [content]="content" [btnCategory]="" [condition]="condition" (clickClaimKarmaPoints)="handleClickOfClaim($event)"
             [data]="kparray">
         </ws-widget-karma-points>

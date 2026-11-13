@@ -1,0 +1,257 @@
+<!-- ── SKELETON STATE ──────────────────────────────────────── -->
+@if (isLoading()) {
+  <div
+    class="mc-card mc-card--skeleton flex flex-col h-full overflow-hidden rounded-2xl"
+    aria-busy="true"
+    aria-label="Loading milestone card"
+  >
+    <div class="mc-skeleton h-36 flex-shrink-0" aria-hidden="true"></div>
+    <div class="flex flex-col gap-3 p-3" aria-hidden="true">
+      <div class="mc-skeleton w-20 h-5 rounded-2xl"></div>
+      <div class="mc-skeleton w-full h-4 rounded"></div>
+      <div class="mc-skeleton w-3/5 h-4 rounded"></div>
+      <div class="flex gap-1">
+        <div class="mc-skeleton w-16 h-5 rounded-xl"></div>
+        <div class="mc-skeleton w-12 h-5 rounded-xl"></div>
+        <div class="mc-skeleton w-12 h-5 rounded-xl"></div>
+      </div>
+      <div class="mc-card__footer flex pt-3">
+        <div class="mc-skeleton w-3/5 h-4 rounded"></div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── CONTENT STATE ───────────────────────────────────────── -->
+@if (!isLoading() && milestone(); as m) {
+  <div
+    class="mc-card flex flex-col h-full overflow-hidden rounded-2xl"
+    role="article"
+    [attr.aria-label]="m.name"
+    [class.mc-card--locked]="isInactive()"
+    [class.mc-card--disabled]="isDisabled()"
+    [class.cursor-pointer]="!isInactive() && !ctaDisabled()"
+    [attr.aria-disabled]="isInactive()"
+    [attr.tabindex]="isInactive() ? null : 0"
+    (click)="onCardClick()"
+    (keydown.enter)="onCardClick()"
+    (keydown.space)="$event.preventDefault(); onCardClick()"
+  >
+    <!-- ┌─── HEADER (gradient or poster) ───────────────────────┐ -->
+    <div
+      class="mc-card__header relative flex flex-col justify-end h-36 p-3 overflow-hidden flex-shrink-0"
+      [class]="'mc-card__header--' + headerTheme()"
+    >
+      @if (showPoster()) {
+        <img
+          class="mc-card__poster absolute inset-0 block w-full h-full object-cover"
+          [src]="m.posterImage"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          (error)="posterFailed.set(true)"
+        />
+      } @else {
+        <span
+          class="mc-card__ring mc-card__ring--lg absolute rounded-full pointer-events-none"
+          aria-hidden="true"
+        ></span>
+        <span
+          class="mc-card__ring mc-card__ring--md absolute rounded-full pointer-events-none"
+          aria-hidden="true"
+        ></span>
+        <span
+          class="mc-card__ring mc-card__ring--sm absolute rounded-full pointer-events-none"
+          aria-hidden="true"
+        ></span>
+        @if (m.bigNumber) {
+          <span
+            class="mc-card__big-number absolute right-3.5 font-bold pointer-events-none select-none whitespace-nowrap"
+            aria-hidden="true"
+            >{{ m.bigNumber }}</span
+          >
+        }
+        @if (m.headline) {
+          <p class="mc-card__headline absolute left-3.5 z-10 m-0 font-bold whitespace-pre-line">{{ m.headline }}</p>
+        }
+      }
+
+      <!-- Milestone label + duration -->
+      <div class="relative z-10 flex items-center justify-between gap-2 w-full">
+        <span
+          class="mc-card__pill mc-card__pill--label flex items-center h-6 px-2 rounded-full text-xs font-semibold whitespace-nowrap"
+        >
+          {{ m.milestoneLabel }}
+        </span>
+        @if (m.durationLabel) {
+          <span
+            class="mc-card__pill mc-card__pill--duration px-1 py-0.5 rounded-xl text-xs font-medium whitespace-nowrap"
+          >
+            {{ m.durationLabel }}
+          </span>
+        }
+      </div>
+    </div>
+    <!-- └──────────────────────────────────────────────────────────┘ -->
+
+    <div class="mc-card__content flex flex-col flex-1 gap-3 p-3">
+      <!-- ┌─── BODY ────────────────────────────────────────────┐ -->
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2.5">
+          <!-- Row 1 – category chip + availability; one line so every card's body lines up -->
+          <div class="flex flex-nowrap items-center gap-2 min-w-0">
+            <span class="mc-card__category flex-shrink-0 px-2 py-0.5 rounded-2xl text-xs font-medium whitespace-nowrap">{{ m.categoryLabel }}</span>
+            @if (isWaiting() && state() !== 'locked') {
+              <span class="mc-card__available mc-card__available--upcoming min-w-0 truncate text-xs font-medium"
+                [title]="availableFrom()">{{ availableFrom() }}</span>
+            } @else if (state() === 'notStarted' && !isDisabled()) {
+              <span class="mc-card__available min-w-0 truncate text-xs font-medium">{{
+                'campaignMicrosite.milestoneCard.availableNow' | translate
+              }}</span>
+            }
+          </div>
+
+          <!-- Row 2 – title (fixed 2-line height so footers line up across cards) -->
+          <h3 class="mc-card__title h-11 m-0 text-base font-semibold leading-snug" [title]="m.name">{{ m.name }}</h3>
+        </div>
+
+        <!-- Row 3 – tags: one row with as many as fit, then "+N" which opens a popover with the rest -->
+        @if (m.tags?.length) {
+          <div class="relative min-w-0">
+            <ul #tagRow class="mc-card__tags flex flex-nowrap gap-x-1 h-5 overflow-hidden m-0 p-0 list-none">
+              @for (tag of visibleTags(); track $index) {
+                <li class="mc-card__tag flex-shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-xl text-xs font-medium leading-4">{{ tag }}</li>
+              }
+              @if (hiddenTags().length) {
+                <li class="flex-shrink-0">
+                  <button
+                    type="button"
+                    class="mc-card__tag mc-card__tag--more block border-0 px-1.5 py-0.5 rounded-xl text-xs font-semibold leading-4 cursor-pointer"
+                    [matMenuTriggerFor]="moreTags"
+                    [attr.aria-label]="'+' + hiddenTags().length + ': ' + hiddenTags().join(', ')"
+                    (click)="$event.stopPropagation()"
+                    (keydown.enter)="$event.stopPropagation()"
+                    (keydown.space)="$event.stopPropagation()"
+                  >+{{ hiddenTags().length }}</button>
+                </li>
+              }
+            </ul>
+
+            <!-- Invisible copy of every tag + a "+N" sample, only for measuring widths -->
+            <ul #tagMeasure class="mc-card__tags-measure flex flex-nowrap gap-x-1 m-0 p-0 list-none" aria-hidden="true">
+              @for (tag of m.tags; track $index) {
+                <li class="mc-card__tag flex-shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-xl text-xs font-medium leading-4">{{ tag }}</li>
+              }
+              <li class="mc-card__tag flex-shrink-0 whitespace-nowrap px-1.5 py-0.5 rounded-xl text-xs font-semibold leading-4">+{{ m.tags.length }}</li>
+            </ul>
+          </div>
+
+          <mat-menu #moreTags="matMenu" class="mc-card__tags-menu">
+            <ul class="flex flex-wrap gap-1 m-0 px-3 py-2 list-none" (click)="$event.stopPropagation()">
+              @for (tag of hiddenTags(); track $index) {
+                <li class="mc-card__tag whitespace-nowrap px-1.5 py-0.5 rounded-xl text-xs font-medium leading-4">{{ tag }}</li>
+              }
+            </ul>
+          </mat-menu>
+        }
+      </div>
+      <!-- └────────────────────────────────────────────────────────┘ -->
+
+      <!-- ┌─── FOOTER: provider + status ───────────────────────┐ -->
+      <!-- mt-auto pins footer + button to the bottom so they line up across cards of different content -->
+      <div class="mc-card__footer flex items-center justify-between gap-2 pt-3 mt-auto">
+        <div class="flex items-center gap-1 h-5 min-w-0">
+          @if (showProviderLogo()) {
+            <img
+              class="mc-card__provider-logo w-5 h-5 rounded-full object-contain flex-shrink-0"
+              [src]="m.provider.logo"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              (error)="logoFailed.set(true)"
+            />
+          }
+          <span class="mc-card__provider-name text-xs leading-4 truncate">{{ m.provider?.name }}</span>
+        </div>
+        @if (status(); as s) {
+          <span
+            class="mc-card__status flex items-center flex-shrink-0 gap-1 text-xs font-medium whitespace-nowrap"
+            [class]="'mc-card__status--' + s.tone"
+          >
+            <span class="mc-card__status-dot w-1 h-1 rounded-full" aria-hidden="true"></span>
+            @switch (s.kind) {
+              @case ('locked') {
+                {{ 'campaignMicrosite.milestoneCard.locked' | translate }}
+              }
+              @case ('overdue') {
+                {{ 'campaignMicrosite.milestoneCard.overdue' | translate }}
+              }
+              @case ('inProgress') {
+                {{ 'campaignMicrosite.milestoneCard.inProgress' | translate }}
+              }
+              @case ('completed') {
+                {{ 'campaignMicrosite.milestoneCard.completed' | translate }}
+              }
+              @case ('due') {
+                {{ 'campaignMicrosite.milestoneCard.due' | translate: { date: s.date } }}
+              }
+            }
+          </span>
+        }
+      </div>
+      <!-- └────────────────────────────────────────────────────────┘ -->
+
+      @if (showCompleted()) {
+        <div class="mc-card__completed box-border flex items-center justify-center gap-1.5 w-full px-4 py-1 rounded text-base font-semibold leading-snug"
+          role="status">
+          <mat-icon class="mc-card__completed-icon" aria-hidden="true">check_circle</mat-icon>
+          {{ completedLabel() }}
+        </div>
+      } @else if (cta(); as action) {
+        <!-- the wrapper carries the tooltip: a disabled button gets no hover events -->
+        <span class="block w-full" [matTooltip]="ctaTooltip() || ''" [matTooltipDisabled]="!ctaTooltip()"
+          matTooltipPosition="above">
+        <button
+          type="button"
+          class="mc-card__cta w-full px-4 py-1 border-0 rounded text-base font-normal leading-snug"
+          [class.cursor-pointer]="!isDisabled()"
+          [disabled]="isDisabled() || isBusy() || ctaDisabled()"
+          [attr.aria-busy]="isBusy()"
+          (click)="onCtaClick($event)"
+          (keydown.enter)="$event.stopPropagation()"
+          (keydown.space)="$event.stopPropagation()"
+        >
+          @if (ctaLabel() && action !== 'locked') {
+            {{ ctaLabel() }}
+          } @else {
+            @switch (action) {
+              @case ('locked') {
+                {{ 'campaignMicrosite.milestoneCard.locked' | translate }}
+              }
+              @case ('resume') {
+                {{ 'campaignMicrosite.milestoneCard.resume' | translate }}
+              }
+              @case ('view') {
+                {{ 'campaignMicrosite.milestoneCard.view' | translate }}
+              }
+              @case ('start') {
+                @switch (m.type) {
+                  @case ('assessment') {
+                    {{ 'campaignMicrosite.milestoneCard.startAssessment' | translate }}
+                  }
+                  @case ('event') {
+                    {{ 'campaignMicrosite.milestoneCard.startEvent' | translate }}
+                  }
+                  @case ('survey') {
+                    {{ 'campaignMicrosite.milestoneCard.startSurvey' | translate }}
+                  }
+                }
+              }
+            }
+          }
+        </button>
+        </span>
+      }
+    </div>
+  </div>
+}
