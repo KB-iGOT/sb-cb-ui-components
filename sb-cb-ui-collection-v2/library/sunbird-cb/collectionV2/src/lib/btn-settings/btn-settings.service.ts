@@ -179,7 +179,24 @@ export class BtnSettingsService {
     }
   }
 
+  private isThemeStylesheetLinked(themeFile: string): boolean {
+    const name = (themeFile || '').split('/').pop()
+    if (!name) {
+      return false
+    }
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const builtFile = new RegExp(`^${escaped}(?:-[A-Z0-9]{8}|\\.[a-f0-9]{16,20})?\\.css$`)
+    const links = Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'))
+    return links.some(link => {
+      const file = (link.getAttribute('href') || '').split(/[?#]/)[0].split('/').pop() || ''
+      return builtFile.test(file)
+    })
+  }
+
   private applyTheme(theme: NsInstanceConfig.ITheme) {
+    if (!this.loadedThemeStyles.has(theme.themeClass) && this.isThemeStylesheetLinked(theme.themeFile)) {
+      this.loadedThemeStyles.add(theme.themeClass)
+    }
     if (!this.loadedThemeStyles.has(theme.themeClass)) {
       if (this.useLinkForThemeInjection) {
         const elem = document.createElement('link')
