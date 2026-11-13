@@ -349,7 +349,15 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
           this.resourceIdentifier = this.playResourceId || this.viewerDataSvc?.resourceId
           this.subTitles = []
           this.vttLangArr = []
-          this.parseVTT()
+          // transcription.all / forOrg only says the org may use transcripts; the
+          // transcoder only has them for audio/video, so don't call it for
+          // assessments, PDFs, SCORM, surveys etc.
+          if (this.isTranscribableResource(this.resourceIdentifier)) {
+            this.parseVTT()
+          } else {
+            // same end state parseVTT reaches when the API returns no transcripts
+            this.enableTranscriptionFlag = false
+          }
         }
       }
     }
@@ -678,6 +686,22 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
 
   enrollUserForAITutor() {
     this.enrollUserToAI.emit()
+  }
+
+  private isTranscribableResource(identifier: string): boolean {
+    if (!identifier) {
+      return false
+    }
+    const transcribableMimeTypes: string[] = [
+      NsContent.EMimeTypes.MP4,
+      NsContent.EMimeTypes.M3U8,
+      NsContent.EMimeTypes.MP3,
+      NsContent.EMimeTypes.M4A,
+    ]
+    const hashEntry = this.tocSvc.hashmap && this.tocSvc.hashmap[identifier]
+    const mimeType = (hashEntry && hashEntry.mimeType)
+      || (this.content ? this.tocSvc.getMimeType(this.content, identifier) : '')
+    return transcribableMimeTypes.includes(mimeType)
   }
 
   async parseVTT() {
