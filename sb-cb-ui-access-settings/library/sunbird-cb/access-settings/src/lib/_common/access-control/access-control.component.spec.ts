@@ -39,6 +39,7 @@ describe('AccessControlComponent', () => {
       isL0MdoUser: jest.fn(() => false),
       areAllOrgHierarchyOrgsSelected: jest.fn(() => false),
       getLoggedInOrgId: jest.fn(() => 'own-org'),
+      getOrgHierarchyOrgIds: jest.fn(() => []),
       enableDeputation: jest.fn()
     };
     component = new AccessControlComponent(dialog as any, fb, accessControlService, {} as any, {} as any);
@@ -72,6 +73,52 @@ describe('AccessControlComponent', () => {
     it('should be false on the creation portal', () => {
       component.config.application = NsAccessControlConfig.Application.Creation_Portal;
       expect(component.isAllOrganisationsSelection([ALL_ORGANISATIONS_SELECTION])).toBe(false);
+    });
+  });
+
+  describe('organisation selection label', () => {
+    it('should show the numeric count when all organisations are selected on MDO', () => {
+      accessControlService.getOrgHierarchyOrgIds.mockReturnValue(Array.from({ length: 104 }, (_, index) => `org-${index}`));
+
+      expect(component.getMdoOrganisationSelectionLabel([ALL_ORGANISATIONS_SELECTION])).toBe('104 items selected');
+      expect(component.getMdoOrganisationSelectionLabel([ALL_ORGANISATIONS_SELECTION])).not.toContain('All organisations selected');
+    });
+
+    it('should show the numeric count for a partial MDO selection', () => {
+      expect(component.getMdoOrganisationSelectionLabel(Array.from({ length: 25 }, (_, index) => `org-${index}`))).toBe('25 items selected');
+    });
+
+    it('should use the singular label for one MDO selection', () => {
+      expect(component.getMdoOrganisationSelectionLabel(['org-a'])).toBe('1 item selected');
+    });
+
+    it('should use the plural label for multiple MDO selections', () => {
+      expect(component.getMdoOrganisationSelectionLabel(['org-a', 'org-b'])).toBe('2 items selected');
+    });
+
+    it('should show the restored saved-filter count on MDO', () => {
+      jest.spyOn(component, 'processDisableAddConditionOnClose').mockImplementation(() => undefined);
+      jest.spyOn(component, 'calculateUserCountForUserGroup').mockResolvedValue(undefined);
+      (component as any).addUserGroupFromCriteria('Saved group', [
+        { criteriaKey: 'rootOrgId', criteriaValue: ['org-a', 'org-b', 'org-c'] }
+      ]);
+
+      const selections = component.ruleConditions(0).at(0).get('selections')?.value;
+      expect(component.getMdoOrganisationSelectionLabel(selections)).toBe('3 items selected');
+    });
+
+    it('should preserve the selected count when switching selection tabs', () => {
+      addGroup('', ['org-a', 'org-b']);
+      const condition = component.ruleConditions(0).at(0);
+      const selections = condition.get('selections')?.value;
+      dialog.open.mockReturnValue(dialogResult(null));
+      jest.spyOn(component, 'processCadreConfigMapping').mockImplementation(() => undefined);
+
+      component.manageSelections(condition.value, component.userGroup.at(0).value, 0, 1);
+
+      expect(dialog.open.mock.calls[0][1].data.activeTabSelected).toBe(1);
+      expect(component.getMdoOrganisationSelectionLabel(condition.get('selections')?.value)).toBe('2 items selected');
+      expect(condition.get('selections')?.value).toEqual(selections);
     });
   });
 
