@@ -1272,6 +1272,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     );
   }
 
+  getMdoOrganisationSelectionLabel(selections: any[] = []): string {
+    const count = this.isAllOrganisationsSelection(selections)
+      ? this.accessControlService.getOrgHierarchyOrgIds().length
+      : selections.length;
+    return `${count} ${count === 1 ? "item" : "items"} selected`;
+  }
+
   /**
    * A saved rootOrgId criteria with no organisation in it is the MDO "Select all" option. It is saved
    * as an empty list, a value that comes back without the list at all is read the same way.
