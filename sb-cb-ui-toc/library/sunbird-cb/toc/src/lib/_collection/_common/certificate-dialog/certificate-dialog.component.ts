@@ -29,7 +29,7 @@ export class CertificateDialogComponent implements OnInit {
     // Determine the certificate URL based on whether it's an achievement/milestone certificate
     const certDownloadUrl = this.data?.isAchievement 
       ? `${this.environment.contentHost}/apis/public/v8/milestone/cert/download/${this.data.certId}`
-      : `${this.environment.contentHost}/api/certreg/public/v2/certs/download/${this.data.certId}`
+      : `${this.environment.contentHost}/apis/public/v8/cert/download/${this.data.certId}`
     
     // tslint:disable-next-line:max-line-length
     this.navUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(certDownloadUrl)}`
@@ -99,7 +99,7 @@ export class CertificateDialogComponent implements OnInit {
   getCertificateUrl(): string {
     return this.data?.isAchievement 
       ? `${this.environment.contentHost}/apis/public/v8/milestone/cert/download/${this.data.certId}`
-      : `${this.environment.contentHost}/api/certreg/public/v2/certs/download/${this.data.certId}`
+      : `${this.environment.contentHost}/apis/public/v8/cert/download/${this.data.certId}`
   }
 
   shareCert() {
