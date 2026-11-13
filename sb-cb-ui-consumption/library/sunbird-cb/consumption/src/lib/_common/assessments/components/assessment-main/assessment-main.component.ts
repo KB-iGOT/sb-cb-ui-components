@@ -325,9 +325,9 @@ export class AssessmentMainComponent implements OnInit {
         })
       ).subscribe({
         next: (resp: any) => {
-          const message = Array.isArray(changedData)
+          const message = event.savedMessage || (Array.isArray(changedData)
             ? `${changedData.length} questions saved successfully`
-            : 'Question saved successfully'
+            : 'Question saved successfully')
           this.snackBar.open(message)
           this.callLoader(false)
           // Reload sessions component data to get updated question list with identifiers

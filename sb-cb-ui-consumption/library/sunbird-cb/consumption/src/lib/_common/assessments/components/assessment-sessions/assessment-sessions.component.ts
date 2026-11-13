@@ -7,6 +7,10 @@ import { MatSnackBar } from '@angular/material/snack-bar'
 import { MatDialog } from '@angular/material/dialog'
 import { SelectQuestionModalComponent } from '../select-question-modal/select-question-modal.component'
 import { BulkUploadAllTypeQuestionComponent } from '../bulk-upload-all-type-question/bulk-upload-all-type-question.component'
+import {
+  AiQuestionsModalComponent, IAiQuestionsGenConfig, IAiQuestionsModalData, IAiQuestionsResult
+} from '../ai-questions-modal/ai-questions-modal.component'
+import { buildAiQuestionNodes } from '../../service/ai-question-nodes'
 
 /** The most questions one section can be authored with. */
 const MAX_TOTAL_QUESTIONS = 500
@@ -18,6 +22,12 @@ const MAX_TOTAL_QUESTIONS = 500
     standalone: false
 })
 export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges {
+  /** Offers AI question generation alongside the manual options when the host enables it. */
+  @Input() aiQuestionsGen: IAiQuestionsGenConfig | null = null
+
+  get aiQuestionsEnabled(): boolean {
+    return !!this.aiQuestionsGen?.enable
+  }
   @Output() saved = new EventEmitter<any>()
   @Output() updated = new EventEmitter<any>()
   @Output() updateQuestion = new EventEmitter<any>()
@@ -908,35 +918,92 @@ export class AssessmentSessionsComponent implements OnInit, OnDestroy, OnChanges
     return false
   }
 
-  isQuestionLimitReached(): boolean {
-    // For basic assessment (single section)
-    if (this.isBasicAssessment() && !this.isBasicAssessmentWithSections()) {
-      const totalQuestions = this.basicAssessmentForm?.get('totalQuestions')?.value || 0
-      const currentQuestionsCount = this.questionsList?.length || 0
-      return currentQuestionsCount >= totalQuestions
-    }
-
-    // For basic assessment with sections
+  /** Only basic assessments set how many questions a section holds; the others report 0. */
+  getSectionTotalQuestions(): number {
     if (this.isBasicAssessmentWithSections()) {
-      const currentSection = this.currentBasicSectionGroup
-      const totalQuestions = currentSection?.get('totalQuestions')?.value || 0
-      const currentQuestionsCount = this.questionsList?.length || 0
-      return currentQuestionsCount >= totalQuestions
+      // For basic assessment with multiple sections, get totalQuestions from current section
+      return this.currentBasicSectionGroup?.get('totalQuestions')?.value || 0
     }
+    if (this.isBasicAssessment()) {
+      // For basic assessment without sections, get totalQuestions from basicAssessmentForm
+      return this.basicAssessmentForm?.get('totalQuestions')?.value || 0
+    }
+    return 0
+  }
 
-    return false
+  /** How many more questions the current section takes, or null when its type sets no limit. */
+  getRemainingQuestionsCount(): number | null {
+    if (!this.isBasicAssessment()) {
+      return null
+    }
+    return Math.max(this.getSectionTotalQuestions() - (this.questionsList?.length || 0), 0)
+  }
+
+  isQuestionLimitReached(): boolean {
+    return this.getRemainingQuestionsCount() === 0
+  }
+
+  onGenerateAIQuestions(): void {
+    // For basic assessment with sections OR advanced assessment, use selected section
+    // For basic assessment without sections (single section), always use index 0
+    const sectionIndex = this.isBasicAssessmentWithSections() || !this.isBasicAssessment() ? this.selectedSectionIndex : 0
+    const sectionIdentifier = this.assessmentData?.children?.[sectionIndex]?.identifier
+    // Checked first, so a generation job is never run for questions that would have nowhere to go
+    if (!sectionIdentifier) {
+      this.snackBar.open('Save the section before generating questions.')
+      return
+    }
+    const data: IAiQuestionsModalData = {
+      plannedCount: this.isBasicAssessment() ? this.getSectionTotalQuestions() : null,
+      existingCount: this.questionsList?.length || 0,
+      courses: this.aiQuestionsGen?.refContent || [],
+      expectedDuration: this.assessmentData?.expectedDuration,
+      isBasicAssessment: this.isBasicAssessment(),
+      isOptionWeightage: this.isAdvanceAssessmentOptionWeightage() || this.isAdvanceAssessmentQuestionOptionWeightage()
+    }
+    const dialogRef = this.dialog.open(AiQuestionsModalComponent, {
+      width: '1000px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'ai-questions-modal-panel',
+      data,
+      autoFocus: false
+    })
+
+    dialogRef.afterClosed().subscribe((result: IAiQuestionsResult) => {
+      if (result) {
+        this.saveAiQuestions(result.response, sectionIdentifier)
+      }
+    })
+  }
+
+  /** Adds the generated questions to the section, saved through the same hierarchy update as questions written by hand. */
+  private saveAiQuestions(response: any, sectionIdentifier: string): void {
+    const { nodes, skipped } = buildAiQuestionNodes(response, {
+      compatibilityLevel: this.assessmentData?.compatibilityLevel,
+      sectionLevelDefinition: this.getCurrentSectionLevelDefinition(),
+    }, () => this.assessmentService.generateUUID())
+    // Never past the number of questions the section is set to hold
+    const remaining = this.getRemainingQuestionsCount()
+    const identifiers = Object.keys(nodes).slice(0, remaining === null ? undefined : remaining)
+    const leftOut = skipped.length + Object.keys(nodes).length - identifiers.length
+
+    if (!identifiers.length) {
+      this.snackBar.open('None of the generated questions could be added. Try generating them again.')
+      return
+    }
+    const changedData: Record<string, any> = {}
+    identifiers.forEach(identifier => changedData[identifier] = nodes[identifier])
+    const saved = `${identifiers.length} ${identifiers.length === 1 ? 'question' : 'questions'} saved successfully`
+    this.updateQuestion.emit({
+      changedData,
+      sectionIdentifier,
+      savedMessage: leftOut ? `${saved}. ${leftOut} could not be added.` : saved,
+    })
   }
 
   openBulkUploadDialog() {
-    // Get totalQuestions based on assessment type
-    let totalQuestions = null
-    if (this.isBasicAssessmentWithSections()) {
-      // For basic assessment with multiple sections, get totalQuestions from current section
-      totalQuestions = this.currentBasicSectionGroup?.get('totalQuestions')?.value || null
-    } else if (this.isBasicAssessment()) {
-      // For basic assessment without sections, get totalQuestions from basicAssessmentForm
-      totalQuestions = this.basicAssessmentForm?.get('totalQuestions')?.value || null
-    }
+    const totalQuestions = this.getSectionTotalQuestions() || null
 
     const dialogRef = this.dialog.open(BulkUploadAllTypeQuestionComponent, {
       width: '90vw',

@@ -30,6 +30,8 @@ import { MatchTheFollowingComponent } from './components/match-the-following/mat
 import { FillUpTheBlanksComponent } from './components/fill-up-the-blanks/fill-up-the-blanks.component'
 import { DialogComponentsModule } from '../dialog-components/dialog-components.module'
 import { BulkUploadAllTypeQuestionComponent } from './components/bulk-upload-all-type-question/bulk-upload-all-type-question.component'
+import { AiQuestionsModalComponent } from './components/ai-questions-modal/ai-questions-modal.component'
+import { AiQuestionsProgressComponent } from './components/ai-questions-progress/ai-questions-progress.component'
 
 
 
@@ -44,7 +46,9 @@ import { BulkUploadAllTypeQuestionComponent } from './components/bulk-upload-all
     MultipleChoiceQuestionComponent,
     MatchTheFollowingComponent,
     FillUpTheBlanksComponent,
-    BulkUploadAllTypeQuestionComponent
+    BulkUploadAllTypeQuestionComponent,
+    AiQuestionsModalComponent,
+    AiQuestionsProgressComponent
   ],
   imports: [
     CommonModule,
