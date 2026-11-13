@@ -37,7 +37,7 @@ export class CertificateDialogComponent implements OnInit {
   ngOnInit() {
     this.url = this.data.cet
     // tslint:disable-next-line:max-line-length
-    this.navUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${this.environment.contentHost}/api/certreg/public/v2/certs/download/${this.data.certId}`
+    this.navUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${this.environment.contentHost}/apis/public/v8/cert/download/${this.data.certId}`
   }
 
   downloadCert() {
