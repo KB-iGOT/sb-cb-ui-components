@@ -12,7 +12,7 @@ export class LeftMenuService {
   }
 
   clearMessages() {
-      this.subject.next()
+      this.subject.next(undefined)
   }
 
   onMessage(): Observable<any> {
