@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { APP_DB_STORES, ConfigurationsService, IndexedDbService } from '@sunbird-cb/utils-v2'
 import { from, Observable, throwError } from 'rxjs'
-import { catchError, map, shareReplay, switchMap } from 'rxjs/operators'
+import { catchError, map, retry, shareReplay, switchMap, timeout } from 'rxjs/operators'
 import { FormCriterionValue, FormLookup, FormRule } from './form-config.model'
 import { EMPTY_FORM_LOOKUP } from './form-lookup'
 
@@ -22,6 +22,16 @@ const DEFAULT_EXPIRY_SECONDS = 300
 
 // The last apicache.formLookupTime seen: a session's first lookup runs before globalConfig is loaded
 const EXPIRY_STORAGE_KEY = 'formLookupTime'
+
+/**
+ * Per-API timeout and retry, read from globalConfig.apiTimeouts[<key>]:
+ *   "apiTimeouts": { "formConfigRead": { "timeoutSeconds": 15, "retries": 1 } }
+ * A request with no response in timeoutSeconds is cancelled and sent again, up to `retries`
+ * more times. timeoutSeconds 0 turns the timeout off. These defaults apply when the key is absent.
+ */
+const API_TIMEOUT_DEFAULTS: { [apiKey: string]: { timeoutSeconds: number, retries: number } } = {
+  formConfigRead: { timeoutSeconds: 15, retries: 1 },
+}
 
 /** What IndexedDB keeps per portal: the readFormDetails result and when it was read */
 interface StoredLookup {
@@ -390,7 +400,15 @@ export class FormConfigService {
   private readForm(formId: number): Observable<any> {
     const key = String(formId)
     if (!this.cache.has(key)) {
-      const request$ = this.http.get<any>(API_END_POINTS.FORM_CONFIG_READ(formId)).pipe(
+      const { timeoutSeconds, retries } = this.apiTimeoutConfig('formConfigRead')
+      let get$ = this.http.get<any>(API_END_POINTS.FORM_CONFIG_READ(formId))
+      if (timeoutSeconds > 0) {
+        // readById sometimes hangs until the gateway gives up (~1 min) while a fresh request
+        // answers at once: cut a hung request short and send it again instead of waiting
+        get$ = get$.pipe(timeout(timeoutSeconds * 1000))
+      }
+      const request$ = get$.pipe(
+        retry(retries),
         catchError(error => {
           // don't keep a failed response, so the next call retries
           this.cache.delete(key)
@@ -401,6 +419,20 @@ export class FormConfigService {
       this.cache.set(key, request$)
     }
     return this.cache.get(key) as Observable<any>
+  }
+
+  /** globalConfig.apiTimeouts[apiKey], each field falling back to API_TIMEOUT_DEFAULTS */
+  private apiTimeoutConfig(apiKey: string): { timeoutSeconds: number, retries: number } {
+    const defaults = API_TIMEOUT_DEFAULTS[apiKey] || { timeoutSeconds: 0, retries: 0 }
+    const configured = this.configSvc.globalConfig?.apiTimeouts?.[apiKey] || {}
+    const read = (raw: any, fallback: number) => {
+      const value = raw === undefined || raw === null || raw === '' ? NaN : Number(raw)
+      return value >= 0 ? value : fallback
+    }
+    return {
+      timeoutSeconds: read(configured.timeoutSeconds, defaults.timeoutSeconds),
+      retries: Math.floor(read(configured.retries, defaults.retries)),
+    }
   }
 
   /** Higher priority criteria are worth more than any combination of lower ones */
