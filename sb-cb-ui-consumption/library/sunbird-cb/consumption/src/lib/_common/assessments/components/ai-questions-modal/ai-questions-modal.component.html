@@ -1,0 +1,273 @@
+<div class="ai-questions-modal">
+  <!-- Header -->
+  <div class="modal-head flex">
+    <div class="head-text">
+      <h2 mat-dialog-title class="modal-title flex flex-middle">
+        <mat-icon class="title-icon">auto_awesome</mat-icon>
+        Generate AI Questions
+      </h2>
+      <p class="modal-subtitle">{{ subtitle }}</p>
+    </div>
+    <button type="button" mat-icon-button aria-label="Close" (click)="dialogRef.close()" [disabled]="generating">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="cap-strip flex-middle">
+      <span *ngIf="data.plannedCount !== null">
+        Questions you will be adding: <strong>{{ data.plannedCount }}</strong>
+        <span class="auto-tag margin-left-s"><mat-icon>lock</mat-icon>From Add Questions</span>
+      </span>
+      <span>Already in bank: <strong>{{ data.existingCount }}</strong></span>
+      <span>AI will generate: <strong>{{ typesTotal }}</strong></span>
+    </div>
+
+    <!-- Reference question set -->
+    <section class="card ref-card" *ngIf="showReferenceSheet">
+      <h3 class="card-title">
+        <mat-icon>description</mat-icon>Reference question set <span class="muted">recommended, Excel or CSV</span>
+      </h3>
+      <ol class="ref-steps">
+        <li>Upload the question set you downloaded earlier.</li>
+        <li>Any questions you added to that sheet yourself count too. Add rows with Source left blank or set to Manual.
+        </li>
+        <li>The new questions will not repeat anything in the sheet or in the current bank.</li>
+      </ol>
+      <button type="button" class="drop" [class.drag]="dragTarget === 'reference'" (click)="referenceInput.click()"
+        (dragover)="onDragOver($event, 'reference')" (dragleave)="dragTarget = null"
+        (drop)="onDrop($event, 'reference')">
+        <mat-icon>file_upload</mat-icon>
+        <span>{{ referenceSheet ? 'Replace reference sheet' : 'Upload reference sheet (.xlsx, .xls, .csv)' }}</span>
+      </button>
+      <input #referenceInput type="file" accept=".xlsx,.xls,.csv" hidden (change)="onFilesPicked($event, 'reference')">
+
+      <ng-container *ngIf="referenceSheet; else noReferenceSheet">
+        <div class="file-row">
+          <mat-icon>description</mat-icon>
+          <span class="file-name">{{ referenceSheet.file.name }}</span>
+          <em>{{ formatSize(referenceSheet.file.size) }}</em>
+          <button type="button" aria-label="Remove reference sheet" (click)="referenceSheet = null">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="ref-summary">
+          <div><b>{{ referenceSheet.total }}</b><span>questions in the sheet</span></div>
+          <div><b>{{ referenceSheet.fromAI }}</b><span>from earlier AI sets</span></div>
+          <div><b>{{ referenceSheet.manual }}</b><span>added manually to the sheet</span></div>
+        </div>
+        <p class="hint">
+          All {{ referenceSheet.total }} questions will be used as reference, along with the {{ data.existingCount }} in
+          the bank. The new set won't repeat any of them.
+        </p>
+      </ng-container>
+      <ng-template #noReferenceSheet>
+        <p class="hint">
+          Without a reference sheet, the AI only avoids questions that are in the bank right now ({{ data.existingCount
+          }}).
+        </p>
+      </ng-template>
+    </section>
+
+    <!-- Course names -->
+    <section class="card">
+      <h3 class="card-title">
+        Course name(s) <span class="req">*</span>
+        <span class="auto-tag right"><mat-icon>lock</mat-icon>From Linked APAR plan</span>
+      </h3>
+      <div class="ctx" *ngIf="data.courses?.length; else noCourses">
+        <div class="ctx-item" *ngFor="let course of data.courses">
+          <div class="ctx-row">
+            <div>
+              <div>
+                {{ course.name | uppercase }}<ng-container *ngIf="course.language"> ({{ course.language
+                  }})</ng-container>
+              </div>
+              <div class="muted">Identifier: {{ course.identifier }}</div>
+              <div class="muted" *ngIf="course.provider">Provider: {{ course.provider }}</div>
+            </div>
+            <span class="badge" *ngIf="course.contextDocuments" [class.ok]="course.contextDocuments.length">
+              {{ course.contextDocuments.length ? 'Available' : 'Not available' }}
+            </span>
+          </div>
+          <div class="muted ctx-docs" *ngIf="course.contextDocuments">
+            {{ course.contextDocuments.length
+            ? 'Contextual documents: ' + course.contextDocuments.join(', ')
+            : 'No contextual documents or VTT files are available for this course.' }}
+          </div>
+        </div>
+      </div>
+      <ng-template #noCourses>
+        <p class="err-text">No courses are linked. Add one in Basic Details.</p>
+      </ng-template>
+    </section>
+
+    <!-- Language -->
+    <section class="card">
+      <h3 class="card-title">
+        <mat-icon>language</mat-icon><label for="aiQuestionsLanguage">Assessment language <span
+            class="req">*</span></label>
+      </h3>
+      <select id="aiQuestionsLanguage" class="select" [(ngModel)]="language">
+        <option *ngFor="let lang of languages" [value]="lang">{{ lang }}</option>
+      </select>
+    </section>
+
+    <!-- Notes -->
+    <section class="card">
+      <h3 class="card-title"><label for="aiQuestionsNotes">Additional notes</label> <span class="muted">optional</span>
+      </h3>
+      <textarea id="aiQuestionsNotes" class="textarea" [(ngModel)]="notes" [maxlength]="notesMaxLength"
+        placeholder="For example: focus on field procedures, avoid numerical calculations, use Indian programme names."></textarea>
+      <div class="counter">{{ notes.length }}/{{ notesMaxLength }}</div>
+    </section>
+
+    <div class="grid-2">
+      <!-- Question types -->
+      <section class="card">
+        <h3 class="card-title">
+          <mat-icon>checklist</mat-icon>Question types
+          <span class="badge right" [class.ok]="isTypesTotalValid" [class.bad]="!isTypesTotalValid">{{ typesBadge
+            }}</span>
+        </h3>
+        <div class="type-row" *ngFor="let type of questionTypes" [class.on]="type.enabled">
+          <mat-slide-toggle [checked]="type.enabled" (change)="onTypeToggle(type, $event.checked)"
+            [aria-label]="'Include ' + type.label"></mat-slide-toggle>
+          <span class="type-name">{{ type.label }}</span>
+          <input class="num" type="number" min="0" [attr.max]="maxQuestions" [(ngModel)]="type.count"
+            [disabled]="!type.enabled" [attr.aria-label]="'Number of ' + type.label">
+        </div>
+        <p class="hint">{{ typesHint }}</p>
+      </section>
+
+      <div class="stack">
+        <!-- Assessment level -->
+        <section class="card">
+          <h3 class="card-title">Assessment level</h3>
+          <div class="levels">
+            <button type="button" *ngFor="let option of levels" [attr.aria-pressed]="option === level"
+              (click)="selectLevel(option)">{{ option }}</button>
+          </div>
+          <p class="hint">Picking a level loads a matching Bloom's mix, which you can still adjust.</p>
+        </section>
+
+        <!-- Time limit -->
+        <section class="card">
+          <h3 class="card-title">
+            <mat-icon>schedule</mat-icon>Time limit
+            <span class="auto-tag right"><mat-icon>lock</mat-icon>From Assessment Settings</span>
+          </h3>
+          <div class="time-val">
+            <ng-container *ngIf="durationMinutes !== null; else noDuration">{{ durationMinutes }} minutes</ng-container>
+            <ng-template #noDuration>Not set</ng-template>
+            <mat-icon>lock</mat-icon>
+          </div>
+          <p class="hint">To change it, update the duration in Assessment Settings.</p>
+        </section>
+      </div>
+    </div>
+
+    <!-- Bloom's taxonomy -->
+    <section class="card">
+      <h3 class="card-title">
+        <mat-icon>psychology</mat-icon>Bloom's Taxonomy distribution
+        <span class="right flex flex-middle bloom-controls">
+          <span class="badge" *ngIf="bloomOn" [class.ok]="bloomTotal === 100" [class.bad]="bloomTotal !== 100">
+            {{ bloomTotal }}% / 100%
+          </span>
+          <mat-slide-toggle [(ngModel)]="bloomOn" aria-label="Use Bloom's taxonomy distribution"></mat-slide-toggle>
+        </span>
+      </h3>
+      <ng-container *ngIf="bloomOn; else bloomOff">
+        <div class="bloom-bar">
+          <span *ngFor="let bloomLevel of bloomLevels" [ngClass]="'b-' + bloomLevel.key"
+            [style.flex-basis.%]="bloomShare(bloomLevel.key)">
+            {{ bloom[bloomLevel.key] ? bloom[bloomLevel.key] + '%' : '' }}
+          </span>
+        </div>
+        <div class="bloom-ends"><span>Lower order thinking</span><span>Higher order thinking</span></div>
+        <div class="bloom-grid">
+          <div class="bloom-card" *ngFor="let bloomLevel of bloomLevels" [ngClass]="'b-' + bloomLevel.key">
+            <h4>{{ bloomLevel.label }}</h4>
+            <small>{{ bloomLevel.description }}</small>
+            <div class="bloom-ctl">
+              <button type="button" [attr.aria-label]="'Decrease ' + bloomLevel.label"
+                (click)="changeBloom(bloomLevel.key, -bloomStep)">−</button>
+              <b>{{ bloom[bloomLevel.key] }}%</b>
+              <button type="button" [attr.aria-label]="'Increase ' + bloomLevel.label"
+                (click)="changeBloom(bloomLevel.key, bloomStep)">+</button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #bloomOff>
+        <p class="bloom-off">
+          Bloom's Taxonomy distribution is disabled. Questions will be generated without cognitive level targeting.
+        </p>
+      </ng-template>
+    </section>
+
+    <div class="grid-2">
+      <!-- Transcripts -->
+      <section class="card">
+        <h3 class="card-title">Transcripts <span class="muted">optional, VTT/TXT, max {{ maxTranscripts }}</span></h3>
+        <button type="button" class="drop" [class.drag]="dragTarget === 'transcripts'" (click)="transcriptInput.click()"
+          (dragover)="onDragOver($event, 'transcripts')" (dragleave)="dragTarget = null"
+          (drop)="onDrop($event, 'transcripts')">
+          <mat-icon>file_upload</mat-icon>
+          <span>{{ transcripts.length }}/{{ maxTranscripts }} files</span>
+        </button>
+        <input #transcriptInput type="file" accept=".vtt,.txt" multiple hidden
+          (change)="onFilesPicked($event, 'transcripts')">
+        <div class="file-list">
+          <div class="file-row" *ngFor="let file of transcripts; let i = index">
+            <mat-icon>description</mat-icon>
+            <span class="file-name">{{ file.name }}</span>
+            <em>{{ formatSize(file.size) }}</em>
+            <button type="button" [attr.aria-label]="'Remove ' + file.name" (click)="removeFile('transcripts', i)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Supporting documents -->
+      <section class="card">
+        <h3 class="card-title">Supporting documents <span class="muted">optional, PDF, max {{ maxDocuments }} × 25
+            MB</span></h3>
+        <button type="button" class="drop" [class.drag]="dragTarget === 'documents'" (click)="documentInput.click()"
+          (dragover)="onDragOver($event, 'documents')" (dragleave)="dragTarget = null"
+          (drop)="onDrop($event, 'documents')">
+          <mat-icon>file_upload</mat-icon>
+          <span>{{ documents.length }}/{{ maxDocuments }} files</span>
+        </button>
+        <input #documentInput type="file" accept=".pdf" multiple hidden (change)="onFilesPicked($event, 'documents')">
+        <div class="file-list">
+          <div class="file-row" *ngFor="let file of documents; let i = index">
+            <mat-icon>description</mat-icon>
+            <span class="file-name">{{ file.name }}</span>
+            <em>{{ formatSize(file.size) }}</em>
+            <button type="button" [attr.aria-label]="'Remove ' + file.name" (click)="removeFile('documents', i)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="modal-foot flex flex-middle">
+    <button type="button" mat-button class="btn-common btn-secondary" (click)="dialogRef.close()"
+      [disabled]="generating">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+    <div class="foot-msg" role="status">{{ errorMessage }}</div>
+    <button type="button" mat-button class="btn-common btn-primary" (click)="generate()"
+      [disabled]="!!errorMessage || generating" [ngClass]="{'btn-disable': !!errorMessage || generating}">
+      <mat-icon>auto_awesome</mat-icon>
+      {{ generating ? 'Generating questions…' : 'Generate ' + typesTotal + ' questions' }}
+    </button>
+  </div>
+</div>

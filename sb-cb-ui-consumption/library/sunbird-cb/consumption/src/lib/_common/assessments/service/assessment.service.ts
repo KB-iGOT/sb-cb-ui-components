@@ -20,6 +20,8 @@ const API_END_POINTS = {
   UPDATE_CQF_ASSESSMENT: `${API_PROXY_V8_CQF}questionset/update`,
   PUBLISH_CQF_ASSESSMENT: `${API_PROXY_V8_CQF}questionset/autopublish/`,
   GET_CQF_LIST: `${API_PROXY_V8_CQF}listEntry`,
+  GENERATE_AI_QUESTIONS: 'apis/proxies/v8/ai/assessments/v1/generate',
+  AI_QUESTIONS_STATUS: 'apis/proxies/v8/ai/assessments/v1/status/',
 }
 
 @Injectable({
@@ -482,6 +484,16 @@ export class AssessmentService {
 
   setContextCategory(contextCategory: string) {
     this.contextCategory = contextCategory || ''
+  }
+
+  /** Sent as multipart, so the browser sets the Content-Type with its boundary. */
+  generateAiQuestions(formData: FormData) {
+    return this.http.post<any>(API_END_POINTS.GENERATE_AI_QUESTIONS, formData)
+  }
+
+  /** Where a generation job started by generateAiQuestions has got to. */
+  getAiQuestionsStatus(jobId: string) {
+    return this.http.get<any>(`${API_END_POINTS.AI_QUESTIONS_STATUS}${encodeURIComponent(jobId)}`)
   }
 
   getPrimaryCategory() {

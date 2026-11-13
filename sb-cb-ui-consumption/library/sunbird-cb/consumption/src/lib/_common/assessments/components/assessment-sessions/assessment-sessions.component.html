@@ -138,6 +138,7 @@
     </div>
 
     <!-- add Questions -->
+    <ng-container *ngIf="aiQuestionsEnabled && !isReadOnly" [ngTemplateOutlet]="aiQuestionsBanner"></ng-container>
     <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5" *ngIf="!isReadOnly">
       <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
         <mat-icon>add</mat-icon>
@@ -280,6 +281,8 @@
       </button>
     </div>
 
+    <ng-container *ngIf="aiQuestionsEnabled && assessmentData?.children?.[selectedSectionIndex]?.identifier && !isReadOnly"
+      [ngTemplateOutlet]="aiQuestionsBanner"></ng-container>
     <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5"
       *ngIf="assessmentData?.children?.[selectedSectionIndex]?.identifier && !isReadOnly">
       <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()"
@@ -386,6 +389,8 @@
     </div>
 
     <!-- Add Questions Buttons - Show only when section is created -->
+    <ng-container *ngIf="aiQuestionsEnabled && hasBasicAssessmentSection() && !isReadOnly"
+      [ngTemplateOutlet]="aiQuestionsBanner"></ng-container>
     <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5"
       *ngIf="hasBasicAssessmentSection() && !isReadOnly">
       <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()"
@@ -440,6 +445,8 @@
     </div>
 
     <!-- Add Questions Buttons - Show only when section is created -->
+    <ng-container *ngIf="aiQuestionsEnabled && hasOptionWeightageSection() && !isReadOnly"
+      [ngTemplateOutlet]="aiQuestionsBanner"></ng-container>
     <div class="questions-btn-container flex flex-middle flex-center gap-5 mt-5"
       *ngIf="hasOptionWeightageSection() && !isReadOnly">
       <button type="button" mat-button class="btn-common btn-primary" (click)="addQuestions()">
@@ -474,3 +481,32 @@
     <p>Assessment sessions are only available for advanced assessments.</p>
   </div>
 </div>
+
+<!-- AI question generation, shown above the manual options of whichever form is active -->
+<ng-template #aiQuestionsBanner>
+  <div class="ai-questions-banner flex flex-middle mt-5">
+    <div class="ai-questions-icon flex flex-middle flex-center">
+      <mat-icon>auto_awesome</mat-icon>
+    </div>
+    <div class="ai-questions-text">
+      <h4 class="ai-questions-title">Let AI draft the questions</h4>
+      <p class="ai-questions-description" [ngSwitch]="getRemainingQuestionsCount()">
+        <ng-container *ngSwitchCase="null">Generate questions for this section with AI.</ng-container>
+        <ng-container *ngSwitchCase="0">
+          All {{ getSectionTotalQuestions() }} questions set in "What is the number of questions you will be adding?"
+          are in the bank.<br>Increase that number to generate more with AI.
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+          Generate the remaining {{ getRemainingQuestionsCount() }} of {{ getSectionTotalQuestions() }} questions for
+          this section with AI.
+        </ng-container>
+      </p>
+    </div>
+    <button type="button" mat-button class="btn-common btn-primary ai-questions-btn" (click)="onGenerateAIQuestions()"
+      [disabled]="isQuestionLimitReached()" [ngClass]="{'btn-disable': isQuestionLimitReached()}">
+      <mat-icon>auto_awesome</mat-icon>
+      Generate AI Questions
+    </button>
+  </div>
+  <div class="add-manually-divider flex flex-middle">or add them yourself</div>
+</ng-template>

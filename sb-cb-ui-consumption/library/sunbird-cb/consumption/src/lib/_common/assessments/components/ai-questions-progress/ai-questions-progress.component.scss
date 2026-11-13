@@ -1,0 +1,56 @@
+$primary: #1b4ca1;
+$primary-muted: #8fa9d6;
+$surface: #f6f8fc;
+$text: #1d2433;
+$muted: #5b6478;
+
+// The dialog draws its own padding and corners, as the Generate AI Questions modal does
+::ng-deep .ai-questions-progress-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+.ai-questions-progress {
+  padding: 22px 22px 24px;
+  background: $surface;
+  color: $text;
+}
+
+.progress-title {
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: $text;
+
+  // MDC reserves a 40px baseline strut above dialog titles
+  &::before {
+    display: none;
+  }
+
+  .title-icon {
+    color: $primary-muted;
+  }
+}
+
+.progress-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding-top: 28px;
+  text-align: center;
+
+  .mat-mdc-progress-spinner {
+    --mat-progress-spinner-active-indicator-color: #{$primary};
+  }
+
+  p {
+    margin: 0;
+    font-size: 13.5px;
+    color: $muted;
+  }
+}
