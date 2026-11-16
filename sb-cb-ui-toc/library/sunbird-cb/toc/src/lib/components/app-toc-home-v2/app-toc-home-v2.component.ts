@@ -57,6 +57,7 @@ import { AppTocV2Service } from '../../services/app-toc-v2.service'
 import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
 import { IComprehensiveAssessmentAttempts, IComprehensiveAssessmentStatus } from '../../_models/common.model'
 import { isCategoryListed, karmaPointsDisabledCategories } from '../../_services/course-category-visibility'
+import { isVolunteerUser } from '../../_services/user-role.util'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -381,7 +382,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   getKarmapointsLimit() {
-    if (!this.forPreview && this.isApiEnabled('totalKarmaPoints', '/apis/proxies/v8/user/totalkarmapoints')) {
+    // volunteers are not whitelisted for user/totalkarmapoints (403); the monthly cap does not apply to them
+    if (!this.forPreview && !isVolunteerUser(this.configSvc)
+      && this.isApiEnabled('totalKarmaPoints', '/apis/proxies/v8/user/totalkarmapoints')) {
       this.contentSvc.userKarmaPoints().subscribe((res: any) => {
         if (res && res.kpList) {
           const info = res.kpList.addinfo
@@ -414,7 +417,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   // The first CBPlan V4 plan holding the content, checked APAR → CBP → AI-CBP.
   async getPlanForContent(doId: string): Promise<IUserCbpPlan | undefined> {
-    if (!doId) {
+    // volunteers have no CBP plans and are not whitelisted for cbplan/v4/user/dictionary (403)
+    if (!doId || isVolunteerUser(this.configSvc)) {
       return undefined
     }
     const data = await this.userCbpPlansSvc.getUserCbpPlansAsync()

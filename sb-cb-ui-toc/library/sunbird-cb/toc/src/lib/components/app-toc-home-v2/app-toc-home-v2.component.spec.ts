@@ -589,4 +589,44 @@ describe('AppTocHomeV2Component', () => {
       })
     })
   })
+
+  describe('volunteer users (not whitelisted for totalkarmapoints / cbplan dictionary)', () => {
+    const volunteerConfig = () => ({ userRoles: new Set(['volunteer']), userProfileV2: { userRoles: [] } })
+    const learnerConfig = () => ({ userRoles: new Set(['public']), userProfileV2: { userRoles: [] } })
+
+    function createRoleComponent(configSvc: any): any {
+      return createComponent({
+        configSvc,
+        forPreview: false,
+        tocConfig: {},
+        commonMethodsSvc: { getEnabledUrl: jest.fn(({ defaultUrl }: any) => defaultUrl) },
+        contentSvc: { userKarmaPoints: jest.fn(() => of({})) },
+        userCbpPlansSvc: { getUserCbpPlansAsync: jest.fn(() => Promise.resolve({ aparPlanList: [], cbpPlanList: [], aiCbpPlanList: [] })) },
+      })
+    }
+
+    it('does not call totalkarmapoints for a volunteer', () => {
+      const component = createRoleComponent(volunteerConfig())
+      component.getKarmapointsLimit()
+      expect(component.contentSvc.userKarmaPoints).not.toHaveBeenCalled()
+    })
+
+    it('still calls totalkarmapoints for other users', () => {
+      const component = createRoleComponent(learnerConfig())
+      component.getKarmapointsLimit()
+      expect(component.contentSvc.userKarmaPoints).toHaveBeenCalled()
+    })
+
+    it('does not read CBP plans (cbplan dictionary) for a volunteer', async () => {
+      const component = createRoleComponent(volunteerConfig())
+      await expect(component.getPlanForContent('do_1')).resolves.toBeUndefined()
+      expect(component.userCbpPlansSvc.getUserCbpPlansAsync).not.toHaveBeenCalled()
+    })
+
+    it('still reads CBP plans for other users', async () => {
+      const component = createRoleComponent(learnerConfig())
+      await component.getPlanForContent('do_1')
+      expect(component.userCbpPlansSvc.getUserCbpPlansAsync).toHaveBeenCalled()
+    })
+  })
 })
