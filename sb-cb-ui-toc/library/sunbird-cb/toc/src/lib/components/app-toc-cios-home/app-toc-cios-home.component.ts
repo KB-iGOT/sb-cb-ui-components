@@ -140,7 +140,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       } else {
         this.validateEnrollmentEligibility()
       }
-      this.prefetchRequiredKarmaCoins()
+      this.karmaCoinsRequest = null
+      this.coinShortfall = false
       this.requiredKarmaCoins = this.readRequiredKarmaCoins(this.extContentReadData)
 
     })
@@ -301,19 +302,9 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     return this.karmaCoinsRequest
   }
 
-  private prefetchRequiredKarmaCoins() {
-    const content = this.extContentReadData
-    this.karmaCoinsRequest = null
-    this.coinShortfall = false
-    this.loadRequiredKarmaCoins(content).then((coins: number) => {
-      if (coins > 0 && content === this.extContentReadData) {
-        this.requiredKarmaCoins = coins
-      }
-    })
-  }
-
   private readRequiredKarmaCoins(content: any): number {
-    return Number(_.get(content, 'requiredKarmaCoins', 0)) || 0
+    const coins = Number(_.get(content, 'requiredKarmaCoins', 0))
+    return coins > 0 ? coins : 0
   }
 
   get karmaCoinsStrip(): { tncText: string, tncHeader: string, tncMessage: string, infoText: string } {
