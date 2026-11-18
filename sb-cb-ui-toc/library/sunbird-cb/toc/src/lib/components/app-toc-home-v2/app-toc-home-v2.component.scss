@@ -62,6 +62,8 @@
 
   .banner-details {
     padding: 36px 0px;
+    box-sizing: border-box;
+    width: 100%;
 
     @media screen and (max-width: 576px) {
       padding-top: 10px;
@@ -111,6 +113,9 @@
 
     .banner-text {
       color: rgba(255, 255, 255, 0.95);
+      width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
   }
 
@@ -208,7 +213,7 @@
 /* Windows display scaling ~150% */
 @media (min-resolution: 1.5dppx) {
   .toc-content {
-    max-width: 735px;
+    max-width: min(735px, 61.25%);
   }
 }
 
