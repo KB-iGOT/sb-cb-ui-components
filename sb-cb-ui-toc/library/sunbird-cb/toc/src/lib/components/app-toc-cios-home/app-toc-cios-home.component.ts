@@ -567,6 +567,15 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   captureRedirectTelemetry(content: any) {
+    if (content?.redirectUrl) {
+      window.open(content.redirectUrl, '_blank', 'noopener')
+    } else if (content?.providerCustomClaim && content?.contentId && content?.partnerId) {
+      const queryParams = {
+        id: content.contentId,
+        partnerId: content.partnerId,
+      }
+      this.router.navigate([`viewer/lti-course`], { queryParams })
+    }
     this.rememberPartnerSession(content)
     this.raiseTelemtryStartEvent()
     this.telemetryToCaptureInteract(content.contentId, 'redirect', 'redirect-content')
@@ -891,7 +900,10 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   get showRedirect(): boolean {
     return this.hasEnrolmentRecord &&
       !this.isEnrolPending &&
-      _.get(this.extContentReadData, 'redirectUrl') &&
+      (
+        _.get(this.extContentReadData, 'redirectUrl')
+        || _.get(this.extContentReadData, 'providerCustomClaim')
+      ) &&
       _.get(this.extContentReadData, 'contentPartner.isActive', false)
   }
 
