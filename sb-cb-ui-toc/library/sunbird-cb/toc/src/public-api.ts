@@ -60,6 +60,7 @@ export * from './lib/components/completion-survey-form/completion-survey-form.co
 export * from './lib/components/public-survey-form/public-survey-form.component'
 export * from './lib/components/survey-form-question/survey-form-question.component'
 export * from './lib/components/survey-form-section/survey-form-section.component'
+export * from './lib/components/app-toc-iframe-page/app-toc-iframe-page.component'
 
 // Route Components
 export * from './lib/routes/app-toc-home/app-toc-home.component'

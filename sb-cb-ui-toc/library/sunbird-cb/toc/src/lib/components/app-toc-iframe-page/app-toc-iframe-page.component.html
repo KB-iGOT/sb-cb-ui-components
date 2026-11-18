@@ -1,0 +1,21 @@
+<div class="iframe-ui">
+  <div class="iframe-header">
+    @if (redirectUrl()) {
+        <a i18n-aria-label aria-label="Back" [routerLink]="redirectUrl()" mat-icon-button>
+            <mat-icon>arrow_back</mat-icon>
+        </a>
+    }
+    @if (logoUrl()) {
+      <div class="iframe-logo">
+        <a routerLink="/static-home">
+          <img [src]="logoUrl()" alt="Application Logo" class="app-logo" />
+        </a>
+      </div>
+    }
+  </div>
+  <div class="iframe-content">
+    @if (safeIframeUrl(); as src) {
+      <iframe [src]="src" title="External course" frameborder="0" allowfullscreen></iframe>
+    }
+  </div>
+</div>
