@@ -733,7 +733,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
     if (
       this.content &&
       this.content.courseCategory === NsContent.ECourseCategory.MODERATED_PROGRAM &&
-      lodash.get(batch, 'enrollmentType') === 'open'
+      lodash.get(batch, 'status') !== 2
     ) {
       return true
     }
