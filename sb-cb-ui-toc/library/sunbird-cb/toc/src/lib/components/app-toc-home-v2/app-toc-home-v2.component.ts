@@ -907,8 +907,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         let moderatedBatchData: any
         if (this.batchData && this.batchData.content && this.batchData.content.length > 1) {
           moderatedBatchData = this.selectedBatchData && this.selectedBatchData.content && this.selectedBatchData.content[0]
+        } else if (this.batchData && this.batchData.content && this.batchData.content.length === 1) {
+          moderatedBatchData = this.batchData.content[0]
         } else {
-          moderatedBatchData = this.batchData && this.batchData.content && this.batchData.content[0]
+          moderatedBatchData = batchData
         }
         this.autoEnrollCuratedProgram(NsContent.ECourseCategory.MODERATED_PROGRAM, moderatedBatchData)
       } else if (this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
