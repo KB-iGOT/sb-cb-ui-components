@@ -1089,8 +1089,9 @@ export class EnrollProfileFormComponent implements OnInit {
         this.canShowshowCadreDetails = true
         const contrl = this.userDetailsForm.get('isCadre')
         if (contrl) {
-          if (Object.keys(this.userProfileObject.profileDetails.personalDetails).includes('isCadre')) {
-            if (this.userProfileObject.profileDetails.personalDetails.isCadre === true) {
+          const isCadreValue = _.get(this.userProfileObject, 'profileDetails.personalDetails.isCadre')
+          if (isCadreValue !== undefined && isCadreValue !== null && isCadreValue !== '') {
+            if (isCadreValue === true || String(isCadreValue).toLowerCase() === 'true') {
               contrl.setValue(true)
               this.isCadreStatus = true
               this.serviceId = this.userProfileObject.profileDetails.cadreDetails.civilServiceTypeId
@@ -1119,6 +1120,8 @@ export class EnrollProfileFormComponent implements OnInit {
             this.canShowshowCadreDetails = false
             this.isCadreStatus = false
           } else {
+            contrl.setValue(false)
+            this.isCadreStatus = false
             contrl.setValidators([Validators.required])
             contrl.updateValueAndValidity()
           }

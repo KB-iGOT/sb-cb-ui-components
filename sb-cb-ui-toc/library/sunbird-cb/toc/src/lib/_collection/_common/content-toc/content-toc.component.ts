@@ -44,6 +44,7 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() tocStructure: any = {}
   @Input() pathSet: any
   @Input() fromViewer = false
+  @Input() aboutMobileBreakpoint = 1201
   @Input() hierarchyMapData: any = {}
   @ViewChild('stickyMenu') tabElement!: MatTabGroup
   @ViewChildren(MatTab) tabs!: QueryList<MatTab>
