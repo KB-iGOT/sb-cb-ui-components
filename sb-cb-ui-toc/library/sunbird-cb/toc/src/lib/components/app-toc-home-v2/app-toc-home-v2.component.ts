@@ -274,6 +274,17 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   private lastProgressRefreshTime: number = 0
   private isRefreshingProgress: boolean = false
   isUnEnrolled: boolean = false
+  // Below this width the TOC switches to the mobile layout (bottom enroll bar, no right card).
+  // Keep in sync with $toc-desktop-min in app-toc-home-v2.component.scss
+  static readonly TOC_DESKTOP_MIN_WIDTH = 900
+  readonly tocDesktopMinWidth = AppTocHomeV2Component.TOC_DESKTOP_MIN_WIDTH
+
+  // Browser zoom changes the viewport width, so re-evaluate on resize
+  @HostListener('window:resize')
+  updateMobileLayout() {
+    this.mobile1200 = window.innerWidth < AppTocHomeV2Component.TOC_DESKTOP_MIN_WIDTH
+  }
+
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
     const windowScroll = window.pageYOffset
@@ -2200,7 +2211,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   ngOnInit() {
     this.dataTransferSvc.setEnrollData(null)
     this.getServerDateTime()
-    this.mobile1200 = window.innerWidth < 1201
+    this.updateMobileLayout()
     this.getI18NTranslations()
     this.loadLearnerAdvisoryData()
     this.setupSelectedBatchSubscription()

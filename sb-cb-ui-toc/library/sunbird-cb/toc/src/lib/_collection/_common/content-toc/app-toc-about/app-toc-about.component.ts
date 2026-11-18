@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, Inject } from '@angular/core'
+import { Component, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, Inject, HostListener } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { MatDialog as MatDialog } from '@angular/material/dialog'
 import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
@@ -90,6 +90,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   @Input() showReviews = false
   @Input() batchData: any
   @Input() fromViewer = false
+  @Input() mobileBreakpoint = 1201
   @Input() selectedBatchData: any
   @Input() selectedTabValue = 0
   @Input() fromMarketPlace? = false
@@ -219,15 +220,17 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
       this.fetchRatingSummary()
     })
   }
+  
+  @HostListener('window:resize')
+  updateMobileLayout() {
+    this.isMobile = window.innerWidth < this.mobileBreakpoint
+  }
+
   ngOnInit() {
     this.pageConfigData = this.activatedRoute?.snapshot?.data?.pageData?.data
     this.compentencyKey = this.configService.compentency[this.environment.compentencyVersionKey]
     this.userProfile = this.configService.userProfile
-    if (window.innerWidth <= 1200) {
-      this.isMobile = true
-    } else {
-      this.isMobile = false
-    }
+    this.updateMobileLayout()
 
     this.tocSvc.getSelectedBatch
       .pipe(takeUntil(this.destroySubject$))
