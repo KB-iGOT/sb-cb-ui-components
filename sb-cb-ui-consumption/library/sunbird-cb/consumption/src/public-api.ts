@@ -211,3 +211,7 @@ export * from './lib/_common/bulk-upload/bulk-upload.constants'
 export * from './lib/_common/bulk-upload/bulk-upload.service'
 export * from './lib/_common/bulk-upload/bulk-upload.module'
 export * from './lib/_common/bulk-upload/components/bulk-upload/bulk-upload.component'
+// Jago chat bot
+export * from './lib/_common/jago-chatbot/jago-chatbot.service'
+export * from './lib/_common/jago-chatbot/jago-chatbot-telemetry.service'
+export * from './lib/_common/jago-chatbot/jago-chatbot.component'
