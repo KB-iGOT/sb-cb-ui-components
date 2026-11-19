@@ -52,6 +52,7 @@ import { EnrollLanguageDialogueComponent } from '../enroll-language-dialogue/enr
 import { CompletionSurveyFormComponent } from '../completion-survey-form/completion-survey-form.component'
 import { PublicSurveyFormComponent } from '../public-survey-form/public-survey-form.component'
 import { NsCardContent } from '../../models/card-content.model'
+import { TOC_DESKTOP_MIN_WIDTH } from '../../_constants/toc-layout.constants'
 import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
 import { AppTocV2Service } from '../../services/app-toc-v2.service'
 import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
@@ -274,15 +275,13 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   private lastProgressRefreshTime: number = 0
   private isRefreshingProgress: boolean = false
   isUnEnrolled: boolean = false
-  // Below this width the TOC switches to the mobile layout (bottom enroll bar, no right card).
-  // Keep in sync with $toc-desktop-min in app-toc-home-v2.component.scss
-  static readonly TOC_DESKTOP_MIN_WIDTH = 900
-  readonly tocDesktopMinWidth = AppTocHomeV2Component.TOC_DESKTOP_MIN_WIDTH
+  // Below TOC_DESKTOP_MIN_WIDTH the page switches to the mobile layout (bottom enroll bar, no right card)
+  readonly tocDesktopMinWidth = TOC_DESKTOP_MIN_WIDTH
 
   // Browser zoom changes the viewport width, so re-evaluate on resize
   @HostListener('window:resize')
   updateMobileLayout() {
-    this.mobile1200 = window.innerWidth < AppTocHomeV2Component.TOC_DESKTOP_MIN_WIDTH
+    this.mobile1200 = window.innerWidth < TOC_DESKTOP_MIN_WIDTH
   }
 
   @HostListener('window:scroll', ['$event'])
