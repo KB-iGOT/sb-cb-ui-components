@@ -1,6 +1,6 @@
 {
   "name": "@sunbird-cb/tree-hierarchy",
-  "version": "0.0.7-ang-17-20",
+  "version": "0.1.0-cbrelease-4.8.42",
   "dependencies": {
     "tslib": "^2.0.0"
   },
@@ -31,5 +31,4 @@
     "@types/uuid": "^10.0.0",
     "@types/d3": "7.4.3"
   }
-
 }

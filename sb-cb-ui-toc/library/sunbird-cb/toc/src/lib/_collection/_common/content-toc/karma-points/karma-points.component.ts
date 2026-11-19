@@ -1,7 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core'
 import { TranslateService } from '@ngx-translate/core'
 
-import { MultilingualTranslationsService, NsContent } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, MultilingualTranslationsService, NsContent } from '@sunbird-cb/utils-v2'
+import { AppTocService } from '../../../../services/app-toc.service'
+import { isCategoryListed, karmaPointsDisabledCategories } from '../../../../_services/course-category-visibility'
 
 @Component({
     selector: 'ws-widget-karma-points',
@@ -14,7 +16,9 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
   kpArray: any[] = []
   constructor(
     private translate: TranslateService,
-    private langTranslations: MultilingualTranslationsService
+    private langTranslations: MultilingualTranslationsService,
+    private tocSvc: AppTocService,
+    private configSvc: ConfigurationsService,
   ) {
     if (localStorage.getItem('websiteLanguage')) {
       this.translate.setDefaultLang('en')
@@ -34,6 +38,18 @@ export class KarmaPointsComponent implements OnInit, OnChanges {
   karmaPointsSlider: any
   btnKPData: any
   disableKarmaPoints = false
+
+  /**
+   * Hidden for course categories listed in `disableKarmaPointsCourseCategories` (TOC page config, else
+   * the application config). Checked here, in the widget, so every TOC layout that shows it follows it.
+   */
+  get hiddenForCategory(): boolean {
+    const categories = karmaPointsDisabledCategories(this.tocSvc?.tocPageConfig, this.configSvc?.instanceConfig)
+    const courseCategory = this.content?.courseCategory
+      || this.condition?.content?.courseCategory
+      || this.baseContentReadData?.courseCategory
+    return isCategoryListed(categories, courseCategory)
+  }
 
   ngOnInit() {
     this.constructNudgeData()

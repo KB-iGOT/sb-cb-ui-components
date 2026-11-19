@@ -246,6 +246,33 @@ span.portrait-org-name {
     right: 8px;
     bottom: 8px;
 }
+.paid-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+}
+.karma-coins-row {
+    position: absolute;
+    right: 16px;
+    bottom: 12px;
+}
+.karma-coins-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px 2px 2px;
+    border-radius: 8px;
+    background-color: var(--color-primary-50);
+    color: var(--text-bandw-black-body);
+    font-family: var(--font-family-noto-sans);
+    font-size: 14px;
+    line-height: 20px;
+    white-space: nowrap;
+}
+.karma-coin-icon {
+    width: 24px;
+    height: 24px;
+}
 }
 
 .card-portrait-clickable {

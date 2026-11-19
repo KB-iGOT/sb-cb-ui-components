@@ -52,14 +52,13 @@ import { EnrollLanguageDialogueComponent } from '../enroll-language-dialogue/enr
 import { CompletionSurveyFormComponent } from '../completion-survey-form/completion-survey-form.component'
 import { PublicSurveyFormComponent } from '../public-survey-form/public-survey-form.component'
 import { NsCardContent } from '../../models/card-content.model'
+import { TOC_DESKTOP_MIN_WIDTH } from '../../_constants/toc-layout.constants'
 import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
 import { AppTocV2Service } from '../../services/app-toc-v2.service'
 import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
-import {
-  IComprehensiveAssessmentAttempts,
-  IComprehensiveAssessmentResult,
-  IComprehensiveAssessmentStatus,
-} from '../../_models/common.model'
+import { IComprehensiveAssessmentAttempts, IComprehensiveAssessmentStatus } from '../../_models/common.model'
+import { isCategoryListed, karmaPointsDisabledCategories } from '../../_services/course-category-visibility'
+import { isVolunteerUser } from '../../_services/user-role.util'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -97,6 +96,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   content: NsContent.IContent | null = null
   contentReadData: NsContent.IContent | null = null
   baseContentReadData: NsContent.IContent | null = null
+  /** Identifier for which viewer data was last sent to the mobile app (avoids re-sending on every change detection) */
+  private viewerDataSentFor: string | null = null
   badgeTooltipText = ''
   errorCode: NsAppToc.EWsTocErrorCode | null = null
   resumeData: any = null
@@ -137,6 +138,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   primaryCategory = NsContent.EPrimaryCategory
   courseCategory = NsContent.ECourseCategory
   WFBlendedProgramStatus = NsContent.WFBlendedProgramStatus
+  blendedWFItems: any[] = []
   blendedReRequestStatuses: string[] = [
     NsContent.WFBlendedProgramStatus.REJECTED,
     NsContent.WFBlendedProgramStatus.WITHDRAWN,
@@ -274,6 +276,15 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   private lastProgressRefreshTime: number = 0
   private isRefreshingProgress: boolean = false
   isUnEnrolled: boolean = false
+  // Below TOC_DESKTOP_MIN_WIDTH the page switches to the mobile layout (bottom enroll bar, no right card)
+  readonly tocDesktopMinWidth = TOC_DESKTOP_MIN_WIDTH
+
+  // Browser zoom changes the viewport width, so re-evaluate on resize
+  @HostListener('window:resize')
+  updateMobileLayout() {
+    this.mobile1200 = window.innerWidth < TOC_DESKTOP_MIN_WIDTH
+  }
+
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
     const windowScroll = window.pageYOffset
@@ -382,7 +393,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   getKarmapointsLimit() {
-    if (!this.forPreview && this.isApiEnabled('totalKarmaPoints', '/apis/proxies/v8/user/totalkarmapoints')) {
+    // volunteers are not whitelisted for user/totalkarmapoints (403); the monthly cap does not apply to them
+    if (!this.forPreview && !isVolunteerUser(this.configSvc)
+      && this.isApiEnabled('totalKarmaPoints', '/apis/proxies/v8/user/totalkarmapoints')) {
       this.contentSvc.userKarmaPoints().subscribe((res: any) => {
         if (res && res.kpList) {
           const info = res.kpList.addinfo
@@ -411,6 +424,21 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   filteredAcbpList(res: any) {
     return res.filter((v: any) => v.identifier === this.courseID)
+  }
+
+  // The first CBPlan V4 plan holding the content, checked APAR → CBP → AI-CBP.
+  async getPlanForContent(doId: string): Promise<IUserCbpPlan | undefined> {
+    // volunteers have no CBP plans and are not whitelisted for cbplan/v4/user/dictionary (403)
+    if (!doId || isVolunteerUser(this.configSvc)) {
+      return undefined
+    }
+    const data = await this.userCbpPlansSvc.getUserCbpPlansAsync()
+    if (!data) {
+      return undefined
+    }
+    const plans = [...(data.aparPlanList || []), ...(data.cbpPlanList || []), ...(data.aiCbpPlanList || [])]
+    return plans.find((plan: IUserCbpPlan) =>
+      (plan.contentList || []).some((content: IUserCbpPlanContent) => content && content.identifier === doId))
   }
 
   async findACPB() {
@@ -569,6 +597,12 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     return false
   }
 
+  /** Karma Points panel hidden for this course category (`disableKarmaPointsCourseCategories` in the TOC config) */
+  get karmaPointsHidden(): boolean {
+    const categories = karmaPointsDisabledCategories(this.tocConfig, this.configSvc?.instanceConfig)
+    return isCategoryListed(categories, this.contentReadData?.courseCategory || this.content?.courseCategory)
+  }
+
   get isComprehensiveAssessment(): boolean {
     return this.contentReadData?.courseCategory === this.comprehensiveAssessmentCategory
       || this.content?.courseCategory === this.comprehensiveAssessmentCategory
@@ -664,7 +698,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         || this.content.primaryCategory === NsContent.EPrimaryCategory.COMP_ASSESSMENT
         || this.content.primaryCategory === NsContent.EPrimaryCategory.OFFLINE_SESSION
         || !(this.content.children && this.content.children.length)
-      if (isResource) {
+      // This getter is bound in the template and runs on every change-detection cycle,
+      // so only notify the mobile app once per content.
+      if (isResource && this.viewerDataSentFor !== this.content.identifier) {
+        this.viewerDataSentFor = this.content.identifier
         this.mobileAppsSvc.sendViewerData(this.content)
       }
       return isResource
@@ -804,7 +841,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       return undefined
     }
     const data: any = await this.contentSvc.fetchBlendedWFDetails(this.content.identifier)
-    return _.maxBy(_.get(data, 'result.data') || [], (wf: any) => wf.lastUpdatedOn)
+    // keep every workflow item so the banner can resolve the status of each batch individually
+    this.blendedWFItems = _.get(data, 'result.data') || []
+    return _.maxBy(this.blendedWFItems, (wf: any) => wf.lastUpdatedOn)
   }
 
   // attaches the latest workflow to the already loaded batch data (used when the user is enrolled)
@@ -816,6 +855,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
           wfInitiated: true,
           batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === latestWF.applicationId),
           wfItem: latestWF,
+          wfItems: this.blendedWFItems,
         }
         this.tocSvc.setWFData(this.batchData)
       }
@@ -857,6 +897,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
             wfInitiated: true,
             batch,
             wfItem,
+            wfItems: this.blendedWFItems,
           },
         }
         this.tocSvc.setBatchData(this.batchData)
@@ -907,8 +948,10 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         let moderatedBatchData: any
         if (this.batchData && this.batchData.content && this.batchData.content.length > 1) {
           moderatedBatchData = this.selectedBatchData && this.selectedBatchData.content && this.selectedBatchData.content[0]
+        } else if (this.batchData && this.batchData.content && this.batchData.content.length === 1) {
+          moderatedBatchData = this.batchData.content[0]
         } else {
-          moderatedBatchData = this.batchData && this.batchData.content && this.batchData.content[0]
+          moderatedBatchData = batchData
         }
         this.autoEnrollCuratedProgram(NsContent.ECourseCategory.MODERATED_PROGRAM, moderatedBatchData)
       } else if (this.content && this.content.courseCategory === NsContent.ECourseCategory.LEARNING_PATHWAY) {
@@ -1079,6 +1122,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
               wfInitiated: true,
               batch: this.batchData.content && this.batchData.content.find((e: any) => e.batchId === wfItem.applicationId),
               wfItem,
+              wfItems: this.blendedWFItems,
             }
           }
           this.tocSvc.setBatchData(this.batchData)
@@ -1484,6 +1528,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
 
   withdrawOrEnroll(data: string) {
     if (data === NsContent.WFBlendedProgramStatus.INITIATE || data === NsContent.WFBlendedProgramStatus.WITHDRAW) {
+      // the user's own request changes the batch counts
+      this.contentSvc.clearBlendedUserCountCache()
       this.fetchBlendedProgramBatchDetails()
     }
   }
@@ -2196,7 +2242,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   ngOnInit() {
     this.dataTransferSvc.setEnrollData(null)
     this.getServerDateTime()
-    this.mobile1200 = window.innerWidth < 1201
+    this.updateMobileLayout()
     this.getI18NTranslations()
     this.loadLearnerAdvisoryData()
     this.setupSelectedBatchSubscription()
@@ -3255,8 +3301,14 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       queryParams.MLId = this.contentReadData.identifier
     }
 
+    // The router reloads on same-URL navigation (onSameUrlNavigation: 'reload'), so navigating to
+    // params the URL already has still runs a full navigation - every NavigationEnd listener
+    // (mandatory notification check, banner change detection and its batch count) fires again
+    const currentParams = this.route.snapshot.queryParamMap
+    const alreadyInUrl = Object.keys(queryParams).every(key => currentParams.get(key) === String(queryParams[key]))
+
     // Only navigate if we have batch ID or other parameters
-    if (Object.keys(queryParams).length > 0) {
+    if (Object.keys(queryParams).length > 0 && !alreadyInUrl) {
       this.router.navigate(
         [],
         {
@@ -3515,7 +3567,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   getServerDateTime() {
-    if (!this.isApiEnabled('getServerDate', '/apis/public/v8/systemDate')) {
+    if (this.forPreview || !this.isApiEnabled('getServerDate', '/apis/public/v8/systemDate')) {
       const clientTime = new Date().getTime()
       this.tocSvc.changeServerDate(clientTime)
       this.serverDate = clientTime

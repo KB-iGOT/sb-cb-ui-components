@@ -324,7 +324,7 @@
         </ng-container>
         <ng-container *ngIf="showRejected && content?.primaryCategory === primaryCategory.BLENDED_PROGRAM">
           <h3 class="margin-remove-bottom mat-body-2 ws-default-text">
-            Your enrollment request is {{batchData?.workFlow?.wfItem?.currentStatus === WFBlendedProgramStatus.REMOVED
+            Your enrollment request is {{getBatchWFItem(selectedBatch)?.currentStatus === WFBlendedProgramStatus.REMOVED
             ?'removed':'rejected'}}.</h3>
         </ng-container>
       </div>

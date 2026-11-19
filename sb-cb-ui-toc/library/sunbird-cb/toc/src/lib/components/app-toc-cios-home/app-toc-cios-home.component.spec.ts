@@ -276,13 +276,91 @@ describe('AppTocCiosHomeComponent', () => {
       expect(created.requiredKarmaCoins).toBe(30)
     })
 
-    it('should still read the karma coins off the content for an already enrolled user', () => {
+    it('should read the karma coins off the content for an enrolled user too', () => {
       routeMock.data = of({
         extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' }, requiredKarmaCoins: 30 } } },
         userEnrollContent: { data: { result: { progress: 40 } } },
       })
       const created = createComponent()
       expect(created.requiredKarmaCoins).toBe(30)
+    })
+  })
+
+  describe('karma coins strip', () => {
+    const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0))
+    const notEnrolledRoute = (content: any = {}) => of({
+      extContent: { data: { content: { contentId: 'c1', contentPartner: { id: 'p1' }, ...content } } },
+    })
+
+    it('should not call the deduction rule api on load', async () => {
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 30 })
+      createComponent()
+      await flushPromises()
+      expect(certSvcMock.getKarmaPointsDeductionRule).not.toHaveBeenCalled()
+    })
+
+    it('should take the strip value from the content read only', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 250 } }))
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 6 })
+      const created = createComponent()
+      await flushPromises()
+      expect(created.requiredKarmaCoins).toBe(6)
+    })
+
+    it('should hide the strip when the content has no karma coins', () => {
+      routeMock.data = notEnrolledRoute()
+      expect(createComponent().requiredKarmaCoins).toBe(0)
+    })
+
+    it('should hide the strip when the content karma coins are zero', () => {
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 0 })
+      expect(createComponent().requiredKarmaCoins).toBe(0)
+    })
+
+    it('should hide the strip for a negative or non numeric value', () => {
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: -5 })
+      expect(createComponent().requiredKarmaCoins).toBe(0)
+      routeMock.data = notEnrolledRoute({ requiredKarmaCoins: 'abc' })
+      expect(createComponent().requiredKarmaCoins).toBe(0)
+    })
+
+    it('should call the deduction rule api once when enrolling', async () => {
+      certSvcMock.getKarmaPointsDeductionRule.mockReturnValue(of({ result: { requiredKarmaPoints: 250 } }))
+      routeMock.data = notEnrolledRoute()
+      const created = createComponent()
+      created.config = {}
+      await created.enRollToExtCourse(created.extContentReadData)
+      await created.enRollToExtCourse(created.extContentReadData)
+      expect(certSvcMock.getKarmaPointsDeductionRule).toHaveBeenCalledTimes(1)
+      expect(created.karmaRedeemData.requiredKarmaCoins).toBe(250)
+    })
+
+    it('should default the strip text when nothing is configured', () => {
+      component.config = {}
+      expect(component.karmaCoinsStrip).toEqual({
+        tncText: 'T&C Apply',
+        tncHeader: 'Terms and Conditions',
+        tncMessage: 'Enrolment eligibility and Karma Coin pricing for this course are at Karmayogi Bharat’s discretion and may change without notice.',
+        infoText: 'Karma Coins will be deducted from your Karma Wallet if you proceed with enrolment.',
+      })
+    })
+
+    it('should take the strip text from config', () => {
+      component.config = { karmaCoinsStrip: { tncText: 'Terms', tncHeader: 'Head', tncMessage: 'Body', infoText: 'Info' } }
+      expect(component.karmaCoinsStrip).toEqual({ tncText: 'Terms', tncHeader: 'Head', tncMessage: 'Body', infoText: 'Info' })
+    })
+
+    it('should open and close the T&C popup', () => {
+      expect(component.karmaCoinsTncOpen).toBe(false)
+      component.openKarmaCoinsTnc()
+      expect(component.karmaCoinsTncOpen).toBe(true)
+      component.closeKarmaCoinsTnc()
+      expect(component.karmaCoinsTncOpen).toBe(false)
+    })
+
+    it('should tolerate a null strip config', () => {
+      component.config = { karmaCoinsStrip: null }
+      expect(component.karmaCoinsStrip.tncText).toBe('T&C Apply')
     })
   })
 
@@ -357,9 +435,24 @@ describe('AppTocCiosHomeComponent', () => {
       expect(component.config).toBeUndefined()
     })
 
-    it('should flag mobile when the viewport is 1200px or narrower', () => {
+    it('should flag mobile when the viewport is narrower than 900px', () => {
+      setWindowProp('innerWidth', 899)
+      component.ngOnInit()
+      expect(component.isMobile).toBe(true)
+    })
+
+    it('should keep the desktop layout from 900px (125% / 150% zoom)', () => {
       setWindowProp('innerWidth', 900)
       component.ngOnInit()
+      expect(component.isMobile).toBe(false)
+    })
+
+    it('should re-evaluate the layout when the window is resized', () => {
+      setWindowProp('innerWidth', 1400)
+      component.ngOnInit()
+      expect(component.isMobile).toBe(false)
+      setWindowProp('innerWidth', 800)
+      component.updateMobileLayout()
       expect(component.isMobile).toBe(true)
     })
 

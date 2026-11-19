@@ -212,7 +212,7 @@ export class EnrollProfileFormComponent implements OnInit {
     if (this.userDetailsForm.get('mobile')) {
       this.userDetailsForm.get('mobile')!.valueChanges
         .subscribe(res => {
-          if (res && res !== this.userProfileObject.profileDetails.personalDetails.mobile ||
+          if (res && String(res) !== String(this.userProfileObject.profileDetails.personalDetails.mobile) ||
             !this.userProfileObject.profileDetails.personalDetails.phoneVerified) {
             if (MOBILE_PATTERN.test(res)) {
               this.verifyMobile = true
@@ -975,6 +975,9 @@ export class EnrollProfileFormComponent implements OnInit {
             this.mVerified = true
           } else {
             this.showMobile = true
+            if (this.userProfileObject.profileDetails.personalDetails.mobile) {
+              contrl.setValue(this.userProfileObject.profileDetails.personalDetails.mobile)
+            }
             contrl.setValidators([Validators.minLength(10), Validators.maxLength(10), Validators.pattern(MOBILE_PATTERN)]);
             contrl.updateValueAndValidity()
           }
@@ -990,7 +993,7 @@ export class EnrollProfileFormComponent implements OnInit {
         const contrl = this.userDetailsForm.get('gender')
         if (contrl) {
           if (this.userProfileObject.profileDetails.personalDetails.gender) {
-            contrl.setValue(this.userProfileObject.profileDetails.personalDetails.gender)
+            contrl.setValue(this.userProfileObject.profileDetails.personalDetails.gender.toUpperCase())
             contrl.setValidators([Validators.required])
             contrl.updateValueAndValidity()
           } else if (this.profileFormType === 'Available user filled iGOT profile') {
@@ -1086,8 +1089,9 @@ export class EnrollProfileFormComponent implements OnInit {
         this.canShowshowCadreDetails = true
         const contrl = this.userDetailsForm.get('isCadre')
         if (contrl) {
-          if (Object.keys(this.userProfileObject.profileDetails.personalDetails).includes('isCadre')) {
-            if (this.userProfileObject.profileDetails.personalDetails.isCadre === true) {
+          const isCadreValue = _.get(this.userProfileObject, 'profileDetails.personalDetails.isCadre')
+          if (isCadreValue !== undefined && isCadreValue !== null && isCadreValue !== '') {
+            if (isCadreValue === true || String(isCadreValue).toLowerCase() === 'true') {
               contrl.setValue(true)
               this.isCadreStatus = true
               this.serviceId = this.userProfileObject.profileDetails.cadreDetails.civilServiceTypeId
@@ -1116,6 +1120,8 @@ export class EnrollProfileFormComponent implements OnInit {
             this.canShowshowCadreDetails = false
             this.isCadreStatus = false
           } else {
+            contrl.setValue(false)
+            this.isCadreStatus = false
             contrl.setValidators([Validators.required])
             contrl.updateValueAndValidity()
           }

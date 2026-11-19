@@ -30,6 +30,8 @@ export const APP_DB_NAME = 'iGotAppDB'
 export const APP_DB_VERSION = 3
 
 export const APP_DB_STORES = {
+  /** readFormDetails lookups (which form to read for a page), keyed by portal. */
+  FORMS: 'forms',
   /** Content metadata keyed by do_id, plus the `all` dictionary blob. */
   DICTIONARY: 'dictionary',
   /** CBP/CVP plan entries keyed by financial year. */

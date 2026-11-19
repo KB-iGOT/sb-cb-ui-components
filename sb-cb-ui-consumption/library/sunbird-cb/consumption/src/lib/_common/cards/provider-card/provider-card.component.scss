@@ -120,3 +120,12 @@
     cursor: pointer;
     transition: color 0.3s ease;
 }
+
+.redeem-karma-coins {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 28px;
+}

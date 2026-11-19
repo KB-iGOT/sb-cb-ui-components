@@ -35,7 +35,7 @@ export class ReuseUserGroupComponent implements OnInit {
   readonly isLoading = signal(false);
   readonly hasLoadFailed = signal(false);
   readonly groups = signal<IReuseUserGroupRow[]>([]);
-  readonly totalCount = signal(0);
+  // readonly totalCount = signal(0);
   readonly searchKey = signal("");
   readonly currentPage = signal(1);
   readonly pageSize = signal(PAGE_SIZE);
@@ -65,7 +65,7 @@ export class ReuseUserGroupComponent implements OnInit {
     return !group || this.isAlreadyUsed(group);
   });
 
-  readonly hasMoreThanLoaded = computed(() => this.totalCount() > this.groups().length);
+  // readonly hasMoreThanLoaded = computed(() => this.totalCount() > this.groups().length);
   readonly isPaginationVisible = computed(() => this.filteredGroups().length > this.pageSize());
   readonly isCCA = computed(() => this.accessControlService.accessControlConfig()?.userConfig.org?.isCCA || false);
 
@@ -87,12 +87,12 @@ export class ReuseUserGroupComponent implements OnInit {
       .subscribe({
         next: response => {
           this.groups.set((response?.result?.content || []).map((group: IReusableUserGroupResult) => this.toRow(group)));
-          this.totalCount.set(response?.result?.count || this.groups().length);
+          // this.totalCount.set(response?.result?.count || this.groups().length);
           this.isLoading.set(false);
         },
         error: () => {
           this.groups.set([]);
-          this.totalCount.set(0);
+          // this.totalCount.set(0);
           this.hasLoadFailed.set(true);
           this.isLoading.set(false);
         }

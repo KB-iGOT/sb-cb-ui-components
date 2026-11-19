@@ -50,6 +50,7 @@ import { NsCardContent } from '../../models/card-content.model'
 import { NsPlaylist } from '../../models/playlist.model'
 import { NsGoal } from '../../models/goal.model'
 import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
+import { isVolunteerUser } from '../../_services/user-role.util'
 
 export enum ErrorType {
   internalServer = 'internalServer',
@@ -563,7 +564,8 @@ export class AppTocHomeComponent implements OnInit, OnDestroy, AfterViewChecked,
   getKarmapointsLimit() {
     // honor toc config apiConfig.totalKarmaPoints.enabled (skip when explicitly disabled)
     const kpCfg = this.tocConfig?.apiConfig?.totalKarmaPoints
-    if (this.forPreview || (kpCfg && !kpCfg.enabled)) {
+    // volunteers are not whitelisted for user/totalkarmapoints (403)
+    if (this.forPreview || (kpCfg && !kpCfg.enabled) || isVolunteerUser(this.configSvc)) {
       return
     }
     this.contentSvc.userKarmaPoints().subscribe((res: any) => {
@@ -596,6 +598,10 @@ export class AppTocHomeComponent implements OnInit, OnDestroy, AfterViewChecked,
   }
 
   async findACPB() {
+    // volunteers have no CBP plans and are not whitelisted for the cbplan dictionary (403)
+    if (isVolunteerUser(this.configSvc)) {
+      return
+    }
     // CBP plan data now lives in IndexedDB (iGotAppDB/cbpPlans); getCBPData() reads the
     // current plan year from that cache instead of localStorage['cbpData'].
     const localCbp = await this.userServiceLib.getCBPData().toPromise()
@@ -1255,8 +1261,10 @@ export class AppTocHomeComponent implements OnInit, OnDestroy, AfterViewChecked,
         let moderatedBatchData: any
         if (this.batchData && this.batchData.content && this.batchData.content.length > 1) {
           moderatedBatchData = this.selectedBatchData && this.selectedBatchData.content && this.selectedBatchData.content[0]
+        } else if (this.batchData && this.batchData.content && this.batchData.content.length === 1) {
+          moderatedBatchData = this.batchData.content[0]
         } else {
-          moderatedBatchData = this.batchData && this.batchData.content && this.batchData.content[0]
+          moderatedBatchData = batchData
         }
         this.autoEnrollCuratedProgram(NsContent.ECourseCategory.MODERATED_PROGRAM, moderatedBatchData)
       } else {

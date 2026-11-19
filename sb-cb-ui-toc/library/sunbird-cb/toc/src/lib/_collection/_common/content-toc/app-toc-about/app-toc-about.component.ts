@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, Inject } from '@angular/core'
+import { Component, OnInit, Input, OnChanges, SimpleChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef, Output, EventEmitter, Inject, HostListener } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { MatDialog as MatDialog } from '@angular/material/dialog'
 import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
@@ -28,6 +28,9 @@ import { DiscussUtilsService } from '../../../../services/discuss-utils.service'
 
 import { ReviewsContentComponent } from '../reviews-content/reviews-content.component'
 import { CertificateDialogComponent } from '../../certificate-dialog/certificate-dialog.component'
+import {
+  configuredCategories, DISABLE_CERTIFICATE_KEY, isCategoryListed, karmaPointsDisabledCategories,
+} from '../../../../_services/course-category-visibility'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
 
 interface IStripUnitContentData {
@@ -87,6 +90,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   @Input() showReviews = false
   @Input() batchData: any
   @Input() fromViewer = false
+  @Input() mobileBreakpoint = 1201
   @Input() selectedBatchData: any
   @Input() selectedTabValue = 0
   @Input() fromMarketPlace? = false
@@ -104,6 +108,14 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   @ViewChild('tagsElem') tagsElem !: ElementRef
   @ViewChild('searchTagElem') searchTagElem !: ElementRef
   disableCertificate = false
+  /**
+   * Certificate hidden by config: the course category is in `disableCertificateCourseCategories`
+   * (TOC page config, else the application config). Checked in addition to `disableCertificate`, which
+   * keeps its old rules (Case Study etc.). A getter, so it follows `config` / `content` whenever they arrive.
+   */
+  get certificateHiddenByConfig(): boolean {
+    return this.isCertificateDisabledFor(this.content?.courseCategory || this.contentReadData?.courseCategory)
+  }
   isExternalContent = false
   primaryCategory = NsContent.EPrimaryCategory
   stripsResultDataMap!: { [key: string]: IStripUnitContentData }
@@ -208,15 +220,17 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
       this.fetchRatingSummary()
     })
   }
+  
+  @HostListener('window:resize')
+  updateMobileLayout() {
+    this.isMobile = window.innerWidth < this.mobileBreakpoint
+  }
+
   ngOnInit() {
     this.pageConfigData = this.activatedRoute?.snapshot?.data?.pageData?.data
     this.compentencyKey = this.configService.compentency[this.environment.compentencyVersionKey]
     this.userProfile = this.configService.userProfile
-    if (window.innerWidth <= 1200) {
-      this.isMobile = true
-    } else {
-      this.isMobile = false
-    }
+    this.updateMobileLayout()
 
     this.tocSvc.getSelectedBatch
       .pipe(takeUntil(this.destroySubject$))
@@ -793,6 +807,7 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
   handleOpenReviewModal(): void {
     this.dialogRef = this.dialog.open(ReviewsContentComponent, {
       width: '400px',
+      maxHeight: 'calc(100vh - 32px)',
       data: { ratings: this.ratingSummaryProcessed, reviews: this.authReplies, latestReviews: this.ratingLookup },
       panelClass: 'ratings-modal-box',
       disableClose: true,
@@ -1066,6 +1081,24 @@ export class AppTocAboutComponent implements OnInit, OnChanges, AfterViewInit, O
     if (this.refreshratingSub) {
       this.refreshratingSub.unsubscribe()
     }
+  }
+
+
+  /**
+   * Course categories whose TOC shows no certificate: `disableCertificateCourseCategories` in the TOC
+   * page config, else in the application config (e.g. ["Case Study", "Baseline Assessment"]).
+   * Adds to the built-in rules (Case Study is still hidden by `disableCertificate`); none when the key is missing.
+   * Matching ignores case and surrounding spaces.
+   */
+  isCertificateDisabledFor(courseCategory?: string): boolean {
+    const categories = configuredCategories(DISABLE_CERTIFICATE_KEY, this.config, this.configService?.instanceConfig)
+    return isCategoryListed(categories, courseCategory)
+  }
+
+  /** Karma Points hidden for this course category (`disableKarmaPointsCourseCategories`); none by default */
+  get karmaPointsHidden(): boolean {
+    const categories = karmaPointsDisabledCategories(this.config, this.configService?.instanceConfig)
+    return isCategoryListed(categories, this.content?.courseCategory || this.contentReadData?.courseCategory)
   }
 
 }

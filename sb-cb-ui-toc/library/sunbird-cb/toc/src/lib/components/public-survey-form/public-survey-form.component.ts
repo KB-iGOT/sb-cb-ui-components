@@ -205,7 +205,7 @@ export class PublicSurveyFormComponent implements OnInit {
       this.appTocSvc.submitFormPublic(formBody).subscribe({
         next: res => {
           this.addLoader = this.addLoader - 1
-          if (_.get(res, 'params.status') === 'success') {
+          if (String(_.get(res, 'params.status', '')).toLowerCase() === 'success') {
             this.openSnackbar('Form is submitted successfully')
             this.dialogRef.close(true)
           } else {

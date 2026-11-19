@@ -62,6 +62,8 @@
 
   .banner-details {
     padding: 36px 0px;
+    box-sizing: border-box;
+    width: 100%;
 
     @media screen and (max-width: 576px) {
       padding-top: 10px;
@@ -111,6 +113,9 @@
 
     .banner-text {
       color: rgba(255, 255, 255, 0.95);
+      width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
   }
 
@@ -205,10 +210,19 @@
   width: 100%;
 }
 
+.toc-v2-layout > .toc-content {
+  min-width: 0;
+}
+
+// The card keeps its width; the content column shrinks instead, so the card never overflows
+.toc-v2-layout > .right-container {
+  flex-shrink: 0;
+}
+
 /* Windows display scaling ~150% */
 @media (min-resolution: 1.5dppx) {
   .toc-content {
-    max-width: 735px;
+    max-width: min(735px, 61.25%);
   }
 }
 
@@ -348,7 +362,7 @@
   display: none;
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: $toc-mobile-max) {
   .mob-tip-for-learner {
     display: block;
     width: 100%;
@@ -369,7 +383,26 @@
   text-align: center;
 }
 
-@media screen and (max-width: 1200px) {
+// Zoomed / smaller desktop screens: keep the right card but make it narrower
+@media screen and (min-width: $toc-desktop-min) and (max-width: 1200px) {
+  .toc-v2-layout > .toc-content {
+    max-width: none;
+    flex: 1 1 0;
+  }
+
+  .toc-v2-layout > .right-container {
+
+    .right-content-inner {
+      width: 320px;
+    }
+
+    .image-div img {
+      max-width: 320px;
+    }
+  }
+}
+
+@media screen and (max-width: $toc-mobile-max) {
   .right-container {
     display: none;
   }
@@ -530,15 +563,35 @@ a.action-button {
   }
 }
 
-@media screen and (min-width: 1201px) {
+@media screen and (min-width: $toc-desktop-min) {
 
   .mobile-enroll-div,
   .mob-share {
     display: none !important;
   }
 
-  .hideAbove1200 {
+  .toc-banner .hideAbove1200 {
     display: none;
+  }
+}
+
+// The About tab (app-toc-about) has its own 1200px mobile rules for when the right card
+// is hidden. On this page the card stays visible down to $toc-desktop-min, so hide
+// About's mobile-only duplicates in that range too.
+@media screen and (min-width: $toc-desktop-min) and (max-width: 1200px) {
+  .toc-v2-layout {
+    .hideAbove1200 {
+      display: none !important;
+    }
+
+    .mobile-karma-points {
+      display: none;
+    }
+
+    .pt-mweb-8,
+    .pt-mweb-4 {
+      padding-top: 0;
+    }
   }
 }
 
@@ -546,7 +599,7 @@ a.action-button {
   padding: 16px;
 }
 
-@media screen and (min-width:1200px) {
+@media screen and (min-width: $toc-desktop-min) {
   .mobile-progress {
     display: none;
   }

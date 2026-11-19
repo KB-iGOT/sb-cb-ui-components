@@ -10,6 +10,7 @@ import { CertificateService } from '../../services/certificate.service'
 import { NsDiscussionV2 } from '@sunbird-cb/discussion-v2'
 import * as _ from 'lodash'
 import { NetCoreService } from '../../services/netcore.service'
+import { TOC_DESKTOP_MIN_WIDTH } from '../../_constants/toc-layout.constants'
 import { ConsentDialogComponent } from './consent-dialog.component'
 
 const KARMA_REDEEM_PAGE_ID = 'app/toc/ext'
@@ -20,6 +21,10 @@ const KARMA_REDEEM_CANCEL = 'redeem-karma-coins-cancel'
 const KARMA_WALLET_ROUTE = '/app/person-profile/karma-wallet'
 const PAYMENT_REQUIRED = 'PAYMENT_REQUIRED'
 const PAYMENT_REQUIRED_STATUS = 402
+const DEFAULT_KARMA_COINS_INFO = 'Karma Coins will be deducted from your Karma Wallet if you proceed with enrolment.'
+const DEFAULT_KARMA_COINS_TNC_HEADER = 'Terms and Conditions'
+const DEFAULT_KARMA_COINS_TNC_MESSAGE =
+  'Enrolment eligibility and Karma Coin pricing for this course are at Karmayogi Bharat’s discretion and may change without notice.'
 const ENROL_STATUS_PENDING = 3
 const ENROLLED_NOTICE_WINDOW_MS = 60 * 60 * 1000
 const ENROL_SUCCESS_MESSAGE = 'Successfully enrolled in the course.'
@@ -51,6 +56,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   scrollLimit: any
   scrolled: boolean | undefined
   isMobile = false
+  readonly tocDesktopMinWidth = TOC_DESKTOP_MIN_WIDTH
   config: any
   widgetData: any
   enableShare = false
@@ -72,9 +78,16 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   private enrolAttempt = 0
   insufficientCoins = false
   insufficientCoinsContent: any = null
+  karmaCoinsTncOpen = false
   private karmaRedeemContent: any = null
   private karmaCoinsRequest: Promise<number> | null = null
   private coinShortfall = false
+  // Browser zoom changes the viewport width, so re-evaluate on resize
+  @HostListener('window:resize')
+  updateMobileLayout() {
+    this.isMobile = window.innerWidth < TOC_DESKTOP_MIN_WIDTH
+  }
+
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
 
@@ -135,6 +148,8 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       } else {
         this.validateEnrollmentEligibility()
       }
+      this.karmaCoinsRequest = null
+      this.coinShortfall = false
       this.requiredKarmaCoins = this.readRequiredKarmaCoins(this.extContentReadData)
 
     })
@@ -169,11 +184,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       this.config = this.route.snapshot.data.pageData.data
       this.initializeDiscussData()
     }
-    if (window.innerWidth <= 1200) {
-      this.isMobile = true
-    } else {
-      this.isMobile = false
-    }
+    this.updateMobileLayout()
     this.contentViewEventForNetCore('view')
   }
 
@@ -287,6 +298,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
           this.coinShortfall = this.isInsufficientCoinsError(err)
           if (this.coinShortfall) {
             this.insufficientCoinsMessage = this.readApiMessage(err)
+            return Number(_.get(err, 'error.result.requiredKarmaPoints')) || 0
           }
           return 0
         })
@@ -295,7 +307,27 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   private readRequiredKarmaCoins(content: any): number {
-    return Number(_.get(content, 'requiredKarmaCoins', 0)) || 0
+    const coins = Number(_.get(content, 'requiredKarmaCoins', 0))
+    return coins > 0 ? coins : 0
+  }
+
+  get karmaCoinsStrip(): { tncText: string, tncHeader: string, tncMessage: string, infoText: string } {
+    const stripConfig = _.get(this.config, 'karmaCoinsStrip', {}) || {}
+    return {
+      tncText: stripConfig.tncText || 'T&C Apply',
+      tncHeader: stripConfig.tncHeader || DEFAULT_KARMA_COINS_TNC_HEADER,
+      tncMessage: stripConfig.tncMessage || DEFAULT_KARMA_COINS_TNC_MESSAGE,
+      infoText: stripConfig.infoText || DEFAULT_KARMA_COINS_INFO,
+    }
+  }
+
+  openKarmaCoinsTnc() {
+    this.karmaCoinsTncOpen = true
+  }
+
+  @HostListener('document:keydown.escape')
+  closeKarmaCoinsTnc() {
+    this.karmaCoinsTncOpen = false
   }
 
   private buildKarmaRedeemMessage(popupConfig: any, coins: number): string {
@@ -530,6 +562,15 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   }
 
   captureRedirectTelemetry(content: any) {
+    if (content?.redirectUrl) {
+      window.open(content.redirectUrl, '_blank', 'noopener')
+    } else if (content?.providerCustomClaim && content?.contentId && content?.partnerId) {
+      const queryParams = {
+        id: content.contentId,
+        partnerId: content.partnerId,
+      }
+      this.router.navigate([`viewer/lti-course`], { queryParams })
+    }
     this.rememberPartnerSession(content)
     this.raiseTelemtryStartEvent()
     this.telemetryToCaptureInteract(content.contentId, 'redirect', 'redirect-content')
@@ -854,7 +895,10 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   get showRedirect(): boolean {
     return this.hasEnrolmentRecord &&
       !this.isEnrolPending &&
-      _.get(this.extContentReadData, 'redirectUrl') &&
+      (
+        _.get(this.extContentReadData, 'redirectUrl')
+        || _.get(this.extContentReadData, 'providerCustomClaim')
+      ) &&
       _.get(this.extContentReadData, 'contentPartner.isActive', false)
   }
 

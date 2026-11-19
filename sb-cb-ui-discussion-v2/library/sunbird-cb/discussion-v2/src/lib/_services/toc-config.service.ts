@@ -1,12 +1,9 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
+import { FormConfigService } from '@sunbird-cb/consumption'
 import { defer, Observable, of } from 'rxjs'
 import { catchError, map, shareReplay, switchMap } from 'rxjs/operators'
-
-const API_END_POINTS = {
-  FORM_CONFIG_READ: '/apis/proxies/v8/formsConfig/v1/read',
-}
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +14,7 @@ export class TocConfigService {
   constructor(
     private http: HttpClient,
     private configSvc: ConfigurationsService,
+    private formConfigSvc: FormConfigService,
   ) { }
 
   getTocConfig(): Observable<any> {
@@ -28,17 +26,11 @@ export class TocConfigService {
       } else {
         this.tocConfig$ = defer(() => {
           const globalConfig = (this.configSvc as any).globalConfig
-          const request = {
-            request: {
-              type: 'page',
-              subType: 'toc',
-              portal: 'portal',
-              clientVersion: (globalConfig
-                && globalConfig.formClentVersion
-                && globalConfig.formClentVersion['toc']) || 1.0,
-            },
-          }
-          return this.http.post<any>(API_END_POINTS.FORM_CONFIG_READ, request)
+          const clientVersion = (globalConfig
+            && globalConfig.formClentVersion
+            && globalConfig.formClentVersion['toc']) || 1.0
+          // the toc form is picked on the client from the user read response, then read by id
+          return this.formConfigSvc.getForm(this.configSvc.unMappedUser, 'portal', 'toc', clientVersion)
         }).pipe(
           map((response: any) => (response && response.result
             && (response.result.form && response.result.form.data || response.result.data)) || null),

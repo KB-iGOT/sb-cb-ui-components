@@ -81,14 +81,15 @@
 <div class="ws-carousel" [ngClass]="hostClasses()" role="region" aria-label="Promotional Banners"
   aria-roledescription="carousel">
   <!-- Screen-reader live announcer: fires whenever currentIndex changes -->
-  <span class="sr-only" aria-live="polite" aria-atomic="true">Slide {{ currentIndex() + 1 }} of {{ resolvedBanners().length
+  <span class="sr-only" aria-live="polite" aria-atomic="true">Slide {{ currentIndex() + 1 }} of {{
+    resolvedBanners().length
     }}</span>
   <!-- TOP CTRL BAR  (top-left | top-right) – rendered ABOVE the track -->
   @if (isTop()) {
   <div class="ws-carousel__ctrl-bar" [ngClass]="'ws-carousel__ctrl-bar--' + navButtonPosition()">
     @if (showArrows() && resolvedBanners().length > 1) {
-    <button type="button" class="ws-carousel__nav" aria-label="Previous banner" [disabled]="resolvedBanners().length <= 1"
-      (click)="prev()">
+    <button type="button" class="ws-carousel__nav" aria-label="Previous banner"
+      [disabled]="resolvedBanners().length <= 1" (click)="prev()">
       <mat-icon aria-hidden="true">chevron_left</mat-icon>
     </button>
     }
@@ -135,7 +136,8 @@
           [style.width]="slideFlexBasis() ? 'auto' : null">
           <!-- Banner image -->
           <img class="ws-carousel__image" [src]="item.bannerUrl" [alt]="item.altText || 'Banner ' + (i + 1)"
-            loading="lazy" />
+            [attr.loading]="i === 0 ? 'eager' : 'lazy'" [attr.fetchpriority]="i === 0 ? 'high' : 'auto'"
+            decoding="async" />
 
           <!-- Overlay: title / subtitle / CTA -->
           @if (item.title || item.subtitle || item.ctaLabel) {
@@ -201,8 +203,8 @@
   @if (isBottom()) {
   <div class="ws-carousel__ctrl-bar" [ngClass]="'ws-carousel__ctrl-bar--' + navButtonPosition()">
     @if (showArrows() && resolvedBanners().length > 1) {
-    <button type="button" class="ws-carousel__nav" aria-label="Previous banner" [disabled]="resolvedBanners().length <= 1"
-      (click)="prev()">
+    <button type="button" class="ws-carousel__nav" aria-label="Previous banner"
+      [disabled]="resolvedBanners().length <= 1" (click)="prev()">
       <mat-icon aria-hidden="true">chevron_left</mat-icon>
     </button>
     }
@@ -230,7 +232,8 @@
     aria-label="Slide indicators">
     @for (item of resolvedBanners(); track item.bannerUrl; let i = $index) {
     <button type="button" class="ws-carousel__dot" [class.ws-carousel__dot--active]="i === currentIndex()" role="tab"
-      [attr.aria-selected]="i === currentIndex()" [attr.aria-label]="'Go to slide ' + (i + 1)" (click)="goTo(i)"></button>
+      [attr.aria-selected]="i === currentIndex()" [attr.aria-label]="'Go to slide ' + (i + 1)"
+      (click)="goTo(i)"></button>
     }
   </div>
   }

@@ -91,6 +91,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
   private _cachedIsParentMilestoneLocked: boolean = false
   private _cachedIsContentUnlocked: boolean = true
   private _cachedCheckForCuratedProgram: boolean = false
+  private _cachedIsComprehensiveAssessmentProgram: boolean = false
   private _cachedIsMilestoneAssessment: boolean = false
   private _cachedIsMilestoneAssessmentLocked: boolean = false
   private _cachedResourceLink: { url: string; queryParams: { [key: string]: any } } = { url: '', queryParams: {} }
@@ -178,6 +179,7 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
     }
 
     this._cachedCheckForCuratedProgram = this.computeCheckForCuratedProgram()
+    this._cachedIsComprehensiveAssessmentProgram = this.computeIsComprehensiveAssessmentProgram()
     this._cachedIsContentUnlocked = this.computeIsContentUnlocked()
     this._cachedIsMilestoneAssessment = this.computeIsMilestoneAssessment()
     this._cachedIsMilestoneAssessmentLocked = this.computeIsMilestoneAssessmentLocked()
@@ -211,6 +213,14 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
         parentData.contextLockingType === NsContent.EContextLockingType.COURSE_ASSESSMENT_ONLY
     }
     return false
+  }
+
+  private computeIsComprehensiveAssessmentProgram(): boolean {
+    const capCategory = 'Comprehensive Assessment Program'
+    const parentData = this.content && this.content.parent && this.hierarchyMapData
+      ? this.hierarchyMapData[this.content.parent] : null
+    return (parentData && parentData.courseCategory === capCategory) ||
+      (this.baseContentReadData && this.baseContentReadData.courseCategory === capCategory) || false
   }
 
   private computeIsContentUnlocked(): boolean {
@@ -975,6 +985,13 @@ export class AppTocContentCardV2Component implements OnInit, OnDestroy {
       return this._cachedCheckForCuratedProgram
     }
     return this.computeCheckForCuratedProgram()
+  }
+
+  get isComprehensiveAssessmentProgram() {
+    if (this._cacheInitialized) {
+      return this._cachedIsComprehensiveAssessmentProgram
+    }
+    return this.computeIsComprehensiveAssessmentProgram()
   }
 
   get isContentUnlocked() {
