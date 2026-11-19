@@ -3,9 +3,6 @@
 
 @use '../../_variables' as *;
 
-$toc-desktop-min: 900px;
-$toc-mobile-max: $toc-desktop-min - 1px;
-
 
 // New TOC page css...
 .source-text {
@@ -217,6 +214,11 @@ $toc-mobile-max: $toc-desktop-min - 1px;
   min-width: 0;
 }
 
+// The card keeps its width; the content column shrinks instead, so the card never overflows
+.toc-v2-layout > .right-container {
+  flex-shrink: 0;
+}
+
 /* Windows display scaling ~150% */
 @media (min-resolution: 1.5dppx) {
   .toc-content {
@@ -389,7 +391,6 @@ $toc-mobile-max: $toc-desktop-min - 1px;
   }
 
   .toc-v2-layout > .right-container {
-    flex: 0 0 auto;
 
     .right-content-inner {
       width: 320px;

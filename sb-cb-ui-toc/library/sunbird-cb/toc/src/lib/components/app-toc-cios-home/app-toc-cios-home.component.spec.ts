@@ -435,9 +435,24 @@ describe('AppTocCiosHomeComponent', () => {
       expect(component.config).toBeUndefined()
     })
 
-    it('should flag mobile when the viewport is 1200px or narrower', () => {
+    it('should flag mobile when the viewport is narrower than 900px', () => {
+      setWindowProp('innerWidth', 899)
+      component.ngOnInit()
+      expect(component.isMobile).toBe(true)
+    })
+
+    it('should keep the desktop layout from 900px (125% / 150% zoom)', () => {
       setWindowProp('innerWidth', 900)
       component.ngOnInit()
+      expect(component.isMobile).toBe(false)
+    })
+
+    it('should re-evaluate the layout when the window is resized', () => {
+      setWindowProp('innerWidth', 1400)
+      component.ngOnInit()
+      expect(component.isMobile).toBe(false)
+      setWindowProp('innerWidth', 800)
+      component.updateMobileLayout()
       expect(component.isMobile).toBe(true)
     })
 

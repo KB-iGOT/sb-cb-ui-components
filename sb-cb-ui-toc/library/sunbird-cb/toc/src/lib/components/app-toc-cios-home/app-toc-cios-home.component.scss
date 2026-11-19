@@ -126,6 +126,61 @@
   width: 100%;
 }
 
+// Desktop layout only (the mobile layout below $toc-desktop-min is unchanged)
+@media screen and (min-width: $toc-desktop-min) {
+  // Main row (tabs + right card): same side gutter as the banner row, so the card never
+  // touches the screen edge when the viewport is narrower than the 1200px fixed width
+  .toc-cios-layout {
+    padding: 0 16px;
+  }
+
+  // Content column fills the space left of the card (instead of a fixed 55%), so the card
+  // sits at the right edge of the row with no empty band beside it
+  .toc-cios-layout > .toc-content {
+    max-width: none;
+    flex: 1 1 0;
+  }
+}
+
+.toc-cios-layout > .toc-content {
+  min-width: 0;
+}
+
+// The card keeps its width; the content column shrinks instead, so the card never overflows
+.toc-cios-layout > .right-container {
+  flex-shrink: 0;
+}
+
+// Zoomed / smaller desktop screens: keep the right card but make it narrower
+@media screen and (min-width: $toc-desktop-min) and (max-width: 1200px) {
+  .toc-cios-layout > .right-container {
+    .right-content {
+      width: 320px;
+    }
+
+    .image-div img {
+      max-width: 320px;
+    }
+  }
+
+  // app-toc-about has its own 1200px mobile rules for when the right card is hidden;
+  // here the card is still visible, so hide About's mobile-only duplicates too.
+  .toc-cios-layout ::ng-deep {
+    .hideAbove1200 {
+      display: none !important;
+    }
+
+    .mobile-karma-points {
+      display: none;
+    }
+
+    .pt-mweb-8,
+    .pt-mweb-4 {
+      padding-top: 0;
+    }
+  }
+}
+
 .right-container {
   .image-div {
     height: 220px;
@@ -248,7 +303,7 @@
   text-align: center;
 }
 
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: $toc-mobile-max) {
   .right-container {
     display: none;
   }
@@ -390,7 +445,7 @@ a.action-button {
   }
 }
 
-@media screen and (min-width: 1201px) {
+@media screen and (min-width: $toc-desktop-min) {
 
   .mobile-enroll-div,
   .mob-share {
@@ -406,7 +461,7 @@ a.action-button {
   padding: 16px;
 }
 
-@media screen and (min-width:1200px) {
+@media screen and (min-width: $toc-desktop-min) {
   .mobile-progress {
     display: none;
   }

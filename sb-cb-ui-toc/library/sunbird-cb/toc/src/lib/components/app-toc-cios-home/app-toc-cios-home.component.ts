@@ -10,6 +10,7 @@ import { CertificateService } from '../../services/certificate.service'
 import { NsDiscussionV2 } from '@sunbird-cb/discussion-v2'
 import * as _ from 'lodash'
 import { NetCoreService } from '../../services/netcore.service'
+import { TOC_DESKTOP_MIN_WIDTH } from '../../_constants/toc-layout.constants'
 import { ConsentDialogComponent } from './consent-dialog.component'
 
 const KARMA_REDEEM_PAGE_ID = 'app/toc/ext'
@@ -55,6 +56,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   scrollLimit: any
   scrolled: boolean | undefined
   isMobile = false
+  readonly tocDesktopMinWidth = TOC_DESKTOP_MIN_WIDTH
   config: any
   widgetData: any
   enableShare = false
@@ -80,6 +82,12 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
   private karmaRedeemContent: any = null
   private karmaCoinsRequest: Promise<number> | null = null
   private coinShortfall = false
+  // Browser zoom changes the viewport width, so re-evaluate on resize
+  @HostListener('window:resize')
+  updateMobileLayout() {
+    this.isMobile = window.innerWidth < TOC_DESKTOP_MIN_WIDTH
+  }
+
   @HostListener('window:scroll', ['$event'])
   handleScroll() {
 
@@ -176,11 +184,7 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       this.config = this.route.snapshot.data.pageData.data
       this.initializeDiscussData()
     }
-    if (window.innerWidth <= 1200) {
-      this.isMobile = true
-    } else {
-      this.isMobile = false
-    }
+    this.updateMobileLayout()
     this.contentViewEventForNetCore('view')
   }
 

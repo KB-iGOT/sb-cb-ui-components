@@ -17,3 +17,8 @@ $font-size-large: 16px;
 $font-size-xlarge: 20px;
 
 $text-primary: #1b4ca1;
+
+// TOC pages switch to the mobile layout below this width.
+// Keep in sync with TOC_DESKTOP_MIN_WIDTH in _constants/toc-layout.constants.ts
+$toc-desktop-min: 900px;
+$toc-mobile-max: $toc-desktop-min - 1px;
