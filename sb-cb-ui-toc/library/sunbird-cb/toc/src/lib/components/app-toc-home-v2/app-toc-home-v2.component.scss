@@ -217,6 +217,7 @@
 // The card keeps its width; the content column shrinks instead, so the card never overflows
 .toc-v2-layout > .right-container {
   flex-shrink: 0;
+  padding-right: 24px;
 }
 
 /* Windows display scaling ~150% */
@@ -383,14 +384,17 @@
   text-align: center;
 }
 
-// Zoomed / smaller desktop screens: keep the right card but make it narrower
-@media screen and (min-width: $toc-desktop-min) and (max-width: 1200px) {
+@media screen and (min-width: $toc-desktop-min) {
   .toc-v2-layout > .toc-content {
     max-width: none;
     flex: 1 1 0;
   }
+}
 
+// Zoomed / smaller desktop screens: keep the right card but make it narrower
+@media screen and (min-width: $toc-desktop-min) and (max-width: 1200px) {
   .toc-v2-layout > .right-container {
+    flex: 0 0 auto;
 
     .right-content-inner {
       width: 320px;
