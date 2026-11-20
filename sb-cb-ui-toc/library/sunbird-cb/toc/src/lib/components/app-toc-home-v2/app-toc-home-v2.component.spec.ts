@@ -43,6 +43,7 @@ function createComponent(overrides: Record<string, any> = {}): any {
       courses: [], pendingCourses: [], isAllCoursesCompleted: false,
     })),
     getAttemptStatus: jest.fn(() => Promise.resolve({ ...NO_ATTEMPTS })),
+    getResultFromEnrolment: jest.fn(() => null),
   }
   return Object.assign(component, overrides)
 }
@@ -118,6 +119,33 @@ describe('AppTocHomeV2Component', () => {
     it('reports zero when neither the API nor the author supplied a total', () => {
       const component = createComponent({ contentReadData: {} })
       expect(component.totalAssessmentAttempts).toBe(0)
+    })
+  })
+
+  describe('assessment result', () => {
+
+    it('treats the assessment as completed only at 100% with status 2', () => {
+      expect(createComponent({ enrolledCourseData: { completionPercentage: 100, status: 2 } })
+        .isAssessmentCompleted).toBe(true)
+      expect(createComponent({ enrolledCourseData: { completionPercentage: 100, status: 1 } })
+        .isAssessmentCompleted).toBe(false)
+      expect(createComponent({ enrolledCourseData: { completionPercentage: 50, status: 2 } })
+        .isAssessmentCompleted).toBe(false)
+    })
+
+    it('passes when the best score meets the pass mark', () => {
+      const component = createComponent({ assessmentResult: { score: 60, passPercentage: 60 } })
+      expect(component.isAssessmentPassed).toBe(true)
+    })
+
+    it('fails when the best score is below the pass mark', () => {
+      const component = createComponent({ assessmentResult: { score: 59, passPercentage: 60 } })
+      expect(component.isAssessmentPassed).toBe(false)
+    })
+
+    it('is not passed when there is no result', () => {
+      const component = createComponent({ assessmentResult: null })
+      expect(component.isAssessmentPassed).toBe(false)
     })
   })
 

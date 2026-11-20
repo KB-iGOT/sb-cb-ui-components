@@ -35,7 +35,9 @@
           </div>
           <div class="flex items-center justify-between text-xs leading-4 score-label">
             <span>{{ 'apptochome.bestScore' | translate }}</span>
-            <span>{{ 'apptochome.passMark' | translate }} {{ assessmentResult.passPercentage | number: '1.0-2' }}%</span>
+            @if (assessmentResult.passPercentage > 0) {
+              <span>{{ 'apptochome.passMark' | translate }} {{ assessmentResult.passPercentage | number: '1.0-2' }}%</span>
+            }
           </div>
         </div>
       }

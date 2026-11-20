@@ -56,7 +56,7 @@ import { TOC_DESKTOP_MIN_WIDTH } from '../../_constants/toc-layout.constants'
 import { NonReleventFeedbackDialogComponent } from '../non-relevent-feedback-dialog/non-relevent-feedback-dialog.component'
 import { AppTocV2Service } from '../../services/app-toc-v2.service'
 import { UnenrollConfirmDialogComponent } from '../unenroll-confirm-dialog/unenroll-confirm-dialog.component'
-import { IComprehensiveAssessmentAttempts, IComprehensiveAssessmentStatus } from '../../_models/common.model'
+import { IComprehensiveAssessmentAttempts, IComprehensiveAssessmentResult, IComprehensiveAssessmentStatus } from '../../_models/common.model'
 import { isCategoryListed, karmaPointsDisabledCategories } from '../../_services/course-category-visibility'
 import { isVolunteerUser } from '../../_services/user-role.util'
 
@@ -348,6 +348,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     private commonMethodsSvc: CommonMethodsService,
     private comprehensiveAssessmentSvc: ComprehensiveAssessmentService,
     private enrolementDictionarySvc: EnrolementDictionaryService,
+    private userCbpPlansSvc: UserCbpPlansService,
     @Inject('environment') public environment: any,
     private cdr: ChangeDetectorRef
   ) {
@@ -669,24 +670,6 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
     //   .catch((err: any) => {
     //     this.loggerSvc.warn('Unable to resolve comprehensive assessment attempts', err)
     //   })
-  }
-
-  private loadComprehensiveAssessmentResult(): void {
-    this.assessmentResult = null
-    if (!this.isComprehensiveAssessment || !this.isAssessmentCompleted || this.forPreview) {
-      return
-    }
-    this.comprehensiveAssessmentSvc.getResult(
-      this.content,
-      this.enrolledCourseData.courseId,
-      this.enrolledCourseData.batchId,
-    )
-      .then((result: IComprehensiveAssessmentResult | null) => {
-        this.assessmentResult = result
-      })
-      .catch((err: any) => {
-        this.loggerSvc.warn('Unable to resolve comprehensive assessment result', err)
-      })
   }
 
   get isResource() {
@@ -1808,7 +1791,9 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
         })
         this.tocSvc.checkModuleWiseData(this.content)
         this.enrolledCourseData = enrolledCourse
-        this.loadComprehensiveAssessmentResult()
+        this.assessmentResult = this.isAssessmentCompleted
+          ? this.comprehensiveAssessmentSvc.getResultFromEnrolment(this.content, enrolledCourse)
+          : null
         this.isCourseCompletedOnThisMonth()
         this.currentCourseBatchId = enrolledCourse.batchId
         // this.downloadCert(enrolledCourse.issuedCertificates)

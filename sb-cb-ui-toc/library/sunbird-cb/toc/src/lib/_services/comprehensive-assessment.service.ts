@@ -11,8 +11,6 @@ import {
 const API_END_POINTS = {
   CAN_ATTEMPT: (assessmentId: string) => `/apis/proxies/v8/user/assessment/retake/${assessmentId}`,
   CAN_ATTEMPT_V5: (assessmentId: string) => `/apis/proxies/v8/user/assessment/v5/retake/${assessmentId}`,
-  ASSESSMENT_RESULT_V4: '/apis/proxies/v8/user/assessment/v4/result',
-  ASSESSMENT_RESULT_V5: '/apis/proxies/v8/user/assessment/v5/result',
   ENROLMENT_DETAILS: '/apis/proxies/v8/learner/course/v5/user/enrollment/details',
 }
 
@@ -94,37 +92,20 @@ export class ComprehensiveAssessmentService {
     }
   }
 
-  async getResult(content: any, courseId: string, batchId: string): Promise<IComprehensiveAssessmentResult | null> {
+  getResultFromEnrolment(content: any, enrolment: any): IComprehensiveAssessmentResult | null {
+    const scores: Record<string, any> = enrolment?.additionalProperties || {}
     const questionSet = this.findQuestionSet(content)
-    const assessmentId = questionSet?.identifier || content?.childNodes?.[0]
+    const assessmentId = questionSet?.identifier && scores[questionSet.identifier]
+      ? questionSet.identifier
+      : Object.keys(scores).find((id: string) => scores[id]?.bestScore !== undefined)
     if (!assessmentId) {
       return null
     }
 
-    const compatibilityLevel = Number(questionSet?.compatibilityLevel) || DEFAULT_COMPATIBILITY_LEVEL
-    const url = compatibilityLevel >= V5_COMPATIBILITY_LEVEL
-      ? API_END_POINTS.ASSESSMENT_RESULT_V5
-      : API_END_POINTS.ASSESSMENT_RESULT_V4
-    const request = {
-      request: {
-        assessmentId,
-        batchId,
-        courseId,
-      },
-    }
-
-    try {
-      const response: any = await this.http.post<any>(url, request).toPromise()
-      const result = response?.result
-      if (!result || result.isInProgress) {
-        return null
-      }
-      return {
-        score: Number(result.overallResult) || 0,
-        passPercentage: Number(result.passPercentage) || 0,
-      }
-    } catch (_err) {
-      return null
+    return {
+      score: Number(scores[assessmentId].bestScore) || 0,
+      passPercentage: Number(questionSet?.minimumPassPercentage ?? questionSet?.passPercentage
+        ?? content?.minimumPassPercentage ?? content?.passPercentage) || 0,
     }
   }
 
