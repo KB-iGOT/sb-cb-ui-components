@@ -389,3 +389,16 @@ $secondary-color: #EF951E;
     font-family: "Lato-Regular";
   }
 }
+
+.ca-best-score {
+  &__label {
+    font-size: 0.875rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  &__value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-success-500, #1d8923);
+  }
+}

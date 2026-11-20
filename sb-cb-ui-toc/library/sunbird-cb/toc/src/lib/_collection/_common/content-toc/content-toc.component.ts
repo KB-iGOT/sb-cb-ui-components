@@ -115,6 +115,8 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   batchId: any
 
   caPendingCourses: IComprehensiveAssessmentCourse[] = []
+  caStatusLoading = true
+  caInstructionsExpanded = false
   breadcrumbData = signal<any[]>([])
 
   constructor(
@@ -1045,15 +1047,20 @@ export class ContentTocComponent implements OnInit, AfterViewInit, OnChanges {
   private loadComprehensiveAssessmentStatus(): void {
     if (this.content?.courseCategory !== 'Comprehensive Assessment') {
       this.caPendingCourses = []
+      this.caStatusLoading = false
       return
     }
     this.setBreadcrumbData()
+    this.caStatusLoading = true
     this.comprehensiveAssessmentSvc.getUnlockStatus(this.contentReadData)
       .then((status: IComprehensiveAssessmentStatus) => {
         this.caPendingCourses = status.pendingCourses
       })
       .catch(() => {
         this.caPendingCourses = []
+      })
+      .finally(() => {
+        this.caStatusLoading = false
       })
   }
 

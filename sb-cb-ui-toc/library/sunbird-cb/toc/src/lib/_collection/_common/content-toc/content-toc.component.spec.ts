@@ -10,6 +10,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations'
 import { TranslateModule } from '@ngx-translate/core'
 import { of } from 'rxjs'
 import { HighlightPipe } from '../../../_pipes/highlight.pipe'
+import { ReplaceNbspPipe } from './pipes/replace-nbsp.pipe'
 
 import { ContentTocComponent } from './content-toc.component'
 
@@ -70,6 +71,16 @@ describe('ContentTocComponent', () => {
       await flushPromises()
 
       expect(component.caPendingCourses).toEqual([PENDING_COURSE])
+      expect(component.caStatusLoading).toBe(false)
+    })
+
+    it('stays loading until the unlock check resolves', () => {
+      const component = createComponent({ content: { courseCategory: CA_CATEGORY } })
+      component.comprehensiveAssessmentSvc.getUnlockStatus.mockReturnValue(new Promise(() => {}))
+
+      component['loadComprehensiveAssessmentStatus']()
+
+      expect(component.caStatusLoading).toBe(true)
     })
 
     it('empties the list once nothing is pending', async () => {
@@ -95,6 +106,7 @@ describe('ContentTocComponent', () => {
 
       expect(component.comprehensiveAssessmentSvc.getUnlockStatus).not.toHaveBeenCalled()
       expect(component.caPendingCourses).toEqual([])
+      expect(component.caStatusLoading).toBe(false)
       expect(component.breadcrumbData()).toEqual([])
     })
 
@@ -109,6 +121,7 @@ describe('ContentTocComponent', () => {
       await flushPromises()
 
       expect(component.caPendingCourses).toEqual([])
+      expect(component.caStatusLoading).toBe(false)
     })
   })
 
@@ -258,7 +271,7 @@ describe('ContentTocComponent', () => {
 
     beforeEach(waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [ContentTocComponent, HighlightPipe],
+        declarations: [ContentTocComponent, HighlightPipe, ReplaceNbspPipe],
         imports: [MatDialogModule, MatTabsModule, TranslateModule.forRoot()],
         providers: [
           provideHttpClient(),
