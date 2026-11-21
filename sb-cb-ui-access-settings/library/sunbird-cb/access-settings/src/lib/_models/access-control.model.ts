@@ -124,6 +124,55 @@ export namespace NsAccessControlConfig {
   export enum Application {
     MDO = "mdo_portal",
     Creation_Portal = "cbp_portal",
+    SPV = "spv_portal",
+  }
+
+  export const SPV_SAVE_ACTION = "spv-save";
+
+  export interface ISpvProvider {
+    name: string;
+    licenseType: string;
+    overAllLimit: number;
+    consumedCount?: number;
+    providerPreference: boolean | null;
+    publishedCourseCount?: number | null;
+    userGroupLimit?: number;
+    unauditedLicencesInfo?: string;
+    unauditedLicencesZeroInfo?: string;
+  }
+
+  export interface ISpvAccessSettings {
+    accessControl?: {
+      version?: number;
+      userGroups?: ISpvUserGroup[];
+    };
+    licence?: {
+      consumed?: number;
+      unaudited?: number;
+    };
+  }
+
+  export interface ISpvUserGroup {
+    userGroupId?: string;
+    userGroup?: number;
+    licenceAllocation?: number;
+    consumed?: number;
+    status?: string;
+    userGroupCriteriaList?: { criteriaKey: string; criteriaValue: any }[];
+  }
+
+  export interface ISpvAccessSettingsRequest {
+    partnerId: string;
+    accessControl: {
+      version: number;
+      userGroups: {
+        // only for a group saved before
+        userGroupId?: string;
+        userGroup: number;
+        licenceAllocation: number;
+        userGroupCriteriaList: { criteriaKey: string; criteriaValue: string[] }[];
+      }[];
+    };
   }
 }
 
