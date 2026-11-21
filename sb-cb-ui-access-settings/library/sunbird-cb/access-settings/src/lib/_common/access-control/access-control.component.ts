@@ -1325,6 +1325,20 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
+    // MHA (IPS), MoEFCC (IFoS) and DoHFW (CHS): a group of only their cross organisation services, with no
+    // organisation of its own, reaches every organisation instead of the own one
+    // Compared without case, a saved group can come back from the api with its service names lower cased
+    const crossOrgReachServices = (this.config?.crossOrgReachServices || []).map((serviceName) => serviceName.toLowerCase());
+    const selectedServices = criteria.find(
+      (entry: any) => entry?.criteriaKey === NsAccessControlConfig.SelectionType.Service
+    )?.criteriaValue || [];
+    if (
+      selectedServices.length > 0 &&
+      selectedServices.every((serviceName: string) => crossOrgReachServices.includes(String(serviceName).toLowerCase()))
+    ) {
+      return;
+    }
+
     criteria.push({
       criteriaKey: NsAccessControlConfig.SelectionType.Organizations,
       criteriaValue: [this.config?.userConfig?.rootOrgId || ""]

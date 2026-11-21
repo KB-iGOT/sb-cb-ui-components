@@ -189,6 +189,68 @@ describe('AccessControlComponent', () => {
     });
   });
 
+  describe('cross organisation reach services', () => {
+    beforeEach(() => {
+      component.isCCA = false;
+      component.config.crossOrgReachServices = ['Indian Police Service (IPS)', 'Indian Forest Service (IFoS)', 'Central Health Service (CHS)'];
+    });
+
+    it('should not append the own organisation to a group of only a cross organisation service, so it reaches every organisation', () => {
+      const criteria: any[] = [
+        { criteriaKey: 'service', criteriaValue: ['Indian Police Service (IPS)'] },
+        { criteriaKey: 'Cadre', criteriaValue: ['Bihar'] }
+      ];
+
+      (component as any).appendOwnOrganisationCriteria(criteria);
+
+      expect(criteria.some((entry) => entry.criteriaKey === 'rootOrgId')).toBe(false);
+    });
+
+    it('should match a saved group whose service names came back lower cased', () => {
+      const criteria: any[] = [{ criteriaKey: 'service', criteriaValue: ['indian forest service (ifos)'] }];
+
+      (component as any).appendOwnOrganisationCriteria(criteria);
+
+      expect(criteria.some((entry) => entry.criteriaKey === 'rootOrgId')).toBe(false);
+    });
+
+    it('should keep the own organisation when another service is selected with it', () => {
+      const criteria: any[] = [{ criteriaKey: 'service', criteriaValue: ['Indian Police Service (IPS)', 'DANICS'] }];
+
+      (component as any).appendOwnOrganisationCriteria(criteria);
+
+      expect(criteria).toContainEqual({ criteriaKey: 'rootOrgId', criteriaValue: ['own-org'] });
+    });
+
+    it('should keep the own organisation for any other service', () => {
+      const criteria: any[] = [{ criteriaKey: 'service', criteriaValue: ['Indian Railway Service'] }];
+
+      (component as any).appendOwnOrganisationCriteria(criteria);
+
+      expect(criteria).toContainEqual({ criteriaKey: 'rootOrgId', criteriaValue: ['own-org'] });
+    });
+
+    it('should keep the organisations the group selected itself', () => {
+      const criteria: any[] = [
+        { criteriaKey: 'service', criteriaValue: ['Indian Police Service (IPS)'] },
+        { criteriaKey: 'rootOrgId', criteriaValue: ['org-a'] }
+      ];
+
+      (component as any).appendOwnOrganisationCriteria(criteria);
+
+      expect(criteria.filter((entry) => entry.criteriaKey === 'rootOrgId')).toEqual([{ criteriaKey: 'rootOrgId', criteriaValue: ['org-a'] }]);
+    });
+
+    it('should keep the own organisation when the config lists no cross organisation services', () => {
+      component.config.crossOrgReachServices = undefined;
+      const criteria: any[] = [{ criteriaKey: 'service', criteriaValue: ['Indian Police Service (IPS)'] }];
+
+      (component as any).appendOwnOrganisationCriteria(criteria);
+
+      expect(criteria).toContainEqual({ criteriaKey: 'rootOrgId', criteriaValue: ['own-org'] });
+    });
+  });
+
   describe('isSavedAllOrganisationsCriteria', () => {
     const isSavedAll = (criteriaKey: string, criteriaValue: any) =>
       (component as any).isSavedAllOrganisationsCriteria(criteriaKey, criteriaValue);
