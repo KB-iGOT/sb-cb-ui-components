@@ -87,7 +87,8 @@
                         selectionType === selectionTypeEnum.Organizations ||
                         selectionType === selectionTypeEnum.Batch) &&
                       filterValue === 'all' &&
-                      !isMdoOrganisationSelection
+                      !isMdoOrganisationSelection &&
+                      (selectionType !== selectionTypeEnum.Service || !isServiceListScopedToOrganisation || dataList?.length > 1)
                     "
                   >
                     <div class="px-2 py-4 options-checkbox">
