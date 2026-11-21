@@ -349,4 +349,61 @@ describe('ComprehensiveAssessmentService', () => {
       })
     })
   })
+
+  describe('getResultFromEnrolment', () => {
+
+    it('reads the best score for the question set from additionalProperties', () => {
+      const content = assessmentWithQuestionSet(6)
+      content.children[0].minimumPassPercentage = 60
+      const row = {
+        ...enrolment('do_assessment', 2),
+        additionalProperties: {
+          do_other: { bestScore: 10, currentScore: 10 },
+          [QUESTION_SET]: { bestScore: 85, currentScore: 70 },
+        },
+      }
+
+      expect(service.getResultFromEnrolment(content, row)).toEqual({ score: 85, passPercentage: 60 })
+    })
+
+    it('falls back to the first scored entry when the question set id is not listed', () => {
+      const row = {
+        ...enrolment('do_assessment', 2),
+        additionalProperties: { do_11470453311646924813166: { bestScore: 100, currentScore: 100 } },
+      }
+
+      expect(service.getResultFromEnrolment(assessmentWithQuestionSet(6), row))
+        .toEqual({ score: 100, passPercentage: 0 })
+    })
+
+    it('uses passPercentage when minimumPassPercentage is not authored', () => {
+      const content = assessmentWithQuestionSet(6)
+      content.children[0].passPercentage = 50
+      const row = { additionalProperties: { [QUESTION_SET]: { bestScore: 40 } } }
+
+      expect(service.getResultFromEnrolment(content, row)).toEqual({ score: 40, passPercentage: 50 })
+    })
+
+    it('falls back to the pass mark on the content itself', () => {
+      const content = assessmentWithQuestionSet(6, { minimumPassPercentage: 75 })
+      const row = { additionalProperties: { [QUESTION_SET]: { bestScore: 80 } } }
+
+      expect(service.getResultFromEnrolment(content, row)).toEqual({ score: 80, passPercentage: 75 })
+    })
+
+    it('returns null when the enrolment carries no scores', () => {
+      expect(service.getResultFromEnrolment(assessmentWithQuestionSet(6), { additionalProperties: {} })).toBeNull()
+      expect(service.getResultFromEnrolment(assessmentWithQuestionSet(6), enrolment('do_assessment', 2))).toBeNull()
+      expect(service.getResultFromEnrolment(assessmentWithQuestionSet(6), null)).toBeNull()
+    })
+
+    it('makes no network call', () => {
+      service.getResultFromEnrolment(assessmentWithQuestionSet(6), {
+        additionalProperties: { [QUESTION_SET]: { bestScore: 90 } },
+      })
+
+      expect(http.get).not.toHaveBeenCalled()
+      expect(http.post).not.toHaveBeenCalled()
+    })
+  })
 })

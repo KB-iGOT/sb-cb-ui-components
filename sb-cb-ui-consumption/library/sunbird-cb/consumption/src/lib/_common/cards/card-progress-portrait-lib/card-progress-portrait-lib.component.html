@@ -199,7 +199,14 @@
     </ng-container>
     <ng-container
       *ngIf="isCardElementEnabled('downloadCertificate') && widgetData?.content?.completionPercentage === 100 && widgetData?.content?.courseCategory !== 'Case Study'">
-      <div class="flex flex-align-end progress-wrapper flex-end mt-1 position-relative">
+      <div class="flex flex-align-end progress-wrapper mt-1 position-relative"
+        [ngClass]="widgetData?.content?.courseCategory === 'Comprehensive Assessment' && widgetData?.content?.bestScore != null ? 'flex-between' : 'flex-end'">
+        @if (widgetData?.content?.courseCategory === 'Comprehensive Assessment' && widgetData?.content?.bestScore != null) {
+          <div class="ca-best-score flex items-center gap-2">
+            <span class="ca-best-score__label">Best score:</span>
+            <span class="ca-best-score__value">{{ widgetData?.content?.bestScore | number: '1.0-2' }}%</span>
+          </div>
+        }
         <div class="progress-btn">
           <ng-container *ngIf="checkSurveyCompletion(); else viewCertificateBtn">
             <button class="resume-btn flex flex-middle flex-between view-btn takeSurveyBtn" (click)="getRedirectUrlData(widgetData?.content)">

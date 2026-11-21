@@ -32,4 +32,29 @@ describe('AccessControlService', () => {
       });
     });
   });
+
+  describe('getCadreControllingAuthorityNames', () => {
+    const configFor = (org: any): any => ({ userConfig: { org } });
+
+    it('should name the organisation when it is a Cadre Controlling Authority', () => {
+      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways', allowservicebasedtargeting: true }))).toEqual([
+        'Ministry of Railways'
+      ]);
+    });
+
+    it('should not name an organisation that is not one', () => {
+      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways', allowservicebasedtargeting: false }))).toEqual([]);
+      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways' }))).toEqual([]);
+    });
+
+    it('should add the L0 it is mapped to when the L0 is one, so a L1 selects the ministry services', () => {
+      service.parentOrganisation.set({ orgName: 'Ministry of Railways', allowservicebasedtargeting: true });
+
+      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Railway Board', allowservicebasedtargeting: true }))).toEqual([
+        'Railway Board',
+        'Ministry of Railways'
+      ]);
+      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Railway Division' }))).toEqual(['Ministry of Railways']);
+    });
+  });
 });
