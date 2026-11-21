@@ -1,17 +1,210 @@
-<div class="py-4 px-10">
-  <div class="p-4 as-container">
-    <div class="flex items-center justify-between">
-      <span class="text-xl font-bold primary-text-color">{{(config?.application === MDO_APPLICATION || config?.application === CBP_APPLICATION) ? 'Access Control' : 'Access Settings'}}</span>
-      <div class="flex gap-2 items-center">
-        <span class="text-sm primary-text-color cursor-pointer" (click)="openInstructonsDialog()">How to use access control?</span>
-        <img src="/assets/icons/support-i.svg" alt="support i" class="img-icon-24 cursor-pointer" (click)="openInstructonsDialog()"/>
+<div [ngClass]="isSpvPortal ? 'spv-access-settings' : 'py-4 px-10'">
+  <div [ngClass]="isSpvPortal ? '' : 'p-4 as-container'">
+    @if (isSpvPortal) {
+      <!-- SPV portal: the page title with Reset and Save, which the host saves -->
+      <div class="spv-page-header">
+        <span class="spv-page-title">Access Settings</span>
+        <div class="spv-header-actions">
+          <button mat-flat-button type="button" class="spv-reset-button" [disabled]="!spvHasUnsavedChanges || isSaving" (click)="spvReset()">
+            Reset
+          </button>
+          <button mat-flat-button type="button" class="spv-save-button" [disabled]="!spvCanOfferSave" (click)="spvSave()">
+            @if (isSaving) {
+              <mat-spinner diameter="16" strokeWidth="2" class="spv-saving"></mat-spinner>
+            }
+            Save
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="light-grey-border p-4 mt-4">
-      @if (isLoading) {
+    } @else {
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-bold primary-text-color">{{(config?.application === MDO_APPLICATION || config?.application === CBP_APPLICATION) ? 'Access Control' : 'Access Settings'}}</span>
+        <div class="flex gap-2 items-center">
+          <span class="text-sm primary-text-color cursor-pointer" (click)="openInstructonsDialog()">How to use access control?</span>
+          <img src="/assets/icons/support-i.svg" alt="support i" class="img-icon-24 cursor-pointer" (click)="openInstructonsDialog()"/>
+        </div>
+      </div>
+    }
+    <div [ngClass]="isSpvPortal ? 'spv-card' : 'light-grey-border p-4 mt-4'">
+      @if (isLoading && !isSpvPortal) {
         <div class="spinner-loader flex items-center justify-center">
           <mat-spinner></mat-spinner>
         </div>
+      }
+
+      @if (isSpvPortal) {
+        <!-- SPV portal: the provider's licences and its enrolment check preference; with Yes, how the Over All Limit is
+          split across the user groups below -->
+        <div class="spv-licence-summary">
+          <div class="spv-summary-field">
+            <span class="spv-label">Licence Type</span>
+            <div class="spv-field-meta">From Provider Settings.</div>
+            <div class="spv-readonly-box">
+              <span class="spv-readonly-text">{{ spvLicenseType }}</span>
+            </div>
+          </div>
+          <div class="spv-summary-field">
+            <span class="spv-label">Over All Limit</span>
+            <div class="spv-field-meta">
+              From Provider Settings.
+              <!-- a pointer to where the limit is edited, not a link -->
+              <span class="spv-edit-link">Edit in Provider Settings</span>
+            </div>
+            <div class="spv-readonly-box">
+              <span class="spv-readonly-value">{{ spvOverAllLimit | number }}</span>
+              <span class="spv-readonly-text spv-licences-word">licences</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="spv-preference-card">
+          <span class="spv-preference-title">Enrolment check preference <span class="spv-required-mark">*</span></span>
+          <div class="spv-field-meta">
+            Validate learner enrolment using provider-level access settings?@if (spvSavedPreferenceTitle) {
+              Saved: <strong>{{ spvSavedPreferenceTitle }}</strong>
+            }
+          </div>
+          <mat-radio-group class="spv-radio-cards" [(ngModel)]="spvChecksEnrolment" aria-label="Enrolment check preference">
+            @for (option of spvEnrolmentCheckOptions; track option.value) {
+              <mat-radio-button class="spv-radio-card" [value]="option.value">
+                <span class="spv-option-title">{{ option.title }}</span>
+                <span class="spv-option-description">{{ option.description }}</span>
+              </mat-radio-button>
+            }
+          </mat-radio-group>
+          @if (spvIsChangingPreference) {
+            <div class="spv-warning spv-preference-warning">
+              <span aria-hidden="true">&#9888;</span> You're changing the preference. Save to review what this means before it takes effect.
+            </div>
+          }
+        </div>
+
+        @if (spvChecksEnrolment === false) {
+          <div class="spv-info-note spv-course-check-note">
+            <span aria-hidden="true">&#9432;</span>
+            Enrolment for {{ spvProviderName || 'this provider' }} is validated by each course's user groups in the Content Portal.
+            Any user groups set earlier are hidden, not deleted.
+          </div>
+        }
+
+        @if (spvChecksEnrolment) {
+          <div class="spv-distribution-card">
+            <span class="spv-distribution-title">Partner Licence Distribution</span>
+            <div class="spv-field-meta">The Over All Limit from Provider Settings, split across the user groups below.</div>
+            <div class="spv-distribution-tiles" [class.has-over-allocation]="spvOverAllocatedCount > 0">
+              <div class="spv-distribution-tile">
+                <span class="spv-tile-label">Over All Limit</span>
+                <span class="spv-tile-value">{{ spvOverAllLimit | number }}</span>
+              </div>
+              <div class="spv-distribution-tile">
+                <span class="spv-tile-label">Allocated to groups</span>
+                <span class="spv-tile-value">{{ spvAllocatedToGroups | number }}</span>
+              </div>
+              <!-- licences used while the preference was No, always shown (0 when none); its info icon says what they are
+                while there are none, and why there are some otherwise -->
+              <div class="spv-distribution-tile spv-unaudited-tile">
+                <span class="spv-tile-label">
+                  Unaudited licences
+                  <span class="spv-info-icon" tabindex="0" role="button" aria-label="About unaudited licences"
+                    aria-describedby="spv-unaudited-licences-info">
+                    i
+                    <span class="spv-info-popover" id="spv-unaudited-licences-info" role="tooltip">
+                      {{ spvUnauditedCount > 0 ? spvUnauditedLicencesInfo : spvUnauditedLicencesZeroInfo }}
+                    </span>
+                  </span>
+                </span>
+                <span class="spv-tile-value">{{ spvUnauditedCount | number }}</span>
+              </div>
+              <div class="spv-distribution-tile">
+                <span class="spv-tile-label">Unallocated</span>
+                <span class="spv-tile-value" [class.has-unallocated]="spvUnallocatedCount > 0">{{ spvUnallocatedCount | number }}</span>
+                <span class="spv-tile-note">For raising allocations or adding groups</span>
+              </div>
+              <!-- how far allocations and unaudited licences go past the Over All Limit, only while they do -->
+              @if (spvOverAllocatedCount) {
+                <div class="spv-distribution-tile">
+                  <span class="spv-tile-label">Over-allocated by</span>
+                  <span class="spv-tile-value over-allocated">{{ spvOverAllocatedCount | number }}</span>
+                </div>
+              }
+              <div class="spv-distribution-tile">
+                <span class="spv-tile-label">Consumed (all)</span>
+                <span class="spv-tile-value">{{ spvConsumedCount | number }}</span>
+              </div>
+            </div>
+
+            <div class="spv-allocation-bar" role="img"
+              [attr.aria-label]="'Licence distribution: ' + (spvAllocatedToGroups | number) + ' of ' + (spvOverAllLimit | number) + ' licences allocated to user groups'">
+              @for (segment of spvSegments; track $index) {
+                <span class="spv-allocation-segment" [style.flex-basis.%]="segment.width" [style.background-color]="segment.colour"></span>
+              }
+              @if (spvUnauditedCount > 0) {
+                <span class="spv-allocation-segment spv-unaudited-segment" [style.flex-basis.%]="spvUnauditedWidth"></span>
+              }
+              @if (spvUnallocatedCount > 0) {
+                <span class="spv-allocation-segment spv-unallocated-segment"></span>
+              }
+            </div>
+
+            <div class="spv-allocation-legend">
+              @for (segment of spvSegments; track $index) {
+                <span class="spv-legend-item">
+                  <span class="spv-legend-swatch" [style.background-color]="segment.colour"></span>
+                  {{ segment.name }} · {{ segment.licences | number }} ({{ segment.percent }}%)
+                </span>
+              }
+              @if (spvUnauditedCount > 0) {
+                <span class="spv-legend-item">
+                  <span class="spv-legend-swatch spv-unaudited-swatch"></span>
+                  Unaudited · {{ spvUnauditedCount | number }} ({{ spvUnauditedPercent }}%)
+                </span>
+              }
+              @if (spvUnallocatedCount > 0) {
+                <span class="spv-legend-item">
+                  <span class="spv-legend-swatch spv-unallocated-swatch"></span>
+                  Unallocated · {{ spvUnallocatedCount | number }}
+                </span>
+              }
+            </div>
+
+            @if (spvOverAllocatedCount) {
+              <div class="spv-licence-error spv-banner" role="alert">
+                <!-- the space is inside the strong, Angular drops one between two elements -->
+                <span aria-hidden="true">&#9940;</span><strong> Over-allocated by {{ spvOverAllocatedCount | number }}.</strong>
+                Group allocations
+                @if (spvUnauditedCount > 0) {
+                  plus unaudited licences
+                }
+                exceed the Over All Limit. Lower allocations by {{ spvOverAllocatedCount | number }} (not below each group's
+                consumed licences) or raise the Over All Limit in Provider Settings to save.
+              </div>
+            }
+            <!-- the groups hold the whole Over All Limit, exactly -->
+            @if (spvOverAllLimit && !spvOverAllocatedCount && !spvUnallocatedCount) {
+              <div class="spv-warning spv-banner">
+                <span aria-hidden="true">&#9888;</span> No unallocated licences left. Add User Group is disabled and allocations can't be
+                raised until another group is lowered or the Over All Limit is raised.
+              </div>
+            }
+
+            <div class="spv-info-note spv-banner">
+              <span aria-hidden="true">&#9432;</span>
+              Every user group applies to {{ spvProviderCourses }}, including courses published later.
+            </div>
+            <div class="spv-info-note spv-banner">
+              <span aria-hidden="true">&#9432;</span>
+              A learner who is in more than one group uses <strong>one</strong> licence, from the first group in priority order
+              (#1, #2, ... the order the groups were created) that has a licence left. When a learner's groups have none left,
+              the learner can't enrol until you raise a group's allocation. Unallocated licences are not used automatically.
+            </div>
+          </div>
+
+          @if (isLoading) {
+            <div class="spinner-loader flex items-center justify-center">
+              <mat-spinner></mat-spinner>
+            </div>
+          }
+        }
       }
 
       @if (canShowAccessControlTypeRadio && !isLoading) {
@@ -68,7 +261,7 @@
         }
 
         <div class="flex justify-between items-center">
-          @if (getTotalUserCount) {
+          @if (getTotalUserCount && !isSpvPortal) {
             <div class="users-total-count flex gap-2 items-center my-3">
               <mat-icon svgIcon="info-outline" [matTooltip]=""></mat-icon>
               <div class="text-dark">Total Count : {{ getTotalUserCount }}</div>
@@ -88,7 +281,8 @@
           }
         </div>
 
-        @if (accessControlForm && userGroup?.length > 0 && !isLoading) {
+        <!-- SPV portal: user groups are only set when enrolment is checked here -->
+        @if (accessControlForm && userGroup?.length > 0 && !isLoading && (!isSpvPortal || spvChecksEnrolment)) {
           <form [formGroup]="accessControlForm">
             <mat-accordion class="example-headers-align access-usergroup-accordion mt-3" multi="true">
               <ng-container formArrayName="userGroup">
@@ -97,17 +291,50 @@
                     <mat-expansion-panel class="access-usergroup-panel" expanded>
                       <mat-expansion-panel-header>
                         <mat-panel-title class="items-center">
-                          <div class="flex gap-4 items-center">
+                          <div class="flex gap-4 items-center" [class.spv-group-title]="isSpvPortal">
+                            @if (isSpvPortal) {
+                              <span class="spv-group-dot" [style.background-color]="spvGroupColour(i)"></span>
+                            }
                             <span class="text-sm groupname">{{ rule.get("name")?.value }}</span>
-                            @if (userCount[i]) {
+                            @if (isSpvPortal) {
+                              <!-- SPV portal: the group's priority, the users it matches, the licences it holds, and whether
+                                learners have enrolled through it -->
+                              <span class="spv-priority-pill" [title]="'Priority ' + (i + 1)">#{{ i + 1 }}</span>
+                              <span class="spv-group-chip spv-count-chip" [attr.aria-busy]="spvIsCounting(rule)">
+                                Count :
+                                @if (spvIsCounting(rule)) {
+                                  <mat-spinner class="spv-count-loader" diameter="12" aria-label="Counting users"></mat-spinner>
+                                } @else {
+                                  {{ (userCount[i] || 0) | number }}
+                                }
+                              </span>
+                              <span class="spv-group-chip spv-licences-chip">
+                                <mat-icon>confirmation_number</mat-icon>
+                                Licences : {{ spvLicencesOf(rule) | number }}
+                              </span>
+                              @if (spvIsExhausted(rule)) {
+                                <span class="spv-group-chip spv-exhausted-chip">
+                                  <span aria-hidden="true">&#9940;</span>
+                                  Exhausted &mdash; learners matching only this group can't enrol until you raise its allocation.
+                                </span>
+                              }
+                              @if (spvIsInUse(rule)) {
+                                <span class="spv-group-chip spv-in-use-chip">
+                                  <span aria-hidden="true">&#128274;</span>
+                                  In use &mdash; {{ spvConsumedOf(rule) | number }} {{ spvConsumedOf(rule) === 1 ? 'enrolment' : 'enrolments' }}.
+                                  Conditions locked; can't be deleted.
+                                </span>
+                              }
+                            } @else if (userCount[i]) {
                               <div class="text-dark user-group-user-count">Count : {{ userCount[i] }}</div>
                             }
                           </div>
                         </mat-panel-title>
                         <mat-panel-description class="justify-end items-center" (click)="$event.stopPropagation()">
                           @if (content?.accessSetting !== MDO_SPECIFIC) {
+                            <!-- SPV portal: only a group learners have enrolled through can't be deleted -->
                             <button
-                              [disabled]="accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value"
+                              [disabled]="isSpvPortal ? spvIsInUse(rule) : (accessControlCriteriaSelection?.readOnly || rule.get('isUserGroupDisabled')?.value)"
                               mat-icon-button
                               aria-label="delete user group"
                               (click)="removeUserGroup(i)"
@@ -162,7 +389,7 @@
                                   <button
                                     mat-button
                                     (click)="manageSelections(condition, rule, i)"
-                                    [disabled]="!condition.get('entity').value || !condition.get('conditionType').value || accessControlCriteriaSelection?.readOnly"
+                                    [disabled]="!condition.get('entity').value || !condition.get('conditionType').value || accessControlCriteriaSelection?.readOnly || (isSpvPortal && rule.get('isUserGroupDisabled')?.value)"
                                     class="rounded-full new-bg-color text-white flex items-center gap-2"
                                   >
                                     <mat-icon svgIcon="svg_search" class="margin-remove"></mat-icon>
@@ -187,6 +414,20 @@
                                       }
                                     </div>
                                   </button>
+                                  @if (isSpvPortal) {
+                                    <!-- SPV portal: the most values the field takes, and what the condition still lacks -->
+                                    @if (spvSelectionLimitOf(condition); as limit) {
+                                      <span class="spv-selection-max">&middot; max {{ limit | number }}</span>
+                                    }
+                                    @if (condition.get('entity')?.value && !spvSelectedCount(condition)) {
+                                      <div class="spv-selection-error">Select at least one value</div>
+                                    }
+                                    <!-- a condition left without a field beside one that has it, said once Save is pressed (a group
+                                      with no field at all says Add at least one condition instead) -->
+                                    @if (spvSaveAttempted && !condition.get('entity')?.value && spvHasCondition(rule)) {
+                                      <div class="spv-selection-error" role="alert">Select at least one condition</div>
+                                    }
+                                  }
                                 </div>
                                 <div class="action-more-options flex justify-end">
                                   <div class="flex gap-4">
@@ -229,26 +470,97 @@
                           }
                         </div>
                       }
-                      <div class="action-add-condition">
-                        <button
-                          [disabled]="
-                            content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
-                            content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER ||
-                            accessControlCriteriaSelection?.readOnly ||
-                            rule.get('isUserGroupDisabled')?.value ||
-                            rule.get('isAddConditionDisabled')?.value
-                          "
-                          mat-button
-                          class="new-secondary-button-no-border button-with-corners"
-                          type="button"
-                          (click)="addCondition(i)"
-                        >
-                          <div class="flex gap-2 flex-middle">
-                            <mat-icon class="primary-text-color">add</mat-icon>
-                            <span class="text-m">Add New Condition</span>
+                      @if (isSpvPortal && spvHasUserCondition(i)) {
+                        <!-- SPV portal: in place of Add New Condition, for a group that picks its users one by one -->
+                        <div class="spv-user-condition-note">
+                          <span aria-hidden="true">&#9432;</span> The User condition can't be combined with other conditions.
+                        </div>
+                      } @else {
+                        <div class="action-add-condition">
+                          <button
+                            [disabled]="
+                              content?.accessSetting === ACCESS_SETTING_ENUM.MDO_SPECIFIC ||
+                              content?.accessSetting === ACCESS_SETTING_ENUM.CUSTOME_USER ||
+                              accessControlCriteriaSelection?.readOnly ||
+                              rule.get('isUserGroupDisabled')?.value ||
+                              rule.get('isAddConditionDisabled')?.value ||
+                              (isSpvPortal && !spvCanAddCondition(i))
+                            "
+                            mat-button
+                            class="new-secondary-button-no-border button-with-corners"
+                            type="button"
+                            (click)="addCondition(i)"
+                          >
+                            <div class="flex gap-2 flex-middle">
+                              <mat-icon class="primary-text-color">add</mat-icon>
+                              <span class="text-m">Add New Condition</span>
+                            </div>
+                          </button>
+                        </div>
+                      }
+                      @if (isSpvPortal) {
+                        @if (spvSaveAttempted && !spvHasCondition(rule)) {
+                          <div class="spv-condition-error" role="alert">Add at least one condition</div>
+                        }
+
+                        <!-- SPV portal: what the group is allowed to take of the Over All Limit -->
+                        <div class="spv-licence-box">
+                          <span class="spv-licence-tag">Licence allocation</span>
+                          <div class="spv-licence-layout">
+                            <div>
+                              <label class="spv-licence-label" [for]="'spv-licences-' + i">Licences for this group <span class="spv-required-mark">*</span></label>
+                              <div class="spv-licence-input-row">
+                                <input class="spv-licence-input" type="number" step="1" placeholder="1" formControlName="licences"
+                                  [id]="'spv-licences-' + i" [attr.min]="spvMinLicencesOf(rule)" [attr.max]="spvMaxLicencesOf(rule)"
+                                  [class.invalid]="spvLicenceErrorMessage(rule)" (keydown)="spvBlockSignAndExponentKeys($event)" />
+                                <span class="spv-licence-suffix">licences</span>
+                              </div>
+                              <div class="spv-licence-hint">
+                                = {{ spvLicencePercent(rule) }}% of Over All Limit &middot; Min {{ spvMinLicencesOf(rule) | number }}
+                                &middot; Max {{ spvMaxLicencesOf(rule) | number }}
+                              </div>
+                            </div>
+
+                            <div class="spv-licence-stat">
+                              <span class="spv-stat-label">Allocated</span>
+                              <span class="spv-stat-value">{{ spvLicencesOf(rule) | number }}</span>
+                            </div>
+                            <div class="spv-licence-stat">
+                              <span class="spv-stat-label">Consumed</span>
+                              <span class="spv-stat-value">{{ spvConsumedOf(rule) | number }}</span>
+                              <span class="spv-consumed-bar" role="progressbar" aria-label="Licences consumed" aria-valuemin="0"
+                                aria-valuemax="100" [attr.aria-valuenow]="spvConsumedPercent(rule)">
+                                <span class="spv-consumed-fill" [style.width.%]="spvConsumedPercent(rule)"></span>
+                              </span>
+                            </div>
+                            <div class="spv-licence-stat">
+                              <span class="spv-stat-label">Available</span>
+                              <span class="spv-stat-value spv-available-value" [class.used-up]="spvIsExhausted(rule)">
+                                {{ spvAvailableOf(rule) | number }}
+                              </span>
+                            </div>
                           </div>
-                        </button>
-                      </div>
+
+                          @if (spvLicenceErrorMessage(rule); as errorMessage) {
+                            <div class="spv-licence-error spv-banner" role="alert">
+                              <span aria-hidden="true">&#9940;</span> {{ errorMessage }}
+                            </div>
+                          }
+                          <!-- shown under a licence error too, it is about the conditions -->
+                          @if (spvMatchesNoUsers(rule, i)) {
+                            <div class="spv-warning spv-banner">
+                              <span aria-hidden="true">&#9888;</span> No users match these conditions
+                            </div>
+                          }
+                          @if (!spvLicenceErrorMessage(rule)) {
+                            @if (spvIdleLicencesWarning(rule, i); as idleWarning) {
+                              <div class="spv-warning spv-banner">
+                                <span aria-hidden="true">&#9888;</span> {{ idleWarning }}
+                              </div>
+                            }
+                          }
+                        </div>
+                      }
                       @if (config?.application === MDO_APPLICATION && !isLoading) {
                         <div class="action-buttons-mdo flex gap-4 items-center justify-center mt-4">
                           <button matButton="outlined" class="flex rounded-full px-4 py-2 mat-btn-outline items-center gap-2" [disabled]="isSavingReusableUserGroup || isSavedUserGroupUnchanged(i)" (click)="saveReusableUserGroups(i)">
@@ -277,7 +589,7 @@
         @if (canAddUserGroup) {
           <div class="text-center mb-6 mt-4">
             <button
-              [disabled]="accessControlCriteriaSelection?.readOnly || isAddUserGroupBtnDisabled"
+              [disabled]="accessControlCriteriaSelection?.readOnly || isAddUserGroupBtnDisabled || (isSpvPortal && !spvCanAddUserGroup)"
               mat-button
               class="new-secondary-button-no-border button-with-corners"
               type="button"
@@ -288,10 +600,22 @@
                 <span class="text-m">Add User Group</span>
               </div>
             </button>
+            @if (isSpvPortal) {
+              <!-- SPV portal: how many groups there can be, or why none can be added -->
+              @if (spvUnallocatedCount) {
+                <div class="spv-group-count">
+                  {{ userGroup.length < spvUserGroupLimit ? userGroup.length + ' of ' + spvUserGroupLimit + ' user groups' : 'Maximum ' + spvUserGroupLimit + ' user groups.' }}
+                </div>
+              } @else {
+                <div class="spv-group-count">
+                  No unallocated licences left. Increase the Over All Limit or reduce an allocation to add a group.
+                </div>
+              }
+            }
           </div>
         }
 
-        @if (userGroup?.length > 0 && config?.application !== MDO_APPLICATION) {
+        @if (userGroup?.length > 0 && config?.application !== MDO_APPLICATION && !isSpvPortal) {
           <div class="action-save flex justify-center items-center gap-4" [ngClass]="{ 'mt-4': userGroup?.length === 1 && config?.application === MDO_APPLICATION }">
             <!-- Save Filter Button -->
             <button
@@ -323,3 +647,76 @@
 
   </div>
 </div>
+
+@if (isSpvPortal) {
+  <!-- SPV portal: the first save confirms the enrolment check preference and lists every user group it saves -->
+  <ng-template #spvSaveConfirm let-dialogRef="dialogRef">
+    <div class="spv-save-confirm">
+      <div class="spv-save-confirm-header">
+        <span class="spv-save-confirm-title">Confirm one-time settings</span>
+        <button mat-icon-button type="button" aria-label="Close" (click)="dialogRef.close(false)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="spv-save-confirm-body">
+        <div>Enrolment check preference: <strong>{{ spvEnrolmentCheckChoice?.summary }}</strong></div>
+        @if (spvUserGroupsToSave.length) {
+          <div class="spv-save-changes">
+            <span class="spv-save-changes-title">User groups</span>
+            <ul>
+              @for (group of spvUserGroupsToSave; track $index) {
+                <li><strong>{{ group.name }}</strong> &mdash; {{ group.detail }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+      <div class="spv-save-confirm-actions">
+        <button type="button" class="spv-confirm-back" (click)="dialogRef.close(false)">Go back</button>
+        <button type="button" class="spv-confirm-save" (click)="dialogRef.close(true)">Confirm and save</button>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- SPV portal: a change of the saved enrolment check preference, confirmed before it is saved -->
+  <ng-template #spvPreferenceChangeConfirm let-dialogRef="dialogRef">
+    <div class="spv-save-confirm">
+      <div class="spv-save-confirm-header">
+        <span class="spv-save-confirm-title">Change enrolment check preference?</span>
+        <button mat-icon-button type="button" aria-label="Close" (click)="dialogRef.close(false)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="spv-save-confirm-body">
+        @if (!spvChecksEnrolment) {
+          <div>
+            Switching to <strong>No</strong>: enrolments will no longer be tracked against the user groups below. The groups
+            are kept and will come back if you switch to Yes again. Licences used while the preference is No will show as
+            <strong>Unaudited licences</strong>.
+          </div>
+        } @else {
+          <div>
+            Switching to <strong>Yes</strong>: the user groups set earlier come back as they were. Licences used while the
+            preference was No will show as <strong>Unaudited licences</strong> in the licence breakup. If they take the total
+            over the Over All Limit, unused licences are removed from the user groups, starting with #1, until it balances.
+          </div>
+        }
+      </div>
+      <div class="spv-save-confirm-actions">
+        <button type="button" class="spv-confirm-back" (click)="dialogRef.close(false)">Go back</button>
+        <button type="button" class="spv-confirm-save" (click)="dialogRef.close(true)">Confirm and save</button>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- SPV portal: Reset, once confirmed, puts back what was last saved -->
+  <ng-template #spvDiscardConfirm let-dialogRef="dialogRef">
+    <div class="spv-discard-confirm">
+      <div class="spv-discard-confirm-title">Discard unsaved changes?</div>
+      <div class="spv-discard-confirm-actions">
+        <button type="button" class="spv-confirm-back" (click)="dialogRef.close(false)">No</button>
+        <button type="button" class="spv-confirm-save" (click)="dialogRef.close(true)">Yes</button>
+      </div>
+    </div>
+  </ng-template>
+}

@@ -5,7 +5,7 @@ import { AccessControlService } from "../../../_services/access-control.service"
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { PageChangeEmitter } from "../../../_models/pagination.model";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
-import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_FILTER_KEY } from "../../../_constants/app.constants";
+import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_FILTER_KEY, SPV_MAX_SELECTIONS } from "../../../_constants/app.constants";
 import { SnackbarComponent } from "../../../components/snackbar/snackbar.component";
 import { Subject } from "rxjs";
 import { first, takeUntil } from "rxjs/operators";
@@ -192,7 +192,24 @@ export class InviteUsersComponent implements OnInit, OnDestroy {
     this.holdSelectedUsers = [...event.selectedRows];
   }
 
+  get isSpvPortal(): boolean {
+    return this.accessControlService.accessControlConfig()?.application === NsAccessControlConfig.Application.SPV;
+  }
+
+  get dialogTitle(): string {
+    // SPV portal: the users of a saved group or a group in use are only shown
+    return this.isSpvPortal && this.data?.disabled ? "Users (view only)" : "Users";
+  }
+
   selectUsers(): void {
+    if (this.isSpvPortal && this.holdSelectedUsers?.length > SPV_MAX_SELECTIONS) {
+      this.snackbar.openFromComponent(SnackbarComponent, {
+        data: { message: `Maximum ${SPV_MAX_SELECTIONS} values`, type: "error" },
+        duration: 3000,
+        panelClass: ["course-error-snackbar", "error"],
+      });
+      return;
+    }
     this.finalSelectedUsers = this.holdSelectedUsers;
     this.usersFinalList = [...this.finalSelectedUsers];
     this.snackbar.openFromComponent(SnackbarComponent, {

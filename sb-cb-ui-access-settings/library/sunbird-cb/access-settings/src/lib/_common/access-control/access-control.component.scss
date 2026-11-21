@@ -314,3 +314,967 @@
     }
   }
 }
+// SPV portal (provider access settings) only. The page takes the root class .spv-access-settings in the SPV portal, so
+// everything below is scoped to it, and the creation and MDO portals look as they did. The popups render outside the
+// page, so their rules use spv- class names of their own instead.
+.spv-access-settings {
+  cursor: default;
+
+  // a field to type in keeps its text cursor; buttons, selects and links keep their pointer
+  input:not([type="radio"]):not([type="checkbox"]),
+  textarea {
+    cursor: text;
+  }
+
+  // the creation portal utility classes the user groups use, which the SPV portal doesn't have
+  .new-bg-color {
+    background-color: #1b4ca1 !important;
+  }
+
+  .primary-text-color {
+    color: #1b4ca1 !important;
+  }
+
+  .text-dark {
+    color: #000 !important;
+  }
+
+  .button-with-corners {
+    border-radius: 35px !important;
+  }
+
+  // the SPV portal has these too, but without the !important that wins over a Material button's own shape and colour,
+  // as Manage Selection needs
+  .rounded-full {
+    border-radius: 9999px !important;
+  }
+
+  .text-white {
+    color: #fff !important;
+  }
+
+  .new-secondary-button-no-border {
+    height: 32px;
+    border: 0 solid #1b4ca1 !important;
+    background-color: transparent !important;
+    color: #1b4ca1 !important;
+    font-weight: 700 !important;
+    line-height: 0 !important;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  // The condition fields and the AND / OR as pills, the way the creation portal's global styles draw .mat-full-radius:
+  // 42px high with round ends, and the always disabled "is" read as a normal value
+  .mat-full-radius ::ng-deep .mat-mdc-form-field {
+    --mat-form-field-container-height: 42px;
+    --mat-form-field-container-vertical-padding: 9px;
+    --mat-form-field-outlined-outline-color: #00000029;
+    --mat-form-field-outlined-hover-outline-color: #00000052;
+    --mat-form-field-outlined-disabled-outline-color: #00000029;
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mdc-notched-outline__leading {
+      min-width: 28px;
+      border-radius: 28px 0 0 28px !important;
+    }
+
+    .mdc-notched-outline__trailing {
+      border-radius: 0 28px 28px 0 !important;
+    }
+
+    .mat-mdc-select-disabled .mat-mdc-select-value {
+      color: #000000de;
+    }
+  }
+
+  // the field (a fifth of the row), a narrow "is", then three equal columns, the last one holds delete and reset
+  .selections-options {
+    grid-template-columns: calc((100% - 64px) / 5) 96px repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  // "N items selected" and its "· max 500" on one line, on the same baseline; what the condition lacks under them
+  .action-options-selected {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 4px;
+
+    .spv-selection-error {
+      flex-basis: 100%;
+    }
+  }
+
+  // the user groups start a little below the distribution card (mat-accordion is inline, so its mt-3 makes no gap)
+  .access-usergroup-accordion {
+    display: block;
+    margin-top: 16px;
+  }
+
+  // a group's header grows when its chips need a second line (a group in use that is also exhausted)
+  ::ng-deep .access-usergroup-panel .mat-expansion-panel-header,
+  ::ng-deep .access-usergroup-panel .mat-expansion-panel-header.mat-expanded {
+    height: auto !important;
+    min-height: 50px;
+  }
+
+  ::ng-deep .access-usergroup-panel .mat-expansion-panel-header-title {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  // the title and its chips take the width the two buttons leave, not Material's third of the header
+  ::ng-deep .access-usergroup-panel .mat-expansion-panel-header-description {
+    flex: 0 0 auto;
+  }
+}
+
+.spv-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.spv-page-title {
+  font-family: Montserrat;
+  font-weight: 600;
+  font-size: 20px;
+  color: #000000;
+}
+
+.spv-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #1b4ca1;
+    border-radius: 9999px;
+    font-family: Lato;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  .spv-reset-button {
+    background: #fff;
+    color: #1b4ca1;
+  }
+
+  .spv-save-button {
+    background: #1b4ca1;
+    color: #fff;
+  }
+
+  .spv-saving {
+    --mat-progress-spinner-active-indicator-color: #fff;
+  }
+}
+
+.spv-card {
+  padding: 16px 24px;
+  border: 1px solid #1b4ca1;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.spv-label {
+  font-family: Lato;
+  font-weight: 700;
+  font-size: 14px;
+  color: #212529;
+}
+
+.spv-field-meta {
+  font-family: Lato;
+  font-weight: 400;
+  font-size: 14px;
+  color: #00000099;
+}
+
+// The read-only Licence Type and Over All Limit, each with a smaller line saying where it comes from
+.spv-licence-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+
+  .spv-field-meta {
+    font-size: 12px;
+  }
+}
+
+.spv-summary-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spv-readonly-box {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin-top: 6px;
+  padding: 0 16px;
+  border: 1px solid #dfe2e7;
+  border-radius: 4px;
+  background: #f7f8fa;
+  font-family: Lato;
+  font-size: 14px;
+}
+
+.spv-readonly-text {
+  color: #00000099;
+}
+
+.spv-readonly-value {
+  font-weight: 700;
+  color: #212529;
+}
+
+.spv-licences-word {
+  margin-left: 4px;
+}
+
+.spv-edit-link {
+  color: #1b4ca1;
+  text-decoration: underline;
+}
+
+// Enrolment check preference, and what No leaves to the Content Portal
+.spv-preference-card {
+  margin-top: 16px;
+  padding: 16px 20px;
+  border: 1px solid #00000014;
+  border-radius: 8px;
+}
+
+.spv-preference-title {
+  display: block;
+  font-family: Lato;
+  font-weight: 700;
+  font-size: 16px;
+  color: #212529;
+}
+
+.spv-required-mark {
+  color: #d13212;
+}
+
+// Radio options drawn as cards
+.spv-radio-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.spv-radio-card {
+  --mat-radio-selected-icon-color: #1b4ca1;
+  --mat-radio-selected-hover-icon-color: #1b4ca1;
+  --mat-radio-selected-focus-icon-color: #1b4ca1;
+  --mat-radio-selected-pressed-icon-color: #1b4ca1;
+  --mat-radio-checked-ripple-color: #1b4ca1;
+
+  padding: 6px 12px 6px 4px;
+  border: 1px solid #00000014;
+  border-radius: 6px;
+
+  &.mat-mdc-radio-checked {
+    border-color: #1b4ca1;
+    background: #e8eefb;
+  }
+
+  ::ng-deep .mdc-form-field {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  ::ng-deep .mdc-label {
+    flex: 1;
+    padding-top: 10px;
+    cursor: pointer;
+  }
+
+  .spv-option-title {
+    display: block;
+    font-family: Lato;
+    font-weight: 700;
+    font-size: 14px;
+    color: #212529;
+  }
+
+  .spv-option-description {
+    display: block;
+    margin-top: 2px;
+    font-family: Lato;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #00000099;
+  }
+}
+
+// The warnings and the notes of the page
+.spv-warning,
+.spv-licence-error,
+.spv-info-note {
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-family: Lato;
+  font-size: 13px;
+}
+
+.spv-warning {
+  background: #fff4e5;
+  color: #b26b00;
+}
+
+.spv-licence-error {
+  background: #fdecea;
+  color: #d13212;
+}
+
+.spv-info-note {
+  background: #e8eefb;
+  color: #1b4ca1;
+}
+
+.spv-banner {
+  margin-top: 12px;
+}
+
+.spv-preference-warning {
+  margin-top: 12px;
+}
+
+.spv-course-check-note {
+  margin-top: 16px;
+}
+
+.spv-distribution-card {
+  margin-top: 16px;
+  padding: 16px 20px;
+  border: 1px solid #00000014;
+  border-radius: 12px;
+}
+
+.spv-distribution-title {
+  font-family: Lato;
+  font-weight: 700;
+  font-size: 16px;
+  color: #212529;
+}
+
+.spv-distribution-tiles {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+
+  // with the Over-allocated by tile there are six
+  &.has-over-allocation {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.spv-distribution-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #f4f5f9;
+
+  .spv-tile-label {
+    font-family: Lato;
+    font-size: 12px;
+    color: #00000099;
+  }
+
+  .spv-tile-value {
+    font-family: Lato;
+    font-weight: 700;
+    font-size: 24px;
+    color: #212529;
+
+    &.has-unallocated {
+      color: #1d8923;
+    }
+
+    &.over-allocated {
+      color: #d13212;
+    }
+  }
+
+  // a line under the value, saying what the tile is for
+  .spv-tile-note {
+    font-family: Lato;
+    font-size: 11px;
+    color: #00000099;
+  }
+}
+
+// The Unaudited licences tile is like the others, with the info icon beside its label
+.spv-unaudited-tile .spv-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// The i beside the tile's label, its text opens on hover and on focus
+.spv-info-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #1b4ca1;
+  border-radius: 50%;
+  font-family: Lato;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: #1b4ca1;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    background: #1b4ca1;
+    color: #fff;
+    outline: none;
+  }
+
+  &:hover .spv-info-popover,
+  &:focus .spv-info-popover {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+.spv-info-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  z-index: 10;
+  width: 260px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: #212529;
+  font-family: Lato;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  color: #fff;
+  transform: translateX(-50%);
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top-color: #212529;
+  }
+}
+
+.spv-allocation-bar {
+  display: flex;
+  height: 14px;
+  margin-top: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #eef0f4;
+}
+
+.spv-allocation-segment {
+  flex: 0 0 auto;
+  height: 100%;
+}
+
+// whatever the groups leave, drawn as the rest of the bar
+.spv-unallocated-segment {
+  flex: 1 1 0;
+  background: repeating-linear-gradient(135deg, #d5d8df 0 4px, #eceef2 4px 8px);
+}
+
+// Licences used while the enrolment check preference was No: slate, hatched, so the segment and its legend swatch can't
+// be taken for a user group's colour or for the shared pool
+.spv-unaudited-segment {
+  background: repeating-linear-gradient(135deg, #4b5563 0 3px, #9ca3af 3px 6px);
+}
+
+.spv-allocation-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 8px;
+  font-family: Lato;
+  font-size: 12px;
+  color: #212529;
+}
+
+.spv-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spv-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+
+  &.spv-unallocated-swatch {
+    background: #d5d8df;
+  }
+
+  &.spv-unaudited-swatch {
+    background: repeating-linear-gradient(135deg, #4b5563 0 2px, #9ca3af 2px 4px);
+  }
+}
+
+// Header of a user group: its colour in the distribution bar, its priority, the users it matches and its licences
+.spv-group-title {
+  flex-wrap: wrap;
+  gap: 8px 12px !important;
+}
+
+.spv-group-dot {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+// The group's priority, the order it was created in; sits close to the name
+.spv-priority-pill {
+  flex: 0 0 auto;
+  margin-left: -6px;
+  padding: 0 6px;
+  border: 1.5px solid #1b4ca1;
+  border-radius: 9999px;
+  color: #1b4ca1;
+  font-family: Lato;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.spv-group-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-family: Lato;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.spv-count-chip {
+  gap: 4px;
+  min-width: 118px;
+  border: 1px solid #00000014;
+  background: #fff;
+  color: #212529;
+}
+
+.spv-count-loader {
+  --mat-progress-spinner-active-indicator-color: #1b4ca1;
+}
+
+// a group learners have enrolled through, shown with its enrolments
+.spv-in-use-chip {
+  gap: 4px;
+  border: 1px dashed #0000004d;
+  background: #fff;
+  color: #212529;
+  font-weight: 700;
+}
+
+// a group in use with every licence used
+.spv-exhausted-chip {
+  gap: 4px;
+  border: 1px dashed #d13212;
+  background: #fff;
+  color: #d13212;
+  font-weight: 700;
+}
+
+.spv-licences-chip {
+  gap: 6px;
+  border: 1px solid #f59a38;
+  background: #fff8ef;
+  color: #b45f06;
+  font-weight: 700;
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    color: inherit;
+  }
+}
+
+.spv-selection-max {
+  margin-left: 4px;
+  font-family: Lato;
+  font-size: 12px;
+  color: #00000099;
+}
+
+// a condition with a field picked saves only with a value, so one without is flagged
+.spv-selection-error,
+.spv-condition-error {
+  font-family: Lato;
+  font-size: 12px;
+  color: #d13212;
+}
+
+// under Add New Condition, lined up with its text
+.spv-condition-error {
+  margin: 2px 0 0 40px;
+}
+
+// in place of Add New Condition, for a group that picks its users one by one
+.spv-user-condition-note {
+  margin-top: 12px;
+  font-family: Lato;
+  font-size: 12px;
+  color: #00000099;
+}
+
+// What a user group is allowed to take of the pool
+.spv-licence-box {
+  position: relative;
+  margin-top: 24px;
+  padding: 20px 16px 14px;
+  border: 1px solid #f5c88a;
+  border-radius: 6px;
+  background: #fff8ef;
+}
+
+.spv-licence-tag {
+  position: absolute;
+  top: -10px;
+  left: 14px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: #f59a38;
+  color: #fff;
+  font-family: Lato;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.spv-licence-label {
+  display: block;
+  font-family: Lato;
+  font-weight: 700;
+  font-size: 12px;
+  color: #212529;
+}
+
+// The licences of a group beside what it has allocated, consumed and has left
+.spv-licence-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 2.2fr) 1fr 1.8fr 1fr;
+  gap: 12px 24px;
+  align-items: center;
+}
+
+.spv-licence-input-row {
+  display: flex;
+  max-width: 580px;
+  margin-top: 6px;
+}
+
+.spv-licence-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #00000029;
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  background: #fff;
+  font-family: Lato;
+  font-weight: 700;
+  font-size: 14px;
+  color: #212529;
+
+  &:focus {
+    outline: 0;
+    border-color: #1b4ca1;
+  }
+
+  &.invalid {
+    border-color: #d13212;
+  }
+}
+
+.spv-licence-suffix {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid #00000029;
+  border-radius: 0 4px 4px 0;
+  background: #f5f6f8;
+  font-family: Lato;
+  font-size: 13px;
+  color: #00000099;
+}
+
+.spv-licence-hint {
+  margin-top: 4px;
+  font-family: Lato;
+  font-size: 11px;
+  color: #00000099;
+}
+
+.spv-licence-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: Lato;
+}
+
+.spv-stat-label {
+  font-size: 12px;
+  color: #00000099;
+}
+
+.spv-stat-value {
+  font-weight: 700;
+  font-size: 16px;
+  color: #212529;
+
+  &.spv-available-value {
+    color: #1d8923;
+  }
+
+  // nothing left of a group's licences once they are used
+  &.used-up {
+    color: #d13212;
+  }
+}
+
+.spv-consumed-bar {
+  display: block;
+  height: 6px;
+  margin-top: 4px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.spv-consumed-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: #1d8923;
+}
+
+.spv-group-count {
+  margin-top: 4px;
+  font-family: Lato;
+  font-size: 12px;
+  color: #00000099;
+  text-align: center;
+}
+
+// The popups of the SPV portal: the confirmations of the enrolment check preference and Reset
+.spv-save-confirm {
+  font-family: Lato;
+  font-size: 14px;
+  color: #000000cc;
+}
+
+.spv-save-confirm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 10px 20px;
+  border-bottom: 1px solid #00000014;
+}
+
+.spv-save-confirm-title {
+  font-weight: 700;
+  font-size: 18px;
+  color: #000000de;
+}
+
+.spv-save-confirm-body {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  line-height: 22px;
+
+  strong {
+    color: #000000de;
+  }
+}
+
+// every user group the first save sends, under the preference
+.spv-save-changes {
+  margin-top: 12px;
+  font-size: 13px;
+
+  ul {
+    max-height: 200px;
+    margin: 4px 0 0;
+    padding-left: 18px;
+    overflow-y: auto;
+    list-style: disc;
+  }
+
+  li + li {
+    margin-top: 4px;
+  }
+}
+
+.spv-save-changes-title {
+  font-weight: 700;
+  color: #000000de;
+}
+
+.spv-save-confirm-actions,
+.spv-discard-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+
+  button {
+    height: 40px;
+    padding: 0 20px;
+    border: 1px solid #1b4ca1;
+    border-radius: 9999px;
+    font-family: Lato;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .spv-confirm-back {
+    background: #fff;
+    color: #1b4ca1;
+  }
+
+  .spv-confirm-save {
+    background: #1b4ca1;
+    color: #fff;
+  }
+}
+
+.spv-save-confirm-actions {
+  border-top: 1px solid #00000014;
+}
+
+.spv-discard-confirm {
+  padding: 24px 4px 4px;
+  font-family: Montserrat;
+}
+
+.spv-discard-confirm-title {
+  padding: 0 20px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #1b2133;
+}
+
+.spv-discard-confirm-actions {
+  justify-content: center;
+}
+
+// only the panels of the popups above, by their panel class
+::ng-deep .spv-access-settings-dialog .mat-mdc-dialog-surface {
+  border-radius: 12px;
+}
+
+// The popups the page opens on the SPV portal (selections, Users, delete) take the panel class too: the creation
+// portal's global styles they use, which the SPV portal doesn't have
+::ng-deep .spv-access-settings-dialog {
+  // Search, Select Users, Apply and Yes
+  .new-bg-color:not(:disabled) {
+    background-color: #1b4ca1 !important;
+    color: #fff !important;
+  }
+
+  .new-bg-color:disabled {
+    background-color: #ebebeb !important;
+    color: #666666 !important;
+  }
+
+  .rounded-full {
+    border-radius: 9999px !important;
+  }
+
+  .text-dark {
+    color: #000 !important;
+  }
+
+  // the search fields, lined up with the Search button beside them, and the Show Entries of the Users list, as pills
+  .mat-full-radius,
+  .mat-full-radius-select {
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mdc-notched-outline__leading {
+      min-width: 28px;
+      border-radius: 28px 0 0 28px !important;
+    }
+
+    .mdc-notched-outline__trailing {
+      border-radius: 0 28px 28px 0 !important;
+    }
+  }
+
+  .mat-full-radius {
+    &.mt-6 {
+      margin-top: 0 !important;
+    }
+
+    .mat-mdc-form-field {
+      --mat-form-field-container-height: 42px;
+      --mat-form-field-container-vertical-padding: 9px;
+    }
+  }
+
+  .mat-full-radius-select .mat-mdc-form-field {
+    --mat-form-field-container-height: 40px;
+    --mat-form-field-container-vertical-padding: 8px;
+  }
+
+  .search-button {
+    height: 40px;
+  }
+}
