@@ -375,6 +375,11 @@ export class AiQuestionsModalComponent {
 
   /** Reads the sheet only to confirm it has questions and to summarise them; the file itself goes to the AI. */
   private async loadReferenceSheet(file: File): Promise<void> {
+    const extension = file.name.split('.').pop()?.toLowerCase() || ''
+    if (!['xlsx', 'xls', 'csv'].includes(extension)) {
+      this.snackBar.open('Invalid file format. Please upload an .xlsx, .xls, or .csv file.')
+      return
+    }
     try {
       const workbook = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' })
       for (const sheetName of workbook.SheetNames) {
