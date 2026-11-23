@@ -520,6 +520,61 @@
   }
 }
 
+.instructions-ca {
+  .ca-box {
+    border-radius: 12px;
+    background-color: var(--color-primary-50, #eef1f7);
+    border: 1px solid var(--color-primary-100, #d5dcea);
+  }
+
+  .ca-box-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-black, #1b1b1b);
+  }
+
+  .ca-eligible-icon {
+    color: var(--color-success-500, #1d8923);
+  }
+
+  .ca-instructions-icon {
+    color: var(--color-primary-500, #1b4ca1);
+  }
+
+  .ca-instructions-text {
+    padding-left: 2.25rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-black, #1b1b1b);
+
+    ::ng-deep {
+      p, ol, ul {
+        margin: 0;
+      }
+      ol, ul {
+        padding-left: 1rem;
+      }
+    }
+  }
+
+  .ca-instructions-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .ca-view-toggle {
+    padding: 0 0 0 2.25rem;
+    border: none;
+    background: none;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-black, #1b1b1b);
+    cursor: pointer;
+  }
+}
+
 ::ng-deep .about-block .toc-about {
   padding: 0 !important;
 }

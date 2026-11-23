@@ -7,6 +7,7 @@ import {
   BATCH_RANGES,
   CHECKBOX_OPTIONS,
   MAX_ORGANISATION_SELECTIONS,
+  NO_SERVICES_MAPPED_MESSAGE,
   SPV_MAX_SELECTIONS,
   ORGANISATION_SELECTION_MODES
 } from "../../../_constants/app.constants";
@@ -75,6 +76,9 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   selectedStateKey = "";
   canChooseState = false;
   stateServiceTypeNames: string[] = [];
+  /** MDO only: set when the organisation has no service at all to select from, not when a search finds none */
+  noServicesMapped = false;
+  readonly noServicesMappedMessage = NO_SERVICES_MAPPED_MESSAGE;
   customeFieldValues: any;
   isEntityCustomField: boolean;
 
@@ -972,8 +976,38 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     this.getServicesList(this.searchControl.value);
   }
 
+  /** MDO only: every organisation except a CCA (DoPT, which keeps the master list) selects only from its own services. */
+  get isServiceListScopedToOrganisation(): boolean {
+    return this.application === NsAccessControlConfig.Application.MDO && !this.isCCA;
+  }
+
   getServicesList(query: string): void {
-    if (this.application === NsAccessControlConfig.Application.MDO || this.applyNewServiceSelections) {
+    if (this.isServiceListScopedToOrganisation) {
+      // Services of the state the organisation sits under, plus those it (or its L0) is the Cadre Controlling Authority of
+      const ownStateServices = this.cadreMappingService.getServicesByStateKeys(
+        this.availableStates.map((state: any) => state.id)
+      );
+      const cadreControllingAuthorityServices = this.cadreMappingService.getServicesByCadreControllingAuthorities(
+        this.accessControlService.getCadreControllingAuthorityNames(this.accessControlConfig!)
+      );
+
+      // Still narrowed by any cadre / batch already selected in the group
+      const selectableServiceNames = new Set(
+        this.accessControlService.holdServiceCadrebatch().service.map((service: any) => service.name?.trim().toLowerCase())
+      );
+      const organisationServices = _.uniqBy(
+        [...ownStateServices, ...cadreControllingAuthorityServices],
+        (service) => service.name?.trim().toLowerCase()
+      ).filter((service) => selectableServiceNames.has(service.name?.trim().toLowerCase()));
+
+      this.noServicesMapped = organisationServices.length === 0;
+      this.dataList = query
+        ? organisationServices.filter((service) => service.name?.toLowerCase().includes(query.toLowerCase()))
+        : organisationServices;
+      this.dataListDup = _.uniqWith([...this.dataListDup, ...this.dataList], _.isEqual);
+      this.alphabet = [];
+      this.getFilteredEntityGrouped();
+    } else if (this.application === NsAccessControlConfig.Application.MDO || this.applyNewServiceSelections) {
       const baseList = this.accessControlService.holdServiceCadrebatch().service;
       const baseServiceNames = new Set(baseList.map(service => service.name?.trim().toLowerCase()));
       

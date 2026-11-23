@@ -23,6 +23,9 @@ export const ALL_ORGANISATIONS_SELECTION = "ALL_ORGANISATIONS";
 // MDO only. The most organisations that can be picked one by one in an Organisation condition.
 export const MAX_ORGANISATION_SELECTIONS = 500;
 
+export const NO_SERVICES_MAPPED_MESSAGE =
+  "No services are currently mapped to your State/Ministry. Please contact the concerned authority for further assistance.";
+
 export const ORGANISATION_SELECTION_MODES = [
   { label: "Manual Selection", value: "individual" },
   { label: "Select all", value: "all" },

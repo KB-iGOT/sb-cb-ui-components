@@ -10,6 +10,7 @@ export interface ICivilService {
   id: string;
   name: string;
   displayName?: string;
+  cadreControllingAuthority?: string;
   commonBatchStartYear: number;
   commonBatchEndYear: number;
   cadreList?: ICadre[];
@@ -215,6 +216,13 @@ export class CadreMappingService {
       id: s.id,
       name: s.name
     }));
+  }
+
+  /** Services whose Cadre Controlling Authority is one of the given organisation names. */
+  getServicesByCadreControllingAuthorities(organisationNames: string[]): Array<{ id: string; name: string }> {
+    return Array.from(this.allServices.values())
+      .filter((service) => organisationNames.includes(service.cadreControllingAuthority))
+      .map((service) => ({ id: service.id, name: service.name }));
   }
 
   /** Services that are not tied to a state, ie. everything the user may always see. */

@@ -4,6 +4,7 @@ import { ContentDictionaryService } from '@sunbird-cb/consumption'
 import {
   IComprehensiveAssessmentAttempts,
   IComprehensiveAssessmentCourse,
+  IComprehensiveAssessmentResult,
   IComprehensiveAssessmentStatus,
 } from '../_models/common.model'
 
@@ -89,6 +90,36 @@ export class ComprehensiveAssessmentService {
     } catch (_err) {
       return this.toAttempts(0, fallbackAllowed)
     }
+  }
+
+  getResultFromEnrolment(content: any, enrolment: any): IComprehensiveAssessmentResult | null {
+    const scores: Record<string, any> = enrolment?.additionalProperties || {}
+    const questionSet = this.findQuestionSet(content)
+    const assessmentId = questionSet?.identifier && scores[questionSet.identifier]
+      ? questionSet.identifier
+      : Object.keys(scores).find((id: string) => scores[id]?.bestScore !== undefined)
+    if (!assessmentId) {
+      return null
+    }
+
+    return {
+      score: Number(scores[assessmentId].bestScore) || 0,
+      passPercentage: Number(questionSet?.minimumPassPercentage ?? questionSet?.passPercentage
+        ?? content?.minimumPassPercentage ?? content?.passPercentage) || 0,
+    }
+  }
+
+  private findQuestionSet(node: any): any {
+    for (const child of node?.children || []) {
+      if (QUESTION_SET_MIME_TYPES.includes(child?.mimeType)) {
+        return child
+      }
+      const nested = this.findQuestionSet(child)
+      if (nested) {
+        return nested
+      }
+    }
+    return null
   }
 
   private resolveAssessmentNode(contentReadData: any): any {

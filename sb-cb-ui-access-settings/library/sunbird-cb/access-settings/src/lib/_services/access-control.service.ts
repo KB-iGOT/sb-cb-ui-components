@@ -244,6 +244,22 @@ export class AccessControlService {
     );
   }
 
+  /** Names of the logged in organisation and of its L0, each only when the org read marks it as a Cadre Controlling Authority (allowservicebasedtargeting). */
+  getCadreControllingAuthorityNames(config?: NsAccessControlConfig.IAccessControlConfig): string[] {
+    const loggedInOrganisation = (config || this.accessControlConfig())?.userConfig?.org;
+    const parentOrganisation = this.parentOrganisation();
+    const authorityNames: string[] = [];
+
+    if (loggedInOrganisation?.allowservicebasedtargeting === true && loggedInOrganisation?.orgName) {
+      authorityNames.push(loggedInOrganisation.orgName);
+    }
+    if (parentOrganisation?.allowservicebasedtargeting === true && parentOrganisation?.orgName) {
+      authorityNames.push(parentOrganisation.orgName);
+    }
+
+    return authorityNames;
+  }
+
   /**
    * Reads the org hierarchy framework that applies to the logged in user - their own when they
    * are the L0, the one of the L0 they are mapped to otherwise - and flattens it into a single
