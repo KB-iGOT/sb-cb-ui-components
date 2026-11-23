@@ -1,15 +1,17 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, signal } from "@angular/core";
+import {
+  AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, ViewChild, signal
+} from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 // import { Router } from "@angular/router";
 import { InviteUsersComponent } from "../dialogs/invite-users/invite-users.component";
 import { IReusableUserGroupRequest, IUserGroupRequest, NsAccessControlConfig } from "../../_models/access-control.model";
-import { FormBuilder, FormGroup, FormArray, Validators } from "@angular/forms";
+import { AbstractControl, FormBuilder, FormGroup, FormArray, ValidationErrors, Validators } from "@angular/forms";
 import { AccessControlService } from "../../_services/access-control.service";
 import { EntitySelectionsComponent } from "../dialogs/entity-selections/entity-selections.component";
 import { v4 as uuidv4 } from "uuid";
 import { CadreMappingService } from "../../_services/cadre-mapping.service";
 import { SnackbarComponent } from "../../components/snackbar/snackbar.component";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatSnackBar, MatSnackBarRef } from "@angular/material/snack-bar";
 import { ConfirmDialogComponent } from "../dialogs/confirm-dialog/confirm-dialog.component";
 import { AccessControlGuideComponent } from "../dialogs/access-control-guide/access-control-guide.component";
 import { SaveUserGroupComponent } from "../dialogs/save-user-group/save-user-group.component";
@@ -18,7 +20,29 @@ import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
 import { MatRadioChange } from "@angular/material/radio";
 import * as _ from "lodash";
-import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_CRITERIA_KEY, MINISTRY_OR_STATE_FILTER_KEY } from "../../_constants/app.constants";
+import {
+  ALL_ORGANISATIONS_SELECTION,
+  MINISTRY_OR_STATE_CRITERIA_KEY,
+  MINISTRY_OR_STATE_FILTER_KEY,
+  SPV_CRITERIA_KEYS,
+  SPV_DEFAULT_UNAUDITED_LICENCES_INFO,
+  SPV_DEFAULT_UNAUDITED_LICENCES_ZERO_INFO,
+  SPV_DEFAULT_USER_GROUP_LIMIT,
+  SPV_ENROLMENT_CHECK_OPTIONS,
+  SPV_LIMITED_SELECTION_ENTITIES,
+  SPV_MAX_SELECTIONS,
+  SPV_MIN_GROUP_LICENCES,
+  SPV_USER_GROUP_COLOURS
+} from "../../_constants/app.constants";
+
+// SPV portal only. A user group as the page keeps it, to compare with what was last saved and to put it back
+interface ISpvUserGroupState {
+  // the userGroupId the api gave the group, empty until it is saved
+  id: string;
+  licences: number | null;
+  consumed: number;
+  conditions: { entity: string; selections: any[] }[];
+}
 
 @Component({
     selector: "sb-uic-access-control",
@@ -26,13 +50,26 @@ import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_CRITERIA_KEY, MINISTRY_O
     styleUrls: ["./access-control.component.scss"],
     standalone: false
 })
-export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AccessControlComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
   @Input() config!: NsAccessControlConfig.IAccessControlConfig;
   @Input() contentId: string = "";
   @Input() content: any;
   @Input() tempAccessControl: any;
+  // SPV portal only: the provider whose access settings are set (contentId is its partnerId, tempAccessControl its
+  // saved settings)
+  @Input() spvProvider?: NsAccessControlConfig.ISpvProvider;
 
-  @Output() accessControlData: EventEmitter<{ userGroup: any; accessType: string; action?: string; userGroupId?: string }> = new EventEmitter();
+  // SPV portal only: Save emits action NsAccessControlConfig.SPV_SAVE_ACTION with the user groups to upsert (none for
+  // No), the enrolment check preference chosen and whether it differs from the saved one. The host saves them and calls
+  // completeSpvSave().
+  @Output() accessControlData: EventEmitter<{
+    userGroup: any;
+    accessType: string;
+    action?: string;
+    userGroupId?: string;
+    providerPreference?: boolean;
+    preferenceChanged?: boolean;
+  }> = new EventEmitter();
   @Output() refreshContentMeta: EventEmitter<boolean> = new EventEmitter();
   @Output() sendForCQF: EventEmitter<boolean> = new EventEmitter();
 
@@ -78,6 +115,26 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   mdoContent: any;
   savedUserGroupConditions = new Map<string, string>();
 
+  // SPV portal only (provider access settings), see the "SPV portal" region at the end
+  SPV_APPLICATION = NsAccessControlConfig.Application.SPV;
+  spvEnrolmentCheckOptions = SPV_ENROLMENT_CHECK_OPTIONS;
+  // the enrolment check preference chosen on the page, and the one saved on the provider; null until one is chosen
+  spvChecksEnrolment: boolean | null = null;
+  spvSavedPreference: boolean | null = null;
+  // what a group still lacks is shown under it once Save is pressed
+  spvSaveAttempted = false;
+  spvAllocatedToGroups = 0;
+  spvSegments: { name: string; licences: number; percent: string; width: number; colour: string }[] = [];
+  spvUnauditedWidth = 0;
+  @ViewChild("spvSaveConfirm") spvSaveConfirm?: TemplateRef<any>;
+  @ViewChild("spvPreferenceChangeConfirm") spvPreferenceChangeConfirm?: TemplateRef<any>;
+  @ViewChild("spvDiscardConfirm") spvDiscardConfirm?: TemplateRef<any>;
+  private spvInitialised = false;
+  private spvVersion = 1;
+  private spvSavedGroups: ISpvUserGroupState[] = [];
+  private spvCountingGroups = new Set<AbstractControl>();
+  private spvOverAllLimitToast?: MatSnackBarRef<SnackbarComponent>;
+
   constructor(
     private dialog: MatDialog,
     private fb: FormBuilder,
@@ -89,6 +146,13 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   async ngOnInit(): Promise<void> {
     this.initForm();
+
+    // The provider access settings of the SPV portal set themselves up apart: none of the content or MDO steps below
+    // apply to them, and they read and save nothing themselves
+    if (this.isSpvPortal) {
+      this.initSpvPortal();
+      return;
+    }
 
     if (this.config?.application === NsAccessControlConfig.Application.MDO) {
       this.isLoading = true
@@ -253,9 +317,23 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     localStorage.removeItem("goToSetting");
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    // SPV portal only: the host passes the provider again after it is saved, and the saved settings once read
+    if (!this.isSpvPortal || !this.spvInitialised) {
+      return;
+    }
+    if (changes.spvProvider) {
+      this.spvApplyProvider();
+    }
+    if (changes.tempAccessControl) {
+      this.spvApplySavedSettings();
+    }
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.spvOverAllLimitToast?.dismiss();
   }
   
   async fetchCadreConfigData(): Promise<void> {
@@ -317,6 +395,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   addUserGroup() {
+    // SPV portal: a group also holds its licences, and is only added while licences are left to give it
+    if (this.isSpvPortal) {
+      if (this.spvCanAddUserGroup) {
+        this.spvAddUserGroup();
+        this.spvUpdateDistribution();
+      }
+      return;
+    }
+
     const ruleGroup = this.fb.group({
       id: [uuidv4()],
       name: [`User Group ${this.userGroup.length + 1}`],
@@ -336,6 +423,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   addCondition(userGroupIndex: number) {
+    // SPV portal: Add New Condition is disabled whenever a condition can't be added, the rules are in spvCanAddCondition
+    if (this.isSpvPortal && !this.spvCanAddCondition(userGroupIndex)) {
+      return;
+    }
     this.processCadreConfigMapping(userGroupIndex);
     const conditions = this.ruleConditions(userGroupIndex);
     const accessSetting = this.content?.accessSetting;
@@ -661,7 +752,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const selectedEntities = conditions.controls
       .map((ctrl, idx) => (idx !== currentConditionIndex ? ctrl.get("entity")?.value : null))
       .filter(e => !!e);
-    return this.accessControlCriteriaSelection?.optionsEntity.filter(option => !selectedEntities.includes(option.value));
+    const availableEntities = this.accessControlCriteriaSelection?.optionsEntity.filter(option => !selectedEntities.includes(option.value));
+    if (!this.isSpvPortal) {
+      return availableEntities;
+    }
+    // SPV portal: User is offered only while it would be the group's one condition, or the condition already holds it
+    const ownEntity = conditions.at(currentConditionIndex)?.get("entity")?.value;
+    return availableEntities?.filter(option =>
+      option.value !== NsAccessControlConfig.SelectionType.Users ||
+      conditions.length === 1 ||
+      ownEntity === NsAccessControlConfig.SelectionType.Users
+    );
   }
 
   getDeleteType(): string {
@@ -682,9 +783,14 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const type = this.getDeleteType();
 
     const group = this.userGroup.at(index);
+    // SPV portal: a group learners have enrolled through can't be deleted
+    if (this.isSpvPortal && this.spvIsInUse(group)) {
+      return;
+    }
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: "470px",
-      data: { additionalData: group?.value?.name, type: type }
+      data: { additionalData: group?.value?.name, type: type },
+      ...this.spvDialogPanel
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
@@ -695,14 +801,17 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             this.resetUserGroup(i);
           }
           this.reindexUserCount();
-          
+
           // Check if any remaining user group has AIS
           const hasAIS = this.hasAllIndiaServicesInAnyGroup();
           if (!hasAIS) {
             this.accessControlService.enableDeputation(false);
           }
-          
-          this.applyAccessControlValue(true);
+
+          // SPV portal: nothing is saved until Save is pressed
+          if (!this.isSpvPortal) {
+            this.applyAccessControlValue(true);
+          }
           this.calculateUserCountForUserGroup(index);
         } else {
           this.userGroup.removeAt(index);
@@ -718,6 +827,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
             this.accessControlService.enableDeputation(false);
           }
 
+        }
+        // SPV portal: the licences of the deleted group are free again
+        if (this.isSpvPortal) {
+          this.spvRevalidateLicences();
+          this.spvUpdateDistribution();
         }
       }
     });
@@ -745,6 +859,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
   resetUserGroupWithSelections(userGroupIndex: number) {
     const group = this.userGroup.at(userGroupIndex);
+    // SPV portal: the conditions of a saved group or a group in use are locked
+    if (this.isSpvPortal && this.spvAreConditionsLocked(group)) {
+      return;
+    }
     if (group) {
       group.get("name")?.setValue(`User Group ${userGroupIndex + 1}`);
       const conditions = group.get("conditions") as FormArray;
@@ -787,15 +905,23 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   removeCondition(userGroupIndex: number, conditionIndex: number) {
     const type = this.getDeleteType();
     const conditions = this.ruleConditions(userGroupIndex);
+    // SPV portal: the conditions of a saved group or a group in use are locked
+    if (this.isSpvPortal && this.spvAreConditionsLocked(this.userGroup.at(userGroupIndex))) {
+      return;
+    }
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: "470px",
-      data: { additionalData: "this condition", type: type }
+      data: { additionalData: "this condition", type: type },
+      ...this.spvDialogPanel
     });
     dialogRef.afterClosed().subscribe(result => {
       if (result?.action === NsAccessControlConfig.IActions.Confirm) {
         this.checkServicesAndResetReleated(userGroupIndex, conditionIndex);
         conditions.removeAt(conditionIndex);
-        this.applyAccessControlValue(true);
+        // SPV portal: nothing is saved until Save is pressed
+        if (!this.isSpvPortal) {
+          this.applyAccessControlValue(true);
+        }
         this.calculateUserCountForUserGroup(userGroupIndex);
         this.processDisableAddConditionOnClose(userGroupIndex);
       }
@@ -805,6 +931,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   resetCondition(userGroupIndex: number, conditionIndex: number) {
     const conditions = this.ruleConditions(userGroupIndex);
     const condition = conditions.at(conditionIndex);
+    // SPV portal: the conditions of a saved group or a group in use are locked
+    if (this.isSpvPortal && this.spvAreConditionsLocked(this.userGroup.at(userGroupIndex))) {
+      return;
+    }
     if (condition) {
       const wasServiceCondition = condition.get("entity")?.value === NsAccessControlConfig.SelectionType.Service;
       
@@ -909,7 +1039,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const dialogRef = this.dialog.open(EntitySelectionsComponent, {
       width: "1032px",
       maxHeight: "95vh",
-      data: { rule: rule, condition: condition, selected: condition.selections, activeTabSelected: activeTabSelected, disabled: isDisabled }
+      data: { rule: rule, condition: condition, selected: condition.selections, activeTabSelected: activeTabSelected, disabled: isDisabled },
+      ...this.spvDialogPanel
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -1076,7 +1207,8 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
 
     const dialogRef = this.dialog.open(InviteUsersComponent, {
       width: "1090px",
-      data: { condition: condition, rule: rule, selected: condition.selections, activeTab: activeTabSelected, disabled: isDisabled }
+      data: { condition: condition, rule: rule, selected: condition.selections, activeTab: activeTabSelected, disabled: isDisabled },
+      ...this.spvDialogPanel
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -1108,6 +1240,15 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   callSnackbar(message: string, type: "success" | "error"): void {
+    // SPV portal: the toast also takes the panel class the SPV portal colours its success and error toasts by
+    if (this.isSpvPortal) {
+      this.snackbar.openFromComponent(SnackbarComponent, {
+        data: { message, type },
+        duration: 5000,
+        panelClass: [`course-${type}-snackbar`, type, "spv-access-settings-toast"]
+      });
+      return;
+    }
     if (type === "success") {
       this.snackbar.openFromComponent(SnackbarComponent, {
         data: { message: message, type: "success" },
@@ -1148,6 +1289,10 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   async applyAccessControlValue(shouldProceedWithoutValidation: boolean = false, displaySuccessMessage: boolean = true): Promise<void> {
+    // SPV portal: the host saves what spvSave() emits, never the content access settings this saves
+    if (this.isSpvPortal) {
+      return;
+    }
     if (!shouldProceedWithoutValidation) {
       const validated = this.validateFormData();
       if (!validated) return;
@@ -1960,16 +2105,22 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     };
     if(payload?.request?.filters) {
+      // SPV portal: the group's Count chip spins while its users are counted
+      if (this.isSpvPortal) {
+        this.spvCountingGroups.add(group);
+      }
       const response = await this.accessControlService
         .validateUser(payload)
         .toPromise()
         .catch(() => {
           this.userCount[userGroupIndex] = 0;
         });
+      this.spvCountingGroups.delete(group);
       if (response?.result?.response) {
         const count = response?.result?.response?.count;
         this.userCount[userGroupIndex] = count;
-        if (!this.userCount[userGroupIndex]) {
+        // SPV portal: a group matching nobody is warned about under the group instead
+        if (!this.userCount[userGroupIndex] && !this.isSpvPortal) {
           this.callSnackbar("No iGOT official match the set conditions selections, please review the set conditions and their respective selections.", "error")
         }
       }
@@ -2402,6 +2553,11 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
       return false;
     }
 
+    // SPV portal: Add User Group shows while enrolment is checked here; spvCanAddUserGroup says when it is enabled
+    if (this.isSpvPortal) {
+      return this.spvChecksEnrolment === true;
+    }
+
     if (!this.userGroup?.length) {
       return true;
     }
@@ -2760,4 +2916,670 @@ export class AccessControlComponent implements OnInit, AfterViewInit, OnDestroy 
     const criteriaValue = entry?.criteriaKey ? entry?.criteriaValue : entry?.[criteriaKey];
     return { criteriaKey, criteriaValue: Array.isArray(criteriaValue) ? criteriaValue : criteriaValue ? [criteriaValue] : [] };
   }
+
+  //#region SPV portal
+  // The provider level access settings of a marketplace provider. Everything here runs only when config.application is
+  // spv_portal. The page shows the provider's licences and its enrolment check preference; with Yes each user group
+  // also holds licences, taken from the Over All Limit in priority order. A saved group or a group learners have
+  // enrolled through has its conditions locked. Save emits what to save, the host saves it and calls completeSpvSave().
+
+  get isSpvPortal(): boolean {
+    return this.config?.application === NsAccessControlConfig.Application.SPV;
+  }
+
+  // The popups the page opens take this panel class on the SPV portal, which has none of the creation portal's global
+  // styles they use; the other portals open them as before
+  get spvDialogPanel(): { panelClass?: string } {
+    return this.isSpvPortal ? { panelClass: "spv-access-settings-dialog" } : {};
+  }
+
+  get spvOverAllLimit(): number {
+    return Number(this.spvProvider?.overAllLimit) || 0;
+  }
+
+  get spvProviderName(): string {
+    return this.spvProvider?.name || "";
+  }
+
+  get spvLicenseType(): string {
+    return this.spvProvider?.licenseType || "";
+  }
+
+  get spvUserGroupLimit(): number {
+    const limit = Number(this.spvProvider?.userGroupLimit);
+    return limit > 0 ? limit : SPV_DEFAULT_USER_GROUP_LIMIT;
+  }
+
+  get spvUnauditedLicencesInfo(): string {
+    return this.spvProvider?.unauditedLicencesInfo?.trim() || SPV_DEFAULT_UNAUDITED_LICENCES_INFO;
+  }
+
+  get spvUnauditedLicencesZeroInfo(): string {
+    return this.spvProvider?.unauditedLicencesZeroInfo?.trim() || SPV_DEFAULT_UNAUDITED_LICENCES_ZERO_INFO;
+  }
+
+  // Licences consumed across the provider: the saved settings' count, the provider's until they are read
+  get spvConsumedCount(): number {
+    return Number(this.tempAccessControl?.licence?.consumed ?? this.spvProvider?.consumedCount) || 0;
+  }
+
+  // Licences used while the preference was No, recorded against no user group
+  get spvUnauditedCount(): number {
+    return Math.max(Number(this.tempAccessControl?.licence?.unaudited) || 0, 0);
+  }
+
+  // The shared pool: what the user groups and the unaudited licences leave of the Over All Limit
+  get spvUnallocatedCount(): number {
+    return Math.max(this.spvOverAllLimit - this.spvAllocatedToGroups - this.spvUnauditedCount, 0);
+  }
+
+  // How far the groups together, with the unaudited licences, go past the Over All Limit
+  get spvOverAllocatedCount(): number {
+    return Math.max(this.spvAllocatedToGroups + this.spvUnauditedCount - this.spvOverAllLimit, 0);
+  }
+
+  get spvUnauditedPercent(): string {
+    return (this.spvOverAllLimit ? (this.spvUnauditedCount / this.spvOverAllLimit) * 100 : 0).toFixed(1);
+  }
+
+  // "all 20 SIMPLILEARN courses", without the number while the courses are not counted
+  get spvProviderCourses(): string {
+    const courses = (word: string) => (this.spvProviderName ? `${this.spvProviderName} ${word}` : `${word} of this provider`);
+    const count = Number(this.spvProvider?.publishedCourseCount) || 0;
+    if (!count) {
+      return `all ${courses("courses")}`;
+    }
+    return count === 1 ? `the 1 ${courses("course")}` : `all ${count.toLocaleString("en-US")} ${courses("courses")}`;
+  }
+
+  // The saved preference, said beside the question once there is one
+  get spvSavedPreferenceTitle(): string {
+    return this.spvEnrolmentCheckOptions.find(option => option.value === this.spvSavedPreference)?.title || "";
+  }
+
+  // A saved preference switched to the other choice, warned about until it is saved or put back
+  get spvIsChangingPreference(): boolean {
+    return this.spvSavedPreference !== null && this.spvChecksEnrolment !== this.spvSavedPreference;
+  }
+
+  // the choice the first save's confirmation names
+  get spvEnrolmentCheckChoice(): { value: boolean; title: string; description: string; summary: string } | undefined {
+    return this.spvEnrolmentCheckOptions.find(option => option.value === this.spvChecksEnrolment);
+  }
+
+  // A new group needs licences left to be given: none are while the pool is used up or over-allocated
+  get spvCanAddUserGroup(): boolean {
+    return this.userGroup.length < this.spvUserGroupLimit && this.spvUnallocatedCount > 0;
+  }
+
+  // Anything changed since the last save, or since the page opened when nothing is saved yet
+  get spvHasUnsavedChanges(): boolean {
+    return this.spvSignatureOf(this.spvChecksEnrolment, this.spvCurrentGroups()) !==
+      this.spvSignatureOf(this.spvSavedPreference, this.spvSavedGroups);
+  }
+
+  // Save is offered once the Over All Limit is set, something has changed and the enrolment check preference is chosen
+  get spvCanOfferSave(): boolean {
+    return !this.isSaving && !!this.spvOverAllLimit && this.spvHasUnsavedChanges && this.spvChecksEnrolment !== null;
+  }
+
+  // and saves only once everything required is filled in: with Yes, user groups that have conditions, all selecting
+  // something, and whose licences fit, together and each
+  get spvCanSave(): boolean {
+    if (!this.spvCanOfferSave) {
+      return false;
+    }
+    return !this.spvChecksEnrolment || (
+      this.userGroup.length > 0 &&
+      !this.spvOverAllocatedCount &&
+      this.userGroup.controls.every(group => {
+        const conditions = (group.get("conditions") as FormArray).controls;
+        return !!group.get("licences")?.valid && conditions.length > 0 &&
+          conditions.every(condition => !!condition.get("entity")?.value && this.spvSelectedCount(condition) > 0);
+      })
+    );
+  }
+
+  // Every user group the first save sends, listed in its confirmation with its licences and conditions, saying which
+  // are new or changed since the last save, and the saved ones deleted. A saved group is known by its id, as the groups
+  // are numbered again when one is deleted. None are saved with No.
+  get spvUserGroupsToSave(): { name: string; detail: string }[] {
+    if (!this.spvChecksEnrolment) {
+      return [];
+    }
+    const savedGroups = this.spvSavedGroups;
+    const currentGroups = this.spvCurrentGroups();
+    const count = (licences: number | null) => (Number(licences) || 0).toLocaleString("en-US");
+    const labelOf = (entity: string) =>
+      this.accessControlCriteriaSelection?.optionsEntity?.find(option => option.value === entity)?.label || entity;
+    const conditions = (group: ISpvUserGroupState) => group.conditions
+      .filter(condition => condition.entity)
+      .map(condition => `${labelOf(condition.entity)} (${condition.selections.length})`)
+      .join(", ") || "no conditions";
+    const conditionValues = (group: ISpvUserGroupState) => group.conditions
+      .map(condition => [condition.entity, _.sortBy(condition.selections.map(selection => this.spvSelectionValue(selection)))]);
+
+    const groups = currentGroups.map((group, index) => {
+      const name = `User Group ${index + 1}`;
+      const saved = group.id ? savedGroups.find(savedGroup => savedGroup.id === group.id) : undefined;
+      if (!saved) {
+        return { name, detail: `New · ${count(group.licences)} licences · ${conditions(group)}` };
+      }
+      const wasLicences = Number(saved.licences) !== Number(group.licences) ? ` (was ${count(saved.licences)})` : "";
+      const conditionsChanged = _.isEqual(conditionValues(saved), conditionValues(group)) ? "" : " · conditions changed";
+      return { name, detail: `${count(group.licences)} licences${wasLicences} · ${conditions(group)}${conditionsChanged}` };
+    });
+    const deleted = savedGroups
+      .map((saved, index) => ({ saved, name: `User Group ${index + 1}` }))
+      .filter(({ saved }) => !currentGroups.some(group => group.id && group.id === saved.id))
+      .map(({ name }) => ({ name, detail: "Deleted" }));
+    return [...groups, ...deleted];
+  }
+
+  spvGroupColour(groupIndex: number): string {
+    return SPV_USER_GROUP_COLOURS[groupIndex % SPV_USER_GROUP_COLOURS.length];
+  }
+
+  spvLicencesOf(group: AbstractControl): number {
+    return Math.max(Number(group?.get("licences")?.value) || 0, 0);
+  }
+
+  spvConsumedOf(group: AbstractControl): number {
+    return Number(group?.get("consumed")?.value) || 0;
+  }
+
+  // The fewest licences a group can hold: 1, or what its learners have already consumed when that is more
+  spvMinLicencesOf(group: AbstractControl): number {
+    return Math.max(this.spvConsumedOf(group), SPV_MIN_GROUP_LICENCES);
+  }
+
+  // The most a group can take: what the groups before it in priority order and the unaudited licences leave of the
+  // Over All Limit
+  spvMaxLicencesOf(group: AbstractControl | null | undefined): number {
+    return Math.max(this.spvOverAllLimit - this.spvUnauditedCount - this.spvEarlierGroupLicences(group), 0);
+  }
+
+  spvAvailableOf(group: AbstractControl): number {
+    return Math.max(this.spvLicencesOf(group) - this.spvConsumedOf(group), 0);
+  }
+
+  spvLicencePercent(group: AbstractControl): string {
+    return (this.spvOverAllLimit ? (this.spvLicencesOf(group) / this.spvOverAllLimit) * 100 : 0).toFixed(1);
+  }
+
+  // How much of its licences a group has consumed, for its progress bar
+  spvConsumedPercent(group: AbstractControl): number {
+    const licences = this.spvLicencesOf(group);
+    return licences ? Math.min((this.spvConsumedOf(group) / licences) * 100, 100) : 0;
+  }
+
+  // A group learners have enrolled through is in use: its conditions are locked and it can't be deleted
+  spvIsInUse(group: AbstractControl): boolean {
+    return this.spvConsumedOf(group) > 0;
+  }
+
+  // The conditions of a saved group (one the api has given an id) or of a group in use are only shown: they can't be
+  // changed, added, deleted or cleared. Its licences can still be changed, and a saved group nobody has enrolled
+  // through can still be deleted.
+  spvAreConditionsLocked(group: AbstractControl): boolean {
+    return !!group?.get("savedUserGroupId")?.value || this.spvIsInUse(group);
+  }
+
+  // A group in use with no licence left: learners matching only this group can't enrol until its allocation is raised
+  spvIsExhausted(group: AbstractControl): boolean {
+    return this.spvIsInUse(group) && !this.spvAvailableOf(group);
+  }
+
+  spvIsCounting(group: AbstractControl): boolean {
+    return this.spvCountingGroups.has(group);
+  }
+
+  spvSelectedCount(condition: AbstractControl): number {
+    return condition?.get("selections")?.value?.length || 0;
+  }
+
+  // User, Organisation and Designation take at most SPV_MAX_SELECTIONS values, the others have no limit (0)
+  spvSelectionLimitOf(condition: AbstractControl): number {
+    return SPV_LIMITED_SELECTION_ENTITIES.includes(condition?.get("entity")?.value) ? SPV_MAX_SELECTIONS : 0;
+  }
+
+  // A group needs a condition with its field chosen; said under Add New Condition, also when every condition was deleted
+  spvHasCondition(group: AbstractControl): boolean {
+    return (group.get("conditions") as FormArray).controls.some(condition => !!condition.get("entity")?.value);
+  }
+
+  // A group whose users are picked one by one takes no further condition
+  spvHasUserCondition(userGroupIndex: number): boolean {
+    return this.ruleConditions(userGroupIndex).controls
+      .some(condition => condition.get("entity")?.value === NsAccessControlConfig.SelectionType.Users);
+  }
+
+  // Add New Condition stays disabled until the last condition has a selection, once every field but User is in use
+  // (User is never combined), after users are picked and for a locked group. A group whose every condition was deleted
+  // can start again.
+  spvCanAddCondition(userGroupIndex: number): boolean {
+    const conditions = this.ruleConditions(userGroupIndex);
+    const lastCondition = conditions.at(conditions.length - 1);
+    const combinableEntities = (this.accessControlCriteriaSelection?.optionsEntity || [])
+      .filter(option => option.value !== NsAccessControlConfig.SelectionType.Users).length;
+    return (!lastCondition || this.spvSelectedCount(lastCondition) > 0) &&
+      conditions.length < combinableEntities &&
+      !this.spvHasUserCondition(userGroupIndex) &&
+      !this.spvAreConditionsLocked(this.userGroup.at(userGroupIndex));
+  }
+
+  // Once what is selected has been counted, a group that matches nobody is warned about; it can still be saved
+  spvMatchesNoUsers(group: AbstractControl, userGroupIndex: number): boolean {
+    return this.spvGroupHasSelections(group) && !this.spvIsCounting(group) && !this.userCount[userGroupIndex];
+  }
+
+  // Licences beyond the users a group matches can't be used by it. Said once the group selects anyone, so a new group
+  // is not warned about while its conditions are being set. A group matching nobody is told that instead.
+  spvIdleLicencesWarning(group: AbstractControl, userGroupIndex: number): string {
+    const licences = this.spvLicencesOf(group);
+    const users = Number(this.userCount[userGroupIndex]) || 0;
+    if (!this.spvGroupHasSelections(group) || !users || licences <= users) {
+      return "";
+    }
+    const matching = users === 1 ? "1 user matches" : `${users.toLocaleString("en-US")} users match`;
+    return `${licences.toLocaleString("en-US")} licences allocated but only ${matching} this group. ` +
+      `${(licences - users).toLocaleString("en-US")} licences may sit idle.`;
+  }
+
+  // Shown once the field has been touched, and again if another group later takes its share of the pool
+  spvLicenceErrorMessage(group: AbstractControl): string {
+    const control = group.get("licences");
+    if (!control || control.valid) {
+      return "";
+    }
+    // what has been used can't be taken back, said even when the licences were not just changed
+    if (control.hasError("belowConsumed")) {
+      const consumed = control.getError("belowConsumed").consumed.toLocaleString("en-US");
+      return `Can't be lower than licences already used (${consumed}). Only unused licences can be removed.`;
+    }
+    if (!(control.dirty || control.touched)) {
+      return "";
+    }
+    if (control.hasError("exceedsLimit")) {
+      return `Only ${control.getError("exceedsLimit").available.toLocaleString("en-US")} unallocated licences available`;
+    }
+    if (control.hasError("required")) {
+      return "Enter the licences for this group.";
+    }
+    return "Enter a whole number of licences.";
+  }
+
+  // A number field takes e, + and any number of - for exponents and signs; licences take one - at most, so a negative
+  // number is still told it isn't a licence count. A field holding only - reads as empty, but bad input.
+  spvBlockSignAndExponentKeys(event: KeyboardEvent): void {
+    const input = event.target as HTMLInputElement;
+    const isSecondMinus = event.key === "-" && (input.value.includes("-") || input.validity.badInput);
+    if (["e", "E", "+"].includes(event.key) || isSecondMinus) {
+      event.preventDefault();
+    }
+  }
+
+  // Saves the settings as they are now, which is what Reset goes back to. The first save asks to confirm the enrolment
+  // check preference, and a save that changes the saved preference asks to confirm the change.
+  spvSave(): void {
+    if (!this.spvCanSave) {
+      // what a user group still lacks is said under it once Save is pressed, and the first problem in a toast
+      this.spvSaveAttempted = this.spvCanOfferSave;
+      if (this.spvCanOfferSave && this.spvChecksEnrolment) {
+        const groups = this.userGroup.controls;
+        const conditionsOf = (group: AbstractControl) => (group.get("conditions") as FormArray).controls;
+        groups.forEach(group => group.get("licences")?.markAsTouched());
+        const withoutCondition = groups.filter(group => !this.spvHasCondition(group)).length;
+        const groupWithoutField = groups.find(group => conditionsOf(group).some(condition => !condition.get("entity")?.value));
+        const groupWithoutValue = groups.find(group => conditionsOf(group)
+          .some(condition => !!condition.get("entity")?.value && !this.spvSelectedCount(condition)));
+        const groupBelowConsumed = groups.find(group => group.get("licences")?.hasError("belowConsumed"));
+        if (!groups.length) {
+          this.callSnackbar("At least one group with one condition is required to save.", "error");
+        } else if (withoutCondition) {
+          this.callSnackbar(`Add at least one condition${withoutCondition > 1 ? ` +${withoutCondition - 1}` : ""}`, "error");
+        } else if (groupWithoutField) {
+          this.callSnackbar(`Can't save: ${groupWithoutField.get("name")?.value}: select at least one condition.`, "error");
+        } else if (groupWithoutValue) {
+          this.callSnackbar(`Can't save: ${groupWithoutValue.get("name")?.value}: every condition needs at least one value.`, "error");
+        } else if (groupBelowConsumed) {
+          this.callSnackbar(`Can't save: ${groupBelowConsumed.get("name")?.value}: allocation is below licences already used.`, "error");
+        } else if (this.spvOverAllocatedCount) {
+          this.callSnackbar(`Can't save: Over-allocated by ${this.spvOverAllocatedCount.toLocaleString("en-US")}`, "error");
+        }
+      }
+      return;
+    }
+    if (this.spvChecksEnrolment === this.spvSavedPreference) {
+      this.spvEmitSave();
+      return;
+    }
+    const popup = this.spvSavedPreference === null ? this.spvSaveConfirm : this.spvPreferenceChangeConfirm;
+    if (!popup) {
+      this.spvEmitSave();
+      return;
+    }
+    this.dialog.open(popup, { width: "520px", maxWidth: "90vw", panelClass: "spv-access-settings-dialog", autoFocus: false })
+      .afterClosed()
+      .subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          this.spvEmitSave();
+        }
+      });
+  }
+
+  // The host calls this once it has saved what Save emitted, with the message to show when saving failed
+  completeSpvSave(errorMessage?: string): void {
+    this.isSaving = false;
+    if (errorMessage) {
+      this.callSnackbar(errorMessage, "error");
+      return;
+    }
+    // the user groups aren't saved with No: they stay as last saved, to come back as they were with Yes
+    if (!this.spvChecksEnrolment) {
+      this.spvApplyState(false, this.spvSavedGroups);
+    }
+    this.spvMarkSaved();
+    this.callSnackbar("Access settings saved successfully", "success");
+  }
+
+  // Discards what changed since the last save, once confirmed
+  spvReset(): void {
+    if (!this.spvHasUnsavedChanges) {
+      return;
+    }
+    const discard = () => {
+      this.spvApplyState(this.spvSavedPreference, this.spvSavedGroups);
+      this.spvSaveAttempted = false;
+    };
+    if (!this.spvDiscardConfirm) {
+      discard();
+      return;
+    }
+    this.dialog
+      .open(this.spvDiscardConfirm, { width: "470px", maxWidth: "90vw", panelClass: "spv-access-settings-dialog", autoFocus: false })
+      .afterClosed()
+      .subscribe((confirmed: boolean) => {
+        if (confirmed) {
+          discard();
+        }
+      });
+  }
+
+  // The user groups as the provider access settings upsert takes them, in priority order. A saved group keeps its
+  // userGroupId, a new one is given its id by the api.
+  spvAccessControlRequest(): NsAccessControlConfig.ISpvAccessSettingsRequest {
+    return {
+      partnerId: this.contentId,
+      accessControl: {
+        version: this.spvVersion,
+        userGroups: this.userGroup.controls.map((group, groupIndex) => {
+          const savedUserGroupId = group.get("savedUserGroupId")?.value;
+          return {
+            ...(savedUserGroupId ? { userGroupId: savedUserGroupId } : {}),
+            userGroup: groupIndex + 1,
+            licenceAllocation: this.spvLicencesOf(group),
+            userGroupCriteriaList: (group.get("conditions") as FormArray).controls.map(condition => {
+              const entity = condition.get("entity")?.value;
+              return {
+                criteriaKey: SPV_CRITERIA_KEYS[entity] || entity,
+                criteriaValue: (condition.get("selections")?.value || []).map((selection: any) => this.spvSelectionValue(selection)),
+              };
+            }),
+          };
+        }),
+      },
+    };
+  }
+
+  private initSpvPortal(): void {
+    this.accessControlCriteriaSelection = this.config?.accessControlCriteriaSelection;
+    this.usersTableConfig = this.config?.usersTableConfig;
+    this.accessType = NsAccessControlConfig.IAccessTypes.Custom;
+    this.accessTypeDup = this.accessType;
+    this.canShowAccessControlTypeRadio = false;
+    this.shouldShowVisibilityToggle = false;
+    this.accessControlService.accessControlConfig.set(this.config);
+    // the Service, Cadre and Batch lists; the page shows its groups once they are read, or failed to be
+    this.fetchCadreConfigData().finally(() => (this.isLoading = false));
+    this.spvInitialised = true;
+    this.spvApplyProvider();
+    this.spvApplySavedSettings();
+  }
+
+  // The provider as the host passes it: its licences, and the preference saved on it
+  private spvApplyProvider(): void {
+    const preference = typeof this.spvProvider?.providerPreference === "boolean" ? this.spvProvider.providerPreference : null;
+    if (preference !== this.spvSavedPreference) {
+      // a preference not changed on the page follows the saved one
+      if (this.spvChecksEnrolment === this.spvSavedPreference) {
+        this.spvChecksEnrolment = preference;
+      }
+      this.spvSavedPreference = preference;
+    }
+    // Save stays disabled while the provider has no Over All Limit, said in a toast that stays until the page is left
+    if (this.spvOverAllLimit) {
+      this.spvOverAllLimitToast?.dismiss();
+      this.spvOverAllLimitToast = undefined;
+    } else if (!this.spvOverAllLimitToast) {
+      this.spvOverAllLimitToast = this.snackbar.openFromComponent(SnackbarComponent, {
+        data: { message: "Set the Over All Limit in Provider Settings first", type: "error" },
+        duration: 0,
+        panelClass: ["course-error-snackbar", "error", "spv-access-settings-toast"]
+      });
+    }
+    this.spvRevalidateLicences();
+    this.spvUpdateDistribution();
+  }
+
+  // The saved user groups, each with what it has consumed, as the host passes them in tempAccessControl
+  private spvApplySavedSettings(): void {
+    const settings: NsAccessControlConfig.ISpvAccessSettings | null = this.tempAccessControl || null;
+    this.spvVersion = Number(settings?.accessControl?.version) || 1;
+    this.spvApplyState(this.spvSavedPreference, this.spvToGroups(settings));
+    this.spvMarkSaved();
+  }
+
+  // The api's user groups in priority order (userGroup is the order), deleted ones left out
+  private spvToGroups(settings: NsAccessControlConfig.ISpvAccessSettings | null): ISpvUserGroupState[] {
+    const savedGroups = _.sortBy(settings?.accessControl?.userGroups || [], "userGroup")
+      .filter((group: NsAccessControlConfig.ISpvUserGroup) => group?.status !== "DELETED");
+    return savedGroups.map((group: NsAccessControlConfig.ISpvUserGroup) => ({
+      id: group.userGroupId || "",
+      licences: Number(group.licenceAllocation) || 0,
+      consumed: Number(group.consumed) || 0,
+      conditions: (group.userGroupCriteriaList || []).map(criteria => {
+        const entity = this.spvEntityOf(criteria.criteriaKey);
+        const values = (Array.isArray(criteria.criteriaValue) ? criteria.criteriaValue : [criteria.criteriaValue])
+          .filter((value: any) => value !== null && value !== undefined && value !== "");
+        return {
+          entity,
+          selections: entity === NsAccessControlConfig.SelectionType.Batch ? values.map(Number) : values.map(String),
+        };
+      }),
+    }));
+  }
+
+  // The api may give a criteria key in any case (cadre for Cadre), the page keeps the library's
+  private spvEntityOf(criteriaKey: string): string {
+    const key = String(criteriaKey || "");
+    return NsAccessControlConfig.SelectionTypeValues.find(value => value.toLowerCase() === key.toLowerCase()) || key;
+  }
+
+  private spvApplyState(preference: boolean | null, groups: ISpvUserGroupState[]): void {
+    this.spvChecksEnrolment = preference;
+    while (this.userGroup.length) {
+      this.userGroup.removeAt(0);
+    }
+    this.userCount = {};
+    this.spvCountingGroups.clear();
+    groups.forEach(group => this.spvAddUserGroup(group));
+    this.spvRevalidateLicences();
+    this.spvUpdateDistribution();
+  }
+
+  // A new, empty group, or a saved one put back as it was saved
+  private spvAddUserGroup(saved?: ISpvUserGroupState): void {
+    const groupIndex = this.userGroup.length;
+    const conditions = saved
+      ? saved.conditions.map(savedCondition => {
+          const condition = this.createConditionGroup(uuidv4(), groupIndex);
+          condition.patchValue({ entity: savedCondition.entity, selections: savedCondition.selections });
+          return condition;
+        })
+      : [this.createConditionGroup(uuidv4(), groupIndex)];
+    const group = this.fb.group({
+      id: [uuidv4()],
+      savedUserGroupId: [saved?.id || ""],
+      name: [`User Group ${groupIndex + 1}`],
+      description: [`Description for UserGroup ${groupIndex + 1}`],
+      conditions: this.fb.array(conditions),
+      isUserGroupDisabled: [false],
+      isAddConditionDisabled: [false],
+      licences: [saved ? saved.licences : null, [this.spvLicenceValidator]],
+      consumed: [saved?.consumed || 0]
+    });
+    // what one group takes changes what is left for the others
+    group.get("licences")?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.spvRevalidateLicences();
+      this.spvUpdateDistribution();
+    });
+    group.get("consumed")?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.spvLockConditions(group);
+      this.spvRevalidateLicences();
+    });
+    this.userGroup.push(group);
+    this.spvLockConditions(group);
+    this.processDisableAddConditionOnClose(groupIndex);
+    if (saved) {
+      this.calculateUserCountForUserGroup(groupIndex);
+    }
+  }
+
+  // Groups take from the pool in priority order, so a group may take what the groups before it leave, and never less
+  // than the licences its learners have already consumed. Only the group that overflows the pool is flagged.
+  private spvLicenceValidator = (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (value === null || value === undefined || value === "") {
+      return { required: true };
+    }
+    // whole numbers from 1 up
+    const licences = Number(value);
+    if (!Number.isInteger(licences) || licences < SPV_MIN_GROUP_LICENCES) {
+      return { invalidLicence: true };
+    }
+    const group = control.parent;
+    const consumed = group ? this.spvConsumedOf(group) : 0;
+    if (licences < consumed) {
+      return { belowConsumed: { consumed } };
+    }
+    const available = this.spvMaxLicencesOf(group);
+    return licences > available ? { exceedsLimit: { available } } : null;
+  };
+
+  // A locked group's conditions are only shown: isUserGroupDisabled disables their actions and opens the selections
+  // read-only, and the field of each can't be changed
+  private spvLockConditions(group: AbstractControl): void {
+    const locked = this.spvAreConditionsLocked(group);
+    group.get("isUserGroupDisabled")?.setValue(locked, { emitEvent: false });
+    (group.get("conditions") as FormArray).controls.forEach(condition => {
+      const entity = condition.get("entity");
+      if (locked) {
+        entity?.disable({ emitEvent: false });
+      } else {
+        entity?.enable({ emitEvent: false });
+      }
+    });
+  }
+
+  // What the groups before the given one hold. A group not in the list yet comes after all of them.
+  private spvEarlierGroupLicences(group: AbstractControl | null | undefined): number {
+    const controls = this.userGroup.controls;
+    const groupIndex = group ? controls.indexOf(group) : -1;
+    return controls
+      .slice(0, groupIndex < 0 ? controls.length : groupIndex)
+      .reduce((total, earlierGroup) => total + this.spvLicencesOf(earlierGroup), 0);
+  }
+
+  private spvGroupHasSelections(group: AbstractControl): boolean {
+    return (group.get("conditions") as FormArray).controls.some(condition => this.spvSelectedCount(condition) > 0);
+  }
+
+  private spvRevalidateLicences(): void {
+    this.userGroup?.controls.forEach(group => group.get("licences")?.updateValueAndValidity({ emitEvent: false }));
+  }
+
+  // The licence distribution bar: a segment per group in its colour, the unaudited licences, and the pool that is left
+  private spvUpdateDistribution(): void {
+    const groups = (this.userGroup?.controls || []).map((group, groupIndex) => ({
+      name: group.get("name")?.value,
+      licences: this.spvLicencesOf(group),
+      colour: this.spvGroupColour(groupIndex),
+    }));
+    this.spvAllocatedToGroups = groups.reduce((total, group) => total + group.licences, 0);
+    // the bar never outgrows the pool, even while a number that does not fit is being typed
+    const barTotal = Math.max(this.spvOverAllLimit, this.spvAllocatedToGroups + this.spvUnauditedCount);
+    this.spvUnauditedWidth = barTotal ? (this.spvUnauditedCount / barTotal) * 100 : 0;
+    this.spvSegments = groups
+      .filter(group => group.licences > 0)
+      .map(group => ({
+        ...group,
+        percent: (this.spvOverAllLimit ? (group.licences / this.spvOverAllLimit) * 100 : 0).toFixed(1),
+        width: (group.licences / barTotal) * 100,
+      }));
+  }
+
+  private spvEmitSave(): void {
+    const preference = !!this.spvChecksEnrolment;
+    this.isSaving = true;
+    this.accessControlData.emit({
+      userGroup: preference ? this.spvAccessControlRequest() : null,
+      accessType: this.accessType,
+      action: NsAccessControlConfig.SPV_SAVE_ACTION,
+      providerPreference: preference,
+      preferenceChanged: preference !== this.spvSavedPreference,
+    });
+  }
+
+  private spvMarkSaved(): void {
+    this.spvSavedPreference = this.spvChecksEnrolment;
+    this.spvSavedGroups = this.spvCurrentGroups();
+    this.spvSaveAttempted = false;
+  }
+
+  private spvCurrentGroups(): ISpvUserGroupState[] {
+    return (this.userGroup?.controls || []).map(group => ({
+      id: group.get("savedUserGroupId")?.value || "",
+      licences: group.get("licences")?.value ?? null,
+      consumed: this.spvConsumedOf(group),
+      conditions: (group.get("conditions") as FormArray).controls.map(condition => ({
+        entity: condition.get("entity")?.value || "",
+        selections: [...(condition.get("selections")?.value || [])],
+      })),
+    }));
+  }
+
+  // What is saved, to tell a change: the preference, and each group's id, licences and conditions
+  private spvSignatureOf(preference: boolean | null, groups: ISpvUserGroupState[]): string {
+    return JSON.stringify([
+      preference,
+      groups.map(group => [
+        group.id,
+        group.licences === null || group.licences === undefined || (group.licences as any) === "" ? null : Number(group.licences),
+        group.conditions.map(condition => [
+          condition.entity,
+          _.sortBy(condition.selections.map(selection => this.spvSelectionValue(selection))),
+        ]),
+      ]),
+    ]);
+  }
+
+  // A selection is saved by its value: a picked user by its userId, anything else as it is
+  private spvSelectionValue(selection: any): string {
+    if (selection && typeof selection === "object") {
+      return String(selection.userId ?? selection.identifier ?? selection.fieldValue ?? selection.value ?? "");
+    }
+    return String(selection);
+  }
+  //#endregion
 }

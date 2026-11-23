@@ -7,6 +7,7 @@ import {
   BATCH_RANGES,
   CHECKBOX_OPTIONS,
   MAX_ORGANISATION_SELECTIONS,
+  SPV_MAX_SELECTIONS,
   ORGANISATION_SELECTION_MODES
 } from "../../../_constants/app.constants";
 import { NsAccessControlConfig } from "../../../_models/access-control.model";
@@ -385,17 +386,30 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
    * The error stays up until a selection goes through.
    */
   private isOrganisationLimitReached(value: any): boolean {
-    if (!this.isMdoOrganisationSelection) {
+    const isSpvLimited = this.isSpvLimitedSelection;
+    if (!this.isMdoOrganisationSelection && !isSpvLimited) {
       return false;
     }
+    const limit = isSpvLimited ? SPV_MAX_SELECTIONS : this.orgSelectionLimit;
     const currentList = this.filterValue === "selected" ? this.selectedData : this.selectedDataTemp;
     const isAdding = !currentList.includes(value);
-    if (isAdding && currentList.length >= this.orgSelectionLimit) {
-      this.organisationLimitError = `Reached Maximum Organisation selection limit, please try adding ${this.orgSelectionLimit} or less Organisations in the manual selection.`;
+    if (isAdding && currentList.length >= limit) {
+      this.organisationLimitError = isSpvLimited
+        ? `Maximum ${limit} values`
+        : `Reached Maximum Organisation selection limit, please try adding ${this.orgSelectionLimit} or less Organisations in the manual selection.`;
       return true;
     }
     this.organisationLimitError = "";
     return false;
+  }
+
+  /** SPV portal: Organisation and Designation take at most SPV_MAX_SELECTIONS values. */
+  get isSpvLimitedSelection(): boolean {
+    return (
+      this.application === NsAccessControlConfig.Application.SPV &&
+      (this.selectionType === NsAccessControlConfig.SelectionType.Organizations ||
+        this.selectionType === NsAccessControlConfig.SelectionType.Designation)
+    );
   }
 
   onChangeOrgSelectionMode(event: MatRadioChange): void {
@@ -1110,6 +1124,15 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   }
 
   getModalTitle(): string {
+    const title = this.selectionTitle();
+    // SPV portal: the selections of a saved group or a group in use are only shown
+    if (this.application === NsAccessControlConfig.Application.SPV && this.data?.disabled) {
+      return `${title.replace(/^Select /, "")} (view only)`;
+    }
+    return title;
+  }
+
+  private selectionTitle(): string {
     switch (this.selectionType) {
       case NsAccessControlConfig.SelectionType.Designation:
         return "Select Designation";
@@ -1262,6 +1285,12 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
             merged.push(item);
           }
         });
+        // SPV portal: Select All ticks up to the limit, and says so
+        if (this.isSpvLimitedSelection && merged.length > SPV_MAX_SELECTIONS) {
+          this.selectedDataTemp = merged.slice(0, SPV_MAX_SELECTIONS);
+          this.organisationLimitError = `Maximum ${SPV_MAX_SELECTIONS} values`;
+          break;
+        }
         this.selectedDataTemp = merged;
         break;
       case "isCCA":
