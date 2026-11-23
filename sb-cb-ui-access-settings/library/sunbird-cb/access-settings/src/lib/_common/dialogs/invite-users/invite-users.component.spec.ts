@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 
 import { InviteUsersComponent } from './invite-users.component';
 import { NsAccessControlConfig } from '../../../_models/access-control.model';
-import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_FILTER_KEY } from '../../../_constants/app.constants';
+import { ALL_ORGANISATIONS_SELECTION, MINISTRY_OR_STATE_FILTER_KEY, SPV_MAX_SELECTIONS } from '../../../_constants/app.constants';
 
 describe('InviteUsersComponent', () => {
   let component: InviteUsersComponent;
@@ -49,6 +49,51 @@ describe('InviteUsersComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('SPV portal', () => {
+    let snackbar: { openFromComponent: jest.Mock };
+
+    beforeEach(() => {
+      config.application = NsAccessControlConfig.Application.SPV;
+      snackbar = { openFromComponent: jest.fn() };
+    });
+
+    const createWithSnackbar = (dialogData: any = {}) => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({ providers: [{ provide: MAT_DIALOG_DATA, useValue: dialogData }] });
+      return TestBed.runInInjectionContext(
+        () => new InviteUsersComponent({ close: jest.fn() } as any, accessControlService, snackbar as any)
+      );
+    };
+
+    it('should title the users of a locked group as view only', () => {
+      expect(createWithSnackbar({ disabled: true }).dialogTitle).toBe('Users (view only)');
+      expect(createWithSnackbar({}).dialogTitle).toBe('Users');
+
+      config.application = NsAccessControlConfig.Application.MDO;
+      expect(createWithSnackbar({ disabled: true }).dialogTitle).toBe('Users');
+    });
+
+    it('should refuse more users than the limit, saying so', () => {
+      component = createWithSnackbar();
+      component.holdSelectedUsers = Array.from({ length: SPV_MAX_SELECTIONS + 1 }, (_, index) => ({ userId: `user-${index}` }));
+
+      component.selectUsers();
+
+      expect(component.finalSelectedUsers).not.toBe(component.holdSelectedUsers);
+      expect(snackbar.openFromComponent.mock.calls[0][1].data).toEqual({ message: `Maximum ${SPV_MAX_SELECTIONS} values`, type: 'error' });
+    });
+
+    it('should take users up to the limit', () => {
+      component = createWithSnackbar();
+      component.holdSelectedUsers = Array.from({ length: SPV_MAX_SELECTIONS }, (_, index) => ({ userId: `user-${index}` }));
+
+      component.selectUsers();
+
+      expect(component.finalSelectedUsers.length).toBe(SPV_MAX_SELECTIONS);
+      expect(component.activeTab).toBe(1);
+    });
   });
 
   describe('search - central deputation', () => {

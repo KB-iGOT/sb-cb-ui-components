@@ -6,7 +6,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { EntitySelectionsComponent } from './entity-selections.component';
 import { NsAccessControlConfig } from '../../../_models/access-control.model';
-import { ALL_ORGANISATIONS_SELECTION, MAX_ORGANISATION_SELECTIONS } from '../../../_constants/app.constants';
+import { ALL_ORGANISATIONS_SELECTION, MAX_ORGANISATION_SELECTIONS, SPV_MAX_SELECTIONS } from '../../../_constants/app.constants';
 import { AccessControlService } from '../../../_services/access-control.service';
 import { CadreMappingService } from '../../../_services/cadre-mapping.service';
 
@@ -161,6 +161,64 @@ describe('EntitySelectionsComponent', () => {
 
       expect(component.selectedDataTemp).toContain('one-more');
       expect(component.organisationLimitError).toBe('');
+    });
+  });
+
+  describe('SPV portal', () => {
+    beforeEach(() => {
+      component.application = NsAccessControlConfig.Application.SPV;
+    });
+
+    it('should cap Organisation at the limit, saying so, and still let one be removed', () => {
+      component.selectedDataTemp = organisationIds(SPV_MAX_SELECTIONS);
+
+      component.toggleSelection({ identifier: 'one-too-many' });
+      expect(component.selectedDataTemp.length).toBe(SPV_MAX_SELECTIONS);
+      expect(component.organisationLimitError).toBe(`Maximum ${SPV_MAX_SELECTIONS} values`);
+
+      component.toggleSelection({ identifier: 'org-0' });
+      expect(component.selectedDataTemp.length).toBe(SPV_MAX_SELECTIONS - 1);
+      expect(component.organisationLimitError).toBe('');
+    });
+
+    it('should cap Designation as well, but no other field', () => {
+      component.selectionType = NsAccessControlConfig.SelectionType.Designation;
+      component.selectedDataTemp = organisationIds(SPV_MAX_SELECTIONS);
+      component.toggleSelection({ designation: 'One Too Many' });
+      expect(component.selectedDataTemp.length).toBe(SPV_MAX_SELECTIONS);
+
+      component.selectionType = NsAccessControlConfig.SelectionType.Group;
+      component.toggleSelection('Group A');
+      expect(component.selectedDataTemp.length).toBe(SPV_MAX_SELECTIONS + 1);
+    });
+
+    it('should not offer the MDO "Select all organisations"', () => {
+      expect(component.isMdoOrganisationSelection).toBe(false);
+      expect(component.canSelectAllOrganisations).toBe(false);
+    });
+
+    it('should tick up to the limit with Select All', () => {
+      jest.spyOn(component, 'getFilteredEntityGrouped').mockImplementation(() => undefined);
+      component.selectedDataTemp = organisationIds(SPV_MAX_SELECTIONS - 1);
+      component.dataList = [{ identifier: 'new-1' }, { identifier: 'new-2' }];
+
+      component.selectAvailableOptions({ checked: true, source: { value: 'selectAll' } } as any);
+
+      expect(component.selectedDataTemp.length).toBe(SPV_MAX_SELECTIONS);
+      expect(component.organisationLimitError).toBe(`Maximum ${SPV_MAX_SELECTIONS} values`);
+    });
+
+    it('should title the popup of a locked group as view only', () => {
+      component = createComponent({ condition: { entity: NsAccessControlConfig.SelectionType.Organizations }, selected: [], disabled: true });
+      component.application = NsAccessControlConfig.Application.SPV;
+      component.selectionType = NsAccessControlConfig.SelectionType.Organizations;
+      expect(component.getModalTitle()).toBe('Organisation (view only)');
+
+      component.selectionType = NsAccessControlConfig.SelectionType.Service;
+      expect(component.getModalTitle()).toBe('Services (view only)');
+
+      component.application = NsAccessControlConfig.Application.MDO;
+      expect(component.getModalTitle()).toBe('Select Services');
     });
   });
 

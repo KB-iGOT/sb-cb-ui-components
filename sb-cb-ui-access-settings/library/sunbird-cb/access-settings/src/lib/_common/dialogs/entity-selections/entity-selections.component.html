@@ -289,7 +289,9 @@
   }
   <ng-container *ngIf="(checkIfData || selectionType === selectionTypeEnum.CentralDeputation) && !isAllOrganisationsSelected">
     <div class="flex gap-4 items-center ml-auto mr-1 apply-button-container my-2">
-      <div *ngIf="isOrgSelectionLimitExceeded() || organisationLimitError" class="text-xs org-limit-error">
+      <!-- SPV portal: Organisation and Designation say the limit their own way -->
+      <div *ngIf="isSpvLimitedSelection && organisationLimitError" class="text-xs org-limit-error">{{ organisationLimitError }}</div>
+      <div *ngIf="!isSpvLimitedSelection && (isOrgSelectionLimitExceeded() || organisationLimitError)" class="text-xs org-limit-error">
         Reached Maximum Organisation selection limit, please try adding {{ orgSelectionLimit }} or less Organisations in the manual selection.
       </div>
       <ng-container *ngIf="selectionType !== selectionTypeEnum.VerificationStatus && selectionType !== selectionTypeEnum.CentralDeputation">

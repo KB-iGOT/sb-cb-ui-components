@@ -1,12 +1,13 @@
 <div class="flex justify-between dialog-heading items-center">
-  <h2 mat-dialog-title class="mb-0">Users</h2>
+  <h2 mat-dialog-title class="mb-0">{{ dialogTitle }}</h2>
   <button mat-icon-button class="close-button" (click)="onClose()">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
 <div mat-dialog-content class="user-dialog-body">
-  <div class="">
+  <!-- SPV portal: no bulk upload, users are only searched -->
+  <div class="" *ngIf="!isSpvPortal">
     <!-- Filter Options -->
     <div class="filter-options">
       <mat-radio-group [(ngModel)]="filterValue" aria-label="Filter options" (change)="onFilterChange($event)">
