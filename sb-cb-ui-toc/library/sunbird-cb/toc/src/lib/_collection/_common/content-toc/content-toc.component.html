@@ -341,36 +341,21 @@
       </div>
     </div>
   </div>
-  <div class="instructions-ca flex flex-col gap-4 mt-4">
-    @if (caStatusLoading) {
-      <div class="ca-box flex items-center gap-3 px-4 py-3">
-        <ws-widget-skeleton-loader [width]="'24px'" [height]="'24px'" [bindingClass]="'rounded-full'"></ws-widget-skeleton-loader>
-        <ws-widget-skeleton-loader [width]="'60%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
-      </div>
-    } @else if (!caPendingCourses?.length) {
-      <div class="ca-box flex items-center gap-3 px-4 py-3">
-        <mat-icon class="ca-eligible-icon">check_circle</mat-icon>
-        <span class="ca-box-title">You are eligible for the {{ contentReadData?.courseCategory || 'Comprehensive Assessment' }}</span>
-      </div>
-    }
-    @if (contentReadData?.purpose) {
-      <div class="ca-box flex flex-col gap-2 p-4">
-        <div class="flex items-center gap-3">
-          <mat-icon class="ca-instructions-icon">warning</mat-icon>
-          <span class="ca-box-title">{{ 'practiceoverview.instructions' | translate }}</span>
+  @if (!viewerPage) {
+    <div class="instructions-ca flex flex-col gap-4 mt-4">
+      @if (caStatusLoading) {
+        <div class="ca-box flex items-center gap-3 px-4 py-3">
+          <ws-widget-skeleton-loader [width]="'24px'" [height]="'24px'" [bindingClass]="'rounded-full'"></ws-widget-skeleton-loader>
+          <ws-widget-skeleton-loader [width]="'60%'" [height]="'16px'" [bindingClass]="'rounded'"></ws-widget-skeleton-loader>
         </div>
-        <div #caInstructions class="ca-instructions-text break-words nodtranslate"
-          [class.ca-instructions-clamp]="!caInstructionsExpanded"
-          [innerHTML]="contentReadData?.purpose | replaceNbsp"></div>
-        @if (caInstructionsExpanded || caInstructions.scrollHeight > caInstructions.clientHeight) {
-          <button type="button" class="ca-view-toggle self-start"
-            (click)="caInstructionsExpanded = !caInstructionsExpanded">
-            {{ caInstructionsExpanded ? 'view less' : 'view more...' }}
-          </button>
-        }
-      </div>
-    }
-  </div>
+      } @else if (!caPendingCourses?.length) {
+        <div class="ca-box flex items-center gap-3 px-4 py-3">
+          <mat-icon class="ca-eligible-icon">check_circle</mat-icon>
+          <span class="ca-box-title">You are eligible for the {{ contentReadData?.courseCategory || 'Comprehensive Assessment' }}</span>
+        </div>
+      }
+    </div>
+  }
   <div class="about-block">
     <ws-widget-app-toc-about [fromViewer]="fromViewer" [pathSet]="pathSet" [content]="content"
           [contentReadData]="contentReadData" [baseContentReadData]="baseContentReadData" [tocStructure]="tocStructure"
@@ -382,6 +367,26 @@
                     [showLimitedSeatsMsg]="showLimitedSeatsMsg" [areAllActiveBatchesFull]="areAllActiveBatchesFull" [fromMDO]="fromMDO"
                     [mobileBreakpoint]="aboutMobileBreakpoint">
         </ws-widget-app-toc-about>
+
+        <!-- <div class="instructions-ca flex flex-col gap-4 mt-4">
+          @if (contentReadData?.purpose) {
+            <div class="ca-box flex flex-col gap-2 p-4">
+              <div class="flex items-center gap-3">
+                <mat-icon class="ca-instructions-icon">warning</mat-icon>
+                <span class="ca-box-title">{{ 'practiceoverview.instructions' | translate }}</span>
+              </div>
+              <div #caInstructions class="ca-instructions-text break-words nodtranslate"
+                [class.ca-instructions-clamp]="!caInstructionsExpanded"
+                [innerHTML]="contentReadData?.purpose | replaceNbsp"></div>
+              @if (caInstructionsExpanded || caInstructions.scrollHeight > caInstructions.clientHeight) {
+                <button type="button" class="ca-view-toggle self-start"
+                  (click)="caInstructionsExpanded = !caInstructionsExpanded">
+                  {{ caInstructionsExpanded ? 'view less' : 'view more...' }}
+                </button>
+              }
+            </div>
+          }
+        </div> -->
   </div>
 }
  

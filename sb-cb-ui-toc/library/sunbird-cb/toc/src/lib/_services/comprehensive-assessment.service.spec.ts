@@ -366,6 +366,14 @@ describe('ComprehensiveAssessmentService', () => {
       expect(service.getResultFromEnrolment(content, row)).toEqual({ score: 85, passPercentage: 60 })
     })
 
+    it('takes the pass mark from minimumPassPercentage in additionalProperties', () => {
+      const content = assessmentWithQuestionSet(6)
+      content.children[0].minimumPassPercentage = 60
+      const row = { additionalProperties: { [QUESTION_SET]: { bestScore: 70, minimumPassPercentage: 80 } } }
+
+      expect(service.getResultFromEnrolment(content, row)).toEqual({ score: 70, passPercentage: 80 })
+    })
+
     it('falls back to the first scored entry when the question set id is not listed', () => {
       const row = {
         ...enrolment('do_assessment', 2),
