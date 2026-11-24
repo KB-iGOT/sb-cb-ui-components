@@ -43,7 +43,7 @@ export class EnrollProfileFormComponent implements OnInit {
   eUserGender = Object.keys(NsUserProfileDetails.EUserGender)
   masterLanguages: any
   masterLanguageBackup: any
-  eCategory = Object.keys(NsUserProfileDetails.ECategory)
+  eCategory: string[] = Object.values(NsUserProfileDetails.ECategory)
   userProfileObject: any
   eligible: boolean = false
   isCadreStatus = false
@@ -65,6 +65,7 @@ export class EnrollProfileFormComponent implements OnInit {
   startBatch: any
   endBatch: any
   yearArray: any
+  savedCadrePending = false
   exclusionYear: any
   selectedCadreName: any
   selectedCadre: any
@@ -629,6 +630,9 @@ export class EnrollProfileFormComponent implements OnInit {
       if (value && value.civilServiceType) {
         this.civilServiceData = value.civilServiceType
         this.civilServiceTypes = this.civilServiceData.civilServiceTypeList.map((service: any) => service.name)
+        if (this.savedCadrePending) {
+          this.applySavedCadreDetails()
+        }
       }
     })
   }
@@ -826,13 +830,36 @@ export class EnrollProfileFormComponent implements OnInit {
           })
         }
       }
-      this.isLoading = false
-      this.defineFormAttributes()
+      this.refreshUserProfile(() => {
+        this.isLoading = false
+        this.defineFormAttributes()
+      })
     }, error => {
       // tslint:disable-next-line:no-console
       console.log(error)
       this.addLoader = this.addLoader - 1
       this.isLoading = false
+    })
+  }
+
+  refreshUserProfile(done: () => void) {
+    const userId = _.get(this.configSrc, 'unMappedUser.id') || _.get(this.configSrc, 'userProfile.userId')
+    if (!userId) {
+      done()
+      return
+    }
+    this.addLoader = this.addLoader + 1
+    // the service already unwraps the response to result.response (the user object)
+    this.userProfileService.getUserdetailsFromRegistry(userId).subscribe((latestProfile: any) => {
+      this.addLoader = this.addLoader - 1
+      if (latestProfile && latestProfile.profileDetails) {
+        this.userProfileObject = latestProfile
+        this.configSrc.unMappedUser = latestProfile
+      }
+      done()
+    }, () => {
+      this.addLoader = this.addLoader - 1
+      done()
     })
   }
 
@@ -993,7 +1020,8 @@ export class EnrollProfileFormComponent implements OnInit {
         const contrl = this.userDetailsForm.get('gender')
         if (contrl) {
           if (this.userProfileObject.profileDetails.personalDetails.gender) {
-            contrl.setValue(this.userProfileObject.profileDetails.personalDetails.gender.toUpperCase())
+            // Options are the enum keys (MALE/FEMALE/OTHER); profile page saves 'Male'/'Female'/'Others'
+            contrl.setValue(this.matchOption(this.eUserGender, this.userProfileObject.profileDetails.personalDetails.gender, { others: 'other' }))
             contrl.setValidators([Validators.required])
             contrl.updateValueAndValidity()
           } else if (this.profileFormType === 'Available user filled iGOT profile') {
@@ -1053,8 +1081,10 @@ export class EnrollProfileFormComponent implements OnInit {
         this.canShowCategory = true
         const contrl = this.userDetailsForm.get('category')
         if (contrl) {
-          if (this.userProfileObject.profileDetails.personalDetails.category) {
-            contrl.setValue(this.userProfileObject.profileDetails.personalDetails.category)
+          const savedCategory = this.userProfileObject.profileDetails.personalDetails.category
+          if (savedCategory) {
+            // Saved value may differ in case from the options (e.g. 'GENERAL' vs 'General'); mat-select matches strictly
+            contrl.setValue(this.matchOption(this.eCategory, savedCategory))
             contrl.setValidators([Validators.required])
             contrl.updateValueAndValidity()
           } else if (this.profileFormType === 'Available user filled iGOT profile') {
@@ -1098,20 +1128,7 @@ export class EnrollProfileFormComponent implements OnInit {
               this.civilServiceId = this.userProfileObject.profileDetails.cadreDetails.civilServiceId
               this.cadreId = this.userProfileObject.profileDetails.cadreDetails.cadreId
               this.cadreControllingAuthority = this.userProfileObject.profileDetails.cadreDetails.cadreControllingAuthorityName
-              setTimeout(() => {
-                this.getService(this.userProfileObject.profileDetails.cadreDetails.civilServiceType)
-                this.onServiceSelect({ value: this.userProfileObject.profileDetails.cadreDetails.civilServiceName })
-                if (this.userProfileObject.profileDetails.cadreDetails.cadreName) {
-                  this.onCadreSelect(this.userProfileObject.profileDetails.cadreDetails.cadreName)
-                }
-                this.userDetailsForm.patchValue({
-                  typeOfCivilService: this.userProfileObject.profileDetails.cadreDetails.civilServiceType,
-                  serviceType: this.userProfileObject.profileDetails.cadreDetails.civilServiceName,
-                  cadreName: this.userProfileObject.profileDetails.cadreDetails.cadreName,
-                  cadreBatch: this.userProfileObject.profileDetails.cadreDetails.cadreBatch,
-                  cadreControllingAuthority: this.userProfileObject.profileDetails.cadreDetails.cadreControllingAuthorityName,
-                })
-              }, 1000)
+              this.applySavedCadreDetails()
             } else {
               contrl.setValue(false)
               this.isCadreStatus = false
@@ -1128,6 +1145,37 @@ export class EnrollProfileFormComponent implements OnInit {
         }
       }
     }
+  }
+
+  matchOption(options: string[], saved: any, aliases: { [key: string]: string } = {}): string {
+    let normalized = String(saved || '').trim().toLowerCase()
+    normalized = aliases[normalized] || normalized
+    return (options || []).find((option: string) => String(option).toLowerCase() === normalized) || ''
+  }
+
+  /** Fills the saved cadre details; waits for fetchCadreData() if the cadre master data has not arrived yet */
+  applySavedCadreDetails() {
+    if (!this.civilServiceData) {
+      this.savedCadrePending = true
+      return
+    }
+    this.savedCadrePending = false
+    const cadreDetails = _.get(this.userProfileObject, 'profileDetails.cadreDetails') || {}
+    this.getService(cadreDetails.civilServiceType)
+    this.onServiceSelect({ value: cadreDetails.civilServiceName })
+    if (cadreDetails.cadreName) {
+      this.onCadreSelect(cadreDetails.cadreName)
+    }
+    // Batch options are numbers; a batch saved as the string "1962" would otherwise show empty
+    const savedBatch = cadreDetails.cadreBatch
+    const batchOption = (this.yearArray || []).find((year: any) => String(year) === String(savedBatch))
+    this.userDetailsForm.patchValue({
+      typeOfCivilService: cadreDetails.civilServiceType,
+      serviceType: cadreDetails.civilServiceName,
+      cadreName: cadreDetails.cadreName,
+      cadreBatch: batchOption !== undefined ? batchOption : savedBatch,
+      cadreControllingAuthority: cadreDetails.cadreControllingAuthorityName,
+    })
   }
 
   findAttr(customAttr: any, fName: any) {
