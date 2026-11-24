@@ -102,10 +102,11 @@ export class ComprehensiveAssessmentService {
       return null
     }
 
+    const result = scores[assessmentId]
     return {
-      score: Number(scores[assessmentId].bestScore) || 0,
-      passPercentage: Number(questionSet?.minimumPassPercentage ?? questionSet?.passPercentage
-        ?? content?.minimumPassPercentage ?? content?.passPercentage) || 0,
+      score: Number(result.bestScore) || 0,
+      passPercentage: Number(result.minimumPassPercentage ?? questionSet?.minimumPassPercentage
+        ?? questionSet?.passPercentage ?? content?.minimumPassPercentage ?? content?.passPercentage) || 0,
     }
   }
 

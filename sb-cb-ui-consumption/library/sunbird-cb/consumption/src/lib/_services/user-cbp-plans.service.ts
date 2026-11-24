@@ -178,6 +178,9 @@ export class UserCbpPlansService {
    */
   async getUserCbpPlansAsync(callApi = false, request?: IUserCbpPlanRequest): Promise<IUserCbpPlanCacheEntry> {
     const planYear = (request && request.planYear) || this.getCurrentPlanYear()
+    if (this.isScopedRequest(request)) {
+      return this.fetchScoped(planYear, request as IUserCbpPlanRequest)
+    }
     const cached = await this.getCacheEntry(planYear)
 
     if (!callApi && cached && this.isEntryValid(cached)) {
@@ -409,33 +412,63 @@ export class UserCbpPlansService {
 
   // ── Fetch and transform ────────────────────────────────────────────────────
 
+  private isScopedRequest(request: IUserCbpPlanRequest | undefined): boolean {
+    return !!request && Object.keys(request).some((key: string) => key !== 'planYear' && !!request[key])
+  }
+
+  private fetchScoped(planYear: string, request: IUserCbpPlanRequest): Promise<IUserCbpPlanCacheEntry> {
+    const key = JSON.stringify({ ...request, planYear })
+    const pending = this.inFlight.get(key)
+    if (pending) {
+      return pending
+    }
+    const fetch = this.fetchEntry(planYear, request)
+      .catch((err: any) => {
+        return { ...this.transform(undefined, planYear), planYear, requestedPlanYear: planYear, cachedAt: 0 }
+      })
+      .finally(() => {
+        if (this.inFlight.get(key) === fetch) {
+          this.inFlight.delete(key)
+        }
+      })
+    this.inFlight.set(key, fetch)
+    return fetch
+  }
+
+  private async fetchEntry(
+    planYear: string,
+    request: IUserCbpPlanRequest | undefined,
+  ): Promise<IUserCbpPlanCacheEntry> {
+    const payload = {
+      request: {
+        ...(request || {}),
+        planYear,
+      },
+    }
+
+    const res: any = await this.http.post(
+      API_END_POINTS.FETCH_USER_CBP_PLAN_DICTIONARY,
+      payload,
+      { withCredentials: true },
+    ).toPromise()
+
+    const resolved = this.resolveYearSlice(res && res.result, planYear)
+
+    return {
+      ...this.transform(resolved.raw, resolved.planYear),
+      planYear: resolved.planYear,
+      requestedPlanYear: planYear,
+      cachedAt: Date.now(),
+    }
+  }
+
   private async fetchAndCache(
     planYear: string,
     request: IUserCbpPlanRequest | undefined,
     cached: IUserCbpPlanCacheEntry | undefined,
   ): Promise<IUserCbpPlanCacheEntry> {
     try {
-      const payload = {
-        request: {
-          ...(request || {}),
-          planYear,
-        },
-      }
-
-      const res: any = await this.http.post(
-        API_END_POINTS.FETCH_USER_CBP_PLAN_DICTIONARY,
-        payload,
-        { withCredentials: true },
-      ).toPromise()
-
-      const resolved = this.resolveYearSlice(res && res.result, planYear)
-
-      const entry: IUserCbpPlanCacheEntry = {
-        ...this.transform(resolved.raw, resolved.planYear),
-        planYear: resolved.planYear,
-        requestedPlanYear: planYear,
-        cachedAt: Date.now(),
-      }
+      const entry = await this.fetchEntry(planYear, request)
 
       // An empty response is deliberately not cached. A proxy rejection (the API
       // whitelist 403, an expired session) can come back as a 200 with no `result`, and
