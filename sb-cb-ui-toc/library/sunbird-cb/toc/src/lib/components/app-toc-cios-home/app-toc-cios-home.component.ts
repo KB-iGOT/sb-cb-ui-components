@@ -563,7 +563,11 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
 
   captureRedirectTelemetry(content: any) {
     if (content?.redirectUrl) {
-      window.open(content.redirectUrl, '_blank', 'noopener')
+      const queryParams = {
+        id: content.contentId,
+        redirectUrl: content.redirectUrl,
+      }
+      this.router.navigate([`viewer/lti-course`], { queryParams })
     } else if (content?.providerCustomClaim && content?.contentId && content?.partnerId) {
       const queryParams = {
         id: content.contentId,
@@ -823,7 +827,6 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
     }
     // If badgeEarningDateEnabled is true, show badge only if badgeEarningDateTime has passed
     if (badge?.badgeEarningDateEnabled && badge?.badgeEarningDateTime) {
-      console.log(badge.badgeEarningDateTime, Date.now())
       return badge.badgeEarningDateTime > Date.now()
     }
     return false
