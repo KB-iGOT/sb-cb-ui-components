@@ -80,4 +80,28 @@ describe('JagoChatbotTelemetryService', () => {
     expect(() => service.raiseInteract({ type: 'click', id: 'chatbot-open' })).not.toThrow()
     expect(() => service.raiseImpression({ subtype: 'chatbot-open' })).not.toThrow()
   })
+
+  it('builds its events without the SDK global object set by the app START, then restores it', () => {
+    const globalObject = { id: '/page/home', ver: '1.0' }
+    const seen: any[] = []
+    ;(sdk as any)._globalObject = globalObject
+    sdk.interact.mockImplementation(() => seen.push((sdk as any)._globalObject))
+    sdk.impression.mockImplementation(() => seen.push((sdk as any)._globalObject))
+
+    service.raiseInteract({ type: 'click', subtype: 'Jago', id: 'chatbot-open' })
+    service.raiseImpression({ subtype: 'chatbot-open' })
+
+    expect(seen).toEqual([{}, {}])
+    expect((sdk as any)._globalObject).toBe(globalObject)
+  })
+
+  it('restores the SDK global object even when the SDK throws', () => {
+    const globalObject = { id: '/page/home', ver: '1.0' }
+    ;(sdk as any)._globalObject = globalObject
+    sdk.interact.mockImplementation(() => { throw new Error('sdk failure') })
+    jest.spyOn(console, 'log').mockImplementation(() => {})
+
+    expect(() => service.raiseInteract({ type: 'click', id: 'chatbot-open' })).not.toThrow()
+    expect((sdk as any)._globalObject).toBe(globalObject)
+  })
 })
