@@ -66,17 +66,38 @@ export class JagoChatbotTelemetryService {
         return
       }
       const pageContext = this.utilitySvc.routeData || {}
-      raise(pageContext.pageId || window.location.pathname, {
+      withEmptyGlobalObject(() => raise(pageContext.pageId || window.location.pathname, {
         context: {
           pdata: { ...this.telemetrySvc.pData },
           ...(pageContext.module ? { env: pageContext.module } : null),
           ...(cdata && cdata.length ? { cdata } : null),
         },
         object: {},
-      })
+      }))
     } catch (e) {
       // tslint:disable-next-line: no-console
       console.log('Error in Jago chatbot telemetry', e)
     }
+  }
+}
+
+/**
+ * Builds a Jago event with an empty `object`. The SDK merges its global object into every event,
+ * and the portal's app START sets that to `{ id: <page id>, ver: '1.0' }`; passing `object: {}`
+ * cannot remove those keys. The SDK builds and queues the event synchronously, so the global
+ * object is cleared only for this one event and is restored straight after.
+ */
+function withEmptyGlobalObject(raise: () => void) {
+  const sdk = $t
+  const globalObject = sdk._globalObject
+  if (!globalObject || typeof globalObject !== 'object') {
+    raise()
+    return
+  }
+  sdk._globalObject = {}
+  try {
+    raise()
+  } finally {
+    sdk._globalObject = globalObject
   }
 }
