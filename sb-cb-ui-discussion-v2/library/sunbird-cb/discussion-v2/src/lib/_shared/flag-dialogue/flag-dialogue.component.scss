@@ -45,6 +45,8 @@
 
 .no-padding {
     padding: 0 !important;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .mdc-checkbox__background {
@@ -67,4 +69,11 @@
 
 .mat-mdc-dialog-container .mdc-dialog__surface {
     padding: 0 !important
+}
+
+.no-shadow {
+    display: flex !important;
+    flex-direction: column;
+    max-height: 85vh;
+    overflow: hidden;
 }
