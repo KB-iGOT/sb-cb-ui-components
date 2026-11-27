@@ -47,7 +47,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   selectionTypeEnum = NsAccessControlConfig.SelectionType;
   radioSelections: { value: string; label: string }[] = [];
   batchRanges: any;
-  selectedCharacterRange: string;
+  selectedCharacterRange: string = ''
   accessControlCriteriaSelection!: NsAccessControlConfig.IAccessControlCriteriaSelection;
   activeTab = 0;
   userProfile: any;
@@ -56,7 +56,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   public readonly data = inject<{ rule: any; condition: any; selected: any[]; activeTabSelected: number; disabled: boolean }>(MAT_DIALOG_DATA);
   searchedDesignationFlagWithQuery: any;
-  orgSelectionIds = [];
+  orgSelectionIds: any[] = [];
 
   paginationOffset = 0;
   totalItemsCount = 0;
@@ -80,7 +80,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   noServicesMapped = false;
   readonly noServicesMappedMessage = NO_SERVICES_MAPPED_MESSAGE;
   customeFieldValues: any;
-  isEntityCustomField: boolean;
+  isEntityCustomField: boolean = false;
 
   entityFilterOptions = CHECKBOX_OPTIONS;
   isCCA = false;
@@ -210,7 +210,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           } else if (this.isOrgHierarchyMode && hierarchyOrgSelections?.length) {
             this.orgSelectionIds = hierarchyOrgSelections;
           } else {
-            this.orgSelectionIds = this.accessControlConfig.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
+            this.orgSelectionIds = this.accessControlConfig?.userConfig.org?.rootOrgId ? [this.accessControlConfig.userConfig.org?.rootOrgId] : [];
           }
         } else {
           this.orgSelectionIds = this.data?.rule?.conditions?.find(
@@ -239,15 +239,15 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
       case NsAccessControlConfig.SelectionType.Service:
         this.radioSelections = this.accessControlCriteriaSelection?.servicesRadioSelection;
         this.resolveSelectableStates();
-        this.getServicesList(this.searchControl.value);
+        this.getServicesList(this.searchControl.value!);
         break;
       case NsAccessControlConfig.SelectionType.Cadre:
         this.radioSelections = this.accessControlCriteriaSelection?.cadreRadioSelection;
-        this.getCadreList(this.searchControl.value);
+        this.getCadreList(this.searchControl.value!);
         break;
       case NsAccessControlConfig.SelectionType.Batch:
         this.radioSelections = this.accessControlCriteriaSelection?.batchRadioSelection;
-        this.getBatchList(this.searchControl.value);
+        this.getBatchList(this.searchControl.value!);
         break;
       case NsAccessControlConfig.SelectionType.Group:
         this.getGroupList();
@@ -518,28 +518,28 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
         if (this.filterValue === "all" && !this.searchControl.value) {
           this.selectedCharacterRange = "A";
           this.updateAlphabet();
-          this.getDesignationsList(this.paginationOffset, this.searchControl.value, [], this.selectedCharacterRange);
+          this.getDesignationsList(this.paginationOffset, this.searchControl.value!, [], this.selectedCharacterRange);
         } else {
-          this.getDesignationsList(this.paginationOffset, this.searchControl.value);
+          this.getDesignationsList(this.paginationOffset, this.searchControl.value!);
         }
         break;
       case NsAccessControlConfig.SelectionType.Organizations:
         if (this.isOrgHierarchyMode) {
-          this.getOrgHierarchyList(this.searchControl.value);
+          this.getOrgHierarchyList(this.searchControl.value!);
           break;
         }
         this.selectedCharacterRange = "A";
         if (this.filterValue === "all" && !this.searchControl.value) this.updateAlphabet();
-        this.getOrganisationsList(this.searchControl.value, []);
+        this.getOrganisationsList(this.searchControl.value!, []);
         break;
       case NsAccessControlConfig.SelectionType.Service:
-        this.getServicesList(this.searchControl.value);
+        this.getServicesList(this.searchControl.value!);
         break;
       case NsAccessControlConfig.SelectionType.Cadre:
-        this.getCadreList(this.searchControl.value);
+        this.getCadreList(this.searchControl.value!);
         break;
       case NsAccessControlConfig.SelectionType.Batch:
-        this.getCadreList(this.searchControl.value);
+        this.getCadreList(this.searchControl.value!);
         break;
     }
   }
@@ -743,16 +743,16 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     if (this.isOrgHierarchyMode && this.selectionType === this.selectionTypeEnum.Organizations) return;
     if (this.dataList.length >= this.totalItemsCount || this.isFetchingMore) return;
     this.isFetchingMore = true;
-    this.paginationOffset += this.accessControlConfig.accessControlCriteriaSelection.paginationLimit || this.paginationLImit;
+    this.paginationOffset += this.accessControlConfig?.accessControlCriteriaSelection.paginationLimit || this.paginationLImit;
     
     switch (this.selectionType) {
       case this.selectionTypeEnum.Designation:
         if (this.searchControl.value) this.selectedCharacterRange = "";
-        this.getDesignationsList(this.paginationOffset, this.searchControl.value, [], this.selectedCharacterRange, true);
+        this.getDesignationsList(this.paginationOffset, this.searchControl.value!, [], this.selectedCharacterRange, true);
         break;
       case this.selectionTypeEnum.Organizations:
         if (this.searchControl.value) this.selectedCharacterRange = "";
-        this.getOrganisationsList(this.searchControl.value, [], this.selectedCharacterRange, true);
+        this.getOrganisationsList(this.searchControl.value!, [], this.selectedCharacterRange, true);
         break;
     }
   }
@@ -792,7 +792,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     }
     
     const pagination = {
-      limit: this.accessControlConfig.accessControlCriteriaSelection.paginationLimit || this.paginationLImit,
+      limit: this.accessControlConfig?.accessControlCriteriaSelection.paginationLimit || this.paginationLImit,
       offset: this.paginationOffset
     };
 
@@ -875,7 +875,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
           },
         });
     } else {
-      const pageSize = this.accessControlConfig.accessControlCriteriaSelection.paginationLimit || this.paginationLImit;
+      const pageSize = this.accessControlConfig?.accessControlCriteriaSelection.paginationLimit || this.paginationLImit;
       const pagination = {
         pageSize: pageSize,
         pageNumber: Math.floor(paginationOffset / pageSize)
@@ -938,7 +938,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
     } else {
       // A L0 state organisation is the state itself; an L1 -> L10 organisation is told its state
       // by the L0 it sits under, which the service has already read
-      const orgStateName = this.accessControlService.getOrgStateName(this.accessControlConfig);
+      const orgStateName = this.accessControlService.getOrgStateName(this.accessControlConfig!);
 
       const matchedState = this.cadreMappingService.findStateByName(orgStateName);
       this.availableStates = matchedState ? [matchedState] : [];
@@ -973,17 +973,18 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 
   onChangeState(event: any): void {
     this.selectedStateKey = event?.value ?? event;
-    this.getServicesList(this.searchControl.value);
+    this.getServicesList(this.searchControl.value!);
   }
 
-  /** MDO only: every organisation except a CCA (DoPT, which keeps the master list) selects only from its own services. */
+  // MDO only: a CCA sees every service of every state. Any other organisation sees only the services
+  // cadreConfig maps to it, and an empty message when it maps none.
   get isServiceListScopedToOrganisation(): boolean {
     return this.application === NsAccessControlConfig.Application.MDO && !this.isCCA;
   }
 
   getServicesList(query: string): void {
     if (this.isServiceListScopedToOrganisation) {
-      // Services of the state the organisation sits under, plus those it (or its L0) is the Cadre Controlling Authority of
+      // Services of the state the organisation sits under, plus those whose cadreControllingAuthority is the organisation or its L0
       const ownStateServices = this.cadreMappingService.getServicesByStateKeys(
         this.availableStates.map((state: any) => state.id)
       );
@@ -1273,7 +1274,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
   if (this.stateServiceTypeNames.includes(this.selectedServiceType) && !this.selectedStateKey) {
     this.selectedStateKey = this.availableStates[0]?.id || "";
   }
-  this.getServicesList(this.searchControl.value);
+  this.getServicesList(this.searchControl.value!);
   
   // If selectAll was checked before, auto-select all items in the new filtered list
   if (wasSelectAllChecked) {
@@ -1283,7 +1284,7 @@ export class EntitySelectionsComponent implements OnInit, OnDestroy {
 }
 
   checkIfCustomeField(condition: any): boolean {
-    const optionsEntity = this.accessControlConfig.accessControlCriteriaSelection.optionsEntity;
+    const optionsEntity = this.accessControlConfig?.accessControlCriteriaSelection.optionsEntity;
     if (optionsEntity && optionsEntity.length) {
       const matched = optionsEntity.find((ele: any) => ele?.value === condition?.entity);
       return matched?.isCustomField || false;

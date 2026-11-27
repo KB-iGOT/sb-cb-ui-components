@@ -220,9 +220,26 @@ export class CadreMappingService {
 
   /** Services whose Cadre Controlling Authority is one of the given organisation names. */
   getServicesByCadreControllingAuthorities(organisationNames: string[]): Array<{ id: string; name: string }> {
-    return Array.from(this.allServices.values())
-      .filter((service) => organisationNames.includes(service.cadreControllingAuthority))
-      .map((service) => ({ id: service.id, name: service.name }));
+    const normalisedOrganisationNames = new Set(
+      (organisationNames || []).map((name) => this.normaliseAuthorityName(name))
+    );
+
+    const matchingServices = Array.from(this.allServices.values()).filter((service) => {
+      const serviceAuthorityName = this.normaliseAuthorityName(service.cadreControllingAuthority);
+      return serviceAuthorityName !== "" && normalisedOrganisationNames.has(serviceAuthorityName);
+    });
+
+    return matchingServices.map((service) => ({ id: service.id, name: service.name }));
+  }
+
+  // Brings an authority name to a comparable form, so small spelling differences between the org read
+  // and cadreConfig do not stop a match:
+  //   "Department of Personnel and Training (DOPT)" -> "department of personnel and training dopt"
+  //   "Department of Personnel and Training DoPT"   -> "department of personnel and training dopt"
+  private normaliseAuthorityName(name: string): string {
+    const lowerCaseName = (name || "").toLowerCase();
+    const withoutPunctuation = lowerCaseName.replace(/[^a-z0-9]+/g, " "); // brackets, commas, extra spaces -> single space
+    return withoutPunctuation.trim();
   }
 
   /** Services that are not tied to a state, ie. everything the user may always see. */

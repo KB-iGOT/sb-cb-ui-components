@@ -436,12 +436,30 @@ describe('EntitySelectionsComponent', () => {
       expect(component.noServicesMapped).toBe(false);
     });
 
+    it('should show a CCA every state to pick from', () => {
+      openServiceList({ isCCA: true });
+
+      expect(component.availableStates.length).toBe(2);
+      expect(component.canChooseState).toBe(true);
+    });
+
     it('should show a ministry that is a Cadre Controlling Authority only the services it controls, without the filter', () => {
       openServiceList({ isCCA: false }, NsAccessControlConfig.Application.MDO, ['Ministry of Home Affairs']);
 
       expect(component.isServiceListScopedToOrganisation).toBe(true);
       expect(listedServices()).toEqual(['DANICS', 'Indian Police Service (IPS)']);
       expect(accessControlService.getCadreControllingAuthorityNames).toHaveBeenCalledWith(config);
+    });
+
+    it('should match the Cadre Controlling Authority regardless of case, spacing and brackets', () => {
+      openServiceList({ isCCA: false }, NsAccessControlConfig.Application.MDO, ['Department of Personnel and Training DoPT']);
+
+      expect(listedServices()).toEqual(['Central Secretariat Stenographers Service']);
+      expect(component.noServicesMapped).toBe(false);
+
+      openServiceList({ isCCA: false }, NsAccessControlConfig.Application.MDO, ['  department OF personnel and training ']);
+
+      expect(listedServices()).toEqual(['Indian Administrative Service (IAS)']);
     });
 
     it('should show a state organisation only the services of its own state', () => {

@@ -8,8 +8,6 @@ export namespace NsAccessControlConfig {
     userConfig: { [key: string]: any; userRoles: any; org?: any };
     content: any;
     application: string;
-    /** MDO only: services (IPS, IFoS, CHS) whose user group, with no organisation condition, reaches every organisation */
-    crossOrgReachServices?: string[];
     mdoContent: any;
     context: {
       type: string;
