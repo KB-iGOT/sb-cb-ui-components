@@ -491,6 +491,11 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
     return this.deliveryModeOptionsByType[this.selectedCompetencyType] || [];
   }
 
+  /** Proficiency Level is optional for Domain competencies, required for others. */
+  get isProficiencyRequired(): boolean {
+    return this.selectedCompetencyType !== 'Domain';
+  }
+
   addCompetency() {
     let type = this.selectedCompetencyType;
     let theme = '';
@@ -506,10 +511,10 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       theme = this.selectedTheme;
       subTheme = this.selectedSubTheme;
     }
-    proficiency_level = this.cbpForm.value.proficiency_level?.trim();
+    proficiency_level = this.cbpForm.value.proficiency_level?.trim() || '';
     delivery_mode = this.cbpForm.value.delivery_mode?.trim();
 
-    if (type && theme && subTheme && proficiency_level && delivery_mode) {
+    if (type && theme && subTheme && (proficiency_level || !this.isProficiencyRequired) && delivery_mode) {
       const exists = this.competenciesArray.value.some(c =>
         c.theme === theme && c.sub_theme === subTheme && c.type === type
       );
@@ -589,8 +594,9 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
   canAddCompetency(): boolean {
     if (!this.selectedCompetencyType) return false;
 
-    // Proficiency Level and Delivery Mode must be selected before adding
-    if (!this.cbpForm.value.proficiency_level || !this.cbpForm.value.delivery_mode) return false;
+    // Delivery Mode is always required; Proficiency Level is optional for Domain
+    if (!this.cbpForm.value.delivery_mode) return false;
+    if (this.isProficiencyRequired && !this.cbpForm.value.proficiency_level) return false;
 
     if (this.selectedCompetencyType === 'Domain') {
       const theme = this.cbpForm.value.manualThemeInput?.trim();
@@ -662,11 +668,11 @@ export class EditCbpPlanComponent implements OnInit, OnDestroy {
       this.originalCompetencyValueArr = JSON.parse(JSON.stringify(this.competenciesArray.value))
     }
     // console.log('this.cbpForm.value',this.cbpForm.value)
-    proficiency_level =  this.cbpForm.value.proficiency_level?.trim();
+    proficiency_level =  this.cbpForm.value.proficiency_level?.trim() || '';
     delivery_mode =  this.cbpForm.value.delivery_mode?.trim();
 
     console.log(' this.competenciesArray', this.competenciesArray)
-    if (type && theme && subTheme && proficiency_level && delivery_mode) {
+    if (type && theme && subTheme && (proficiency_level || !this.isProficiencyRequired) && delivery_mode) {
 
       console.log('this.editCompetencyIndex--', this.editCompetencyIndex)
       if (this.editCompetencyIndex > -1) {

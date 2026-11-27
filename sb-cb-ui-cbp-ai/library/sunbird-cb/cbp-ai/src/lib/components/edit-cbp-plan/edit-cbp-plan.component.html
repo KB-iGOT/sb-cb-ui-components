@@ -240,7 +240,7 @@
                     
                     <div class="competency-step-row" *ngIf="selectedTheme || (selectedCompetencyType === 'Domain')">
                         <div class="competency-step">
-                            <label class="step-label">4. Proficiency Level</label>
+                            <label class="step-label">4. Proficiency Level<span *ngIf="!isProficiencyRequired"> (Optional)</span></label>
                             <div class="competency-dropdown-container">
                                 <mat-form-field appearance="outline" class="competency-dropdown">
                                     <mat-select formControlName="proficiency_level" placeholder="Select Proficiency Level">
