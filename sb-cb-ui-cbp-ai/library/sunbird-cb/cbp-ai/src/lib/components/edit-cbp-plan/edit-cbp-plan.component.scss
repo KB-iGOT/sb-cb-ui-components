@@ -830,6 +830,21 @@ border: none;
     gap: 12px;
   }
 
+  .competency-step-row {
+    display: flex;
+    gap: 24px;
+
+    .competency-step {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 16px;
+    }
+  }
+
   .step-label {
     color: #1B4CA1;
     font-family: Lato;
