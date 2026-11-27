@@ -92,6 +92,7 @@ export namespace WsEvents {
     id?: string
     pageid?: string
     target?: string
+    extra?: { [key: string]: any }
   }
 
   export interface ITelemetryTabData {
@@ -99,9 +100,15 @@ export namespace WsEvents {
     index: number,
   }
 
+  export interface ITelemetryCdata {
+    id: string
+    type: string
+  }
+
   export interface IWsEventTelemetry {
     eventSubType: EnumTelemetrySubType
     pageContext?: ITelemetryPageContext
+    cdata?: ITelemetryCdata[]
   }
 
   // PDF Telemetry Event

@@ -1,7 +1,7 @@
 import {
   Component, OnDestroy, OnInit, AfterViewInit, AfterViewChecked,
   HostListener, ElementRef, ViewChild, ViewEncapsulation, Input,
-  Inject, ChangeDetectorRef,
+  Inject, ChangeDetectorRef, inject,
 } from '@angular/core'
 import { Location } from '@angular/common'
 import { SafeHtml, DomSanitizer, SafeStyle } from '@angular/platform-browser'
@@ -25,7 +25,7 @@ import { NsWidgetResolver } from '@sunbird-cb/resolver-v2'
 import {
   APP_DB_STORES, ConfigurationsService, DataTransferService, EventService,
   IndexedDbService, LoggerService, MultilingualTranslationsService,
-  NsPage, TFetchStatus, TelemetryService,
+  NsPage, SearchJourneyService, TFetchStatus, TelemetryService,
   UtilityService, WidgetEnrollService, WsEvents,
 } from '@sunbird-cb/utils-v2'
 
@@ -87,6 +87,7 @@ const SNACKBAR_DURATION = 3000
   standalone: false
 })
 export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecked, AfterViewInit {
+  private readonly searchJourneySvc = inject(SearchJourneyService)
   queryParamsData: { [key: string]: string } = {}; // Initialize queryParamsData
   show = false
   changeTab = false
@@ -1613,8 +1614,14 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       {
         pageIdExt: `btn-${action}`,
         module: WsEvents.EnumTelemetrymodules.LEARN,
-      }
+      },
+      this.getSearchJourneyCdata()
     )
+  }
+
+  private getSearchJourneyCdata(): WsEvents.ITelemetryCdata[] | undefined {
+    const cdata = this.searchJourneySvc.getCdataForContent(this.content?.identifier)
+    return cdata ? [cdata] : undefined
   }
 
   raiseEnrollTelementryForSakshamAIGenerated() {
@@ -1636,7 +1643,8 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
       {
         pageId: `/app/toc/${this.content?.identifier}/overview_btn-enroll`,
         module: WsEvents.EnumTelemetrymodules.CONTENT,
-      }
+      },
+      this.getSearchJourneyCdata()
     )
   }
 
@@ -1706,6 +1714,7 @@ export class AppTocHomeV2Component implements OnInit, OnDestroy, AfterViewChecke
   }
 
   programEnrollCall(batchData: any) {
+    this.raiseEnrollmentTelemetry('enroll')
     this.autoEnrollCuratedProgram(NsContent.ECourseCategory.MODERATED_PROGRAM, batchData)
   }
 

@@ -6,7 +6,7 @@ import { ActivatedRoute, Event, NavigationEnd, Router } from '@angular/router'
 import { NsContent } from '../../_services/widget-content.model'
 import { BATCH_LIST_LIMIT, WidgetContentService } from '../../_services/widget-content.service'
 import { viewerRouteGenerator } from '../../_services/viewer-route-util'
-import { TFetchStatus, UtilityService, ConfigurationsService, LoggerService, WsEvents, EventService, MultilingualTranslationsService } from '@sunbird-cb/utils-v2'
+import { TFetchStatus, UtilityService, ConfigurationsService, LoggerService, WsEvents, EventService, MultilingualTranslationsService, SearchJourneyService } from '@sunbird-cb/utils-v2'
 import { ConfirmDialogComponent } from '../../_collection/_common/confirm-dialog/confirm-dialog.component'
 import { AccessControlService } from '../../services/access-control.service'
 import { Subscription, fromEvent } from 'rxjs'
@@ -63,6 +63,7 @@ dayjs.extend(isSameOrAfter)
 })
 
 export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
+  private readonly searchJourneySvc = inject(SearchJourneyService)
   iGOT = 'iGOT'
   show = false
   @Input() banners: NsAppToc.ITocBanner | null = null
@@ -603,6 +604,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
 
     const batchData = this.batchControl.value
     if (this.content && this.content.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM) {
+      this.raiseTelemetry('request-enroll')
       // conflicts check start
       const userList: any = this.userEnrollmentList && this.userEnrollmentList.filter(ele => {
         if (ele.content.primaryCategory === NsContent.EPrimaryCategory.BLENDED_PROGRAM) {
@@ -1610,8 +1612,14 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       {
         pageIdExt: `btn-${subType}`,
         module: WsEvents.EnumTelemetrymodules.CONTENT,
-      }
+      },
+      this.getSearchJourneyCdata()
     )
+  }
+
+  private getSearchJourneyCdata(): WsEvents.ITelemetryCdata[] | undefined {
+    const cdata = this.searchJourneySvc.getCdataForContent(this.content?.identifier)
+    return cdata ? [cdata] : undefined
   }
 
   translateLabels(label: string, type: any, subtype: any) {

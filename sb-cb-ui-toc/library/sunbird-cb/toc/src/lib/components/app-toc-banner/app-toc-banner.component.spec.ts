@@ -18,6 +18,7 @@ import {
   PipeLimitToModule,
   PipePartialContentModule,
   PipePublicURLModule,
+  SearchJourneyService,
   UtilityService,
 } from '@sunbird-cb/utils-v2'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
@@ -25,6 +26,7 @@ import { CommonMethodsService } from '@sunbird-cb/consumption'
 import { AppTocBannerComponent } from './app-toc-banner.component'
 import { AppTocService } from '../../services/app-toc.service'
 import { BATCH_LIST_LIMIT, WidgetContentService } from '../../_services/widget-content.service'
+import { NsContent } from '../../_services/widget-content.model'
 import { MobileAppsService } from '../../services/mobile-apps.service'
 import { TitleTagService } from '../../services/title-tag.service'
 import { ActionService } from '../../services/action.service'
@@ -409,6 +411,56 @@ describe('AppTocBannerComponent', () => {
     })
   })
 
+  describe('search journey telemetry', () => {
+    const journeyCdata = { id: 'journey-1', type: 'global-search' }
+
+    function createTelemetryComponent(primaryCategory: string): any {
+      return createComponent({
+        content: { identifier: COURSE_ID, primaryCategory },
+        batchControl: { value: { batchId: 'batch_0' } },
+        userEnrollmentList: [],
+        events: { raiseInteractTelemetry: jest.fn() },
+        searchJourneySvc: {
+          getCdataForContent: jest.fn((contentId: string) => (contentId === COURSE_ID ? journeyCdata : null)),
+        },
+        openRequestToEnroll: jest.fn(),
+        programEnrollCall: { emit: jest.fn() },
+      })
+    }
+
+    it('raises a request-enroll event with the journey cdata for a blended program', () => {
+      const component = createTelemetryComponent(NsContent.EPrimaryCategory.BLENDED_PROGRAM)
+
+      component.requestToEnrollDialog()
+
+      expect(component.events.raiseInteractTelemetry).toHaveBeenCalledWith(
+        { type: 'click', subType: 'request-enroll', id: COURSE_ID },
+        { id: COURSE_ID, type: NsContent.EPrimaryCategory.BLENDED_PROGRAM },
+        expect.objectContaining({ pageIdExt: 'btn-request-enroll' }),
+        [journeyCdata]
+      )
+      expect(component.openRequestToEnroll).toHaveBeenCalledWith({ batchId: 'batch_0' })
+    })
+
+    it('leaves the enrol event to the TOC page for other programs', () => {
+      const component = createTelemetryComponent('Program')
+
+      component.requestToEnrollDialog()
+
+      expect(component.events.raiseInteractTelemetry).not.toHaveBeenCalled()
+      expect(component.programEnrollCall.emit).toHaveBeenCalledWith({ batchId: 'batch_0' })
+    })
+
+    it('sends banner events without cdata for content not clicked from search', () => {
+      const component = createTelemetryComponent('Course')
+      component.content = { identifier: 'do_other', primaryCategory: 'Course' }
+
+      component.raiseTelemetry('shareContent')
+
+      expect(component.events.raiseInteractTelemetry.mock.calls[0][3]).toBeUndefined()
+    })
+  })
+
   describe('TestBed', () => {
     let component: AppTocBannerComponent
     let fixture: ComponentFixture<AppTocBannerComponent>
@@ -452,6 +504,7 @@ describe('AppTocBannerComponent', () => {
           { provide: LoggerService, useValue: { log: jest.fn(), error: jest.fn() } },
           { provide: UserAutocompleteService, useValue: { searchUser: jest.fn().mockReturnValue(of({})) } },
           { provide: EventService, useValue: { raiseInteractTelemetry: jest.fn() } },
+          { provide: SearchJourneyService, useValue: { getCdataForContent: jest.fn(() => null) } },
           {
             provide: MultilingualTranslationsService,
             useValue: { languageSelectedObservable: of(), translateLabel: jest.fn(), translateActualLabel: jest.fn() },

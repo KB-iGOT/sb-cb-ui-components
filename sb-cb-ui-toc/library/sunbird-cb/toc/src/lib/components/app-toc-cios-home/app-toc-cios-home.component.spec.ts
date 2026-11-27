@@ -36,6 +36,7 @@ jest.mock('@sunbird-cb/utils-v2', () => ({
   ConfigurationsService: jest.fn().mockImplementation(() => ({})),
   EventService: jest.fn().mockImplementation(() => ({})),
   MultilingualTranslationsService: jest.fn().mockImplementation(() => ({})),
+  SearchJourneyService: class MockSearchJourneyService { },
   WidgetContentService: jest.fn().mockImplementation(() => ({})),
   WsEvents: {
     WsEventType: { Telemetry: 'telemetry' },
@@ -58,7 +59,11 @@ jest.mock('./consent-dialog.component', () => ({
 }))
 
 import { of, throwError, BehaviorSubject, Subject } from 'rxjs'
+import { TestBed } from '@angular/core/testing'
+import { SearchJourneyService } from '@sunbird-cb/utils-v2'
 import { AppTocCiosHomeComponent } from './app-toc-cios-home.component'
+
+const JOURNEY_CDATA = { id: 'journey-1', type: 'global-search' }
 
 describe('AppTocCiosHomeComponent', () => {
   let component: AppTocCiosHomeComponent
@@ -97,8 +102,12 @@ describe('AppTocCiosHomeComponent', () => {
   }
 
   /** Builds a fresh component with the current mocks. */
-  const createComponent = (): AppTocCiosHomeComponent =>
-    new AppTocCiosHomeComponent(
+  const searchJourneySvcMock = {
+    getCdataForContent: jest.fn((contentId: string) => (contentId === 'clicked-1' ? JOURNEY_CDATA : null)),
+  }
+
+  const createComponent = (): AppTocCiosHomeComponent => {
+    return TestBed.runInInjectionContext(() => new AppTocCiosHomeComponent(
       routeMock,
       routerMock,
       commonSvcMock,
@@ -113,11 +122,15 @@ describe('AppTocCiosHomeComponent', () => {
       snackBarMock,
       netCoreServiceMock,
       environmentMock
-    )
+    ))
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
+    TestBed.configureTestingModule({
+      providers: [{ provide: SearchJourneyService, useValue: searchJourneySvcMock }],
+    })
 
     routeMock = {
       data: of({}),
@@ -1423,7 +1436,19 @@ describe('AppTocCiosHomeComponent', () => {
       expect(eventsMock.raiseInteractTelemetry).toHaveBeenCalledWith(
         { type: 'click', subType: 'redirect', id: 'redirect-content' },
         { id: 'c1', type: 'External content' },
-        { module: 'Home' }
+        { module: 'Home' },
+        undefined
+      )
+    })
+
+    it('should attach the search journey cdata when the content was clicked from search', () => {
+      component.telemetryToCaptureInteract('clicked-1', 'enroll', 'enrol-content')
+      expect(searchJourneySvcMock.getCdataForContent).toHaveBeenCalledWith('clicked-1')
+      expect(eventsMock.raiseInteractTelemetry).toHaveBeenCalledWith(
+        { type: 'click', subType: 'enroll', id: 'enrol-content' },
+        { id: 'clicked-1', type: 'External content' },
+        { module: 'Home' },
+        [JOURNEY_CDATA]
       )
     })
 
@@ -1433,7 +1458,8 @@ describe('AppTocCiosHomeComponent', () => {
       expect(eventsMock.raiseInteractTelemetry).toHaveBeenCalledWith(
         expect.objectContaining({ subType: 'redirect' }),
         expect.objectContaining({ id: 'c1' }),
-        expect.anything()
+        expect.anything(),
+        undefined
       )
     })
   })

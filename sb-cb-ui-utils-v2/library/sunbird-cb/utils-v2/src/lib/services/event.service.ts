@@ -53,7 +53,12 @@ export class EventService {
 
 
   // helper functions
-  raiseInteractTelemetry(edata: WsEvents.ITelemetryEdata, object: any, pageContext?: WsEvents.ITelemetryPageContext) {
+  raiseInteractTelemetry(
+    edata: WsEvents.ITelemetryEdata,
+    object: any,
+    pageContext?: WsEvents.ITelemetryPageContext,
+    cdata?: WsEvents.ITelemetryCdata[],
+  ) {
     this.dispatchEvent<WsEvents.IWsEventTelemetryInteract>({
       eventType: WsEvents.WsEventType.Telemetry,
       eventLogLevel: WsEvents.WsEventLogLevel.Info,
@@ -62,13 +67,14 @@ export class EventService {
         object,
         pageContext: this.getContext(pageContext),
         eventSubType: WsEvents.EnumTelemetrySubType.Interact,
+        ...(Array.isArray(cdata) ? { cdata } : null),
       },
       from: '',
       to: 'Telemetry',
     })
   }
 
-  raiseFeedbackTelemetry(edata: WsEvents.ITelemetryEdata, object: any, from?: string) {
+  raiseFeedbackTelemetry(edata: WsEvents.ITelemetryEdata, object: any, from?: string, cdata?: WsEvents.ITelemetryCdata[]) {
     this.dispatchEvent<WsEvents.IWsEventTelemetryInteract>({
       eventType: WsEvents.WsEventType.Telemetry,
       eventLogLevel: WsEvents.WsEventLogLevel.Info,
@@ -76,6 +82,7 @@ export class EventService {
         edata,
         object,
         eventSubType: WsEvents.EnumTelemetrySubType.Feedback,
+        ...(Array.isArray(cdata) ? { cdata } : null),
       },
       from: from || '',
       to: 'Telemetry',
@@ -83,7 +90,7 @@ export class EventService {
   }
 
   // Raise custom impression events eg:on tab change
-  raiseCustomImpression(object: any, pageContext?: WsEvents.ITelemetryPageContext) {
+  raiseCustomImpression(object: any, pageContext?: WsEvents.ITelemetryPageContext, cdata?: WsEvents.ITelemetryCdata[]) {
     this.dispatchEvent<WsEvents.IWsEventTelemetryImpression>({
       eventType: WsEvents.WsEventType.Telemetry,
       eventLogLevel: WsEvents.WsEventLogLevel.Info,
@@ -91,6 +98,7 @@ export class EventService {
         object,
         pageContext: this.getContext(pageContext),
         eventSubType: WsEvents.EnumTelemetrySubType.Impression,
+        ...(Array.isArray(cdata) ? { cdata } : null),
       },
       from: '',
       to: 'Telemetry',
