@@ -36,25 +36,38 @@ describe('AccessControlService', () => {
   describe('getCadreControllingAuthorityNames', () => {
     const configFor = (org: any): any => ({ userConfig: { org } });
 
-    it('should name the organisation when it is a Cadre Controlling Authority', () => {
-      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways', allowservicebasedtargeting: true }))).toEqual([
+    it('should name the organisation, whatever allowservicebasedtargeting says', () => {
+      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways' }))).toEqual(['Ministry of Railways']);
+      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways', allowservicebasedtargeting: false }))).toEqual([
         'Ministry of Railways'
       ]);
     });
 
-    it('should not name an organisation that is not one', () => {
-      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways', allowservicebasedtargeting: false }))).toEqual([]);
-      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways' }))).toEqual([]);
+    it('should name nothing when the organisation has no name', () => {
+      expect(service.getCadreControllingAuthorityNames(configFor(null))).toEqual([]);
     });
 
-    it('should add the L0 it is mapped to when the L0 is one, so a L1 selects the ministry services', () => {
-      service.parentOrganisation.set({ orgName: 'Ministry of Railways', allowservicebasedtargeting: true });
+    it('should add the L0 it is mapped to, so a L1 selects the ministry services', () => {
+      service.parentOrganisation.set({ orgName: 'Ministry of Railways' });
 
-      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Railway Board', allowservicebasedtargeting: true }))).toEqual([
+      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Railway Board' }))).toEqual([
         'Railway Board',
         'Ministry of Railways'
       ]);
-      expect(service.getCadreControllingAuthorityNames(configFor({ orgName: 'Railway Division' }))).toEqual(['Ministry of Railways']);
+    });
+
+    it('should name the organisation by its channel too, when it differs from the orgName', () => {
+      expect(
+        service.getCadreControllingAuthorityNames(
+          configFor({ orgName: 'Department of Personnel and Training DoPT', channel: 'Department of Personnel and Training' })
+        )
+      ).toEqual(['Department of Personnel and Training DoPT', 'Department of Personnel and Training']);
+    });
+
+    it('should not repeat a name the orgName and channel share', () => {
+      expect(
+        service.getCadreControllingAuthorityNames(configFor({ orgName: 'Ministry of Railways', channel: 'Ministry of Railways' }))
+      ).toEqual(['Ministry of Railways']);
     });
   });
 });

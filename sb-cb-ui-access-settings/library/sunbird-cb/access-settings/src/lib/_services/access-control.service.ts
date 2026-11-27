@@ -244,20 +244,33 @@ export class AccessControlService {
     );
   }
 
-  /** Names of the logged in organisation and of its L0, each only when the org read marks it as a Cadre Controlling Authority (allowservicebasedtargeting). */
+  // Names of the logged in organisation and of its L0. A service whose cadreControllingAuthority in cadreConfig
+  // matches one of them is mapped to the organisation; an organisation with no match has no services.
   getCadreControllingAuthorityNames(config?: NsAccessControlConfig.IAccessControlConfig): string[] {
     const loggedInOrganisation = (config || this.accessControlConfig())?.userConfig?.org;
     const parentOrganisation = this.parentOrganisation();
-    const authorityNames: string[] = [];
 
-    if (loggedInOrganisation?.allowservicebasedtargeting === true && loggedInOrganisation?.orgName) {
-      authorityNames.push(loggedInOrganisation.orgName);
-    }
-    if (parentOrganisation?.allowservicebasedtargeting === true && parentOrganisation?.orgName) {
-      authorityNames.push(parentOrganisation.orgName);
-    }
+    const authorityNames = [
+      ...this.getAuthorityNamesOf(loggedInOrganisation),
+      ...this.getAuthorityNamesOf(parentOrganisation),
+    ];
 
-    return authorityNames;
+    // orgName and channel are often the same, keep each name once
+    return Array.from(new Set(authorityNames));
+  }
+
+  // Both orgName and channel are returned because the two can be spelt differently, and cadreConfig
+  // may name the authority by either. Eg. for DoPT, orgName is "Department of Personnel and Training DoPT"
+  // while channel and cadreConfig both say "Department of Personnel and Training".
+  private getAuthorityNamesOf(organisation: any): string[] {
+    const names: string[] = [];
+    if (organisation?.orgName) {
+      names.push(organisation.orgName);
+    }
+    if (organisation?.channel) {
+      names.push(organisation.channel);
+    }
+    return names;
   }
 
   /**
