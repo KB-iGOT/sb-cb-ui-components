@@ -1,5 +1,6 @@
-import { Inject, Injectable } from '@angular/core'
-import { filter } from 'rxjs/operators'
+import { Inject, Injectable, NgZone, inject } from '@angular/core'
+import { fromEvent, race, timer } from 'rxjs'
+import { exhaustMap, filter, first, scan, share, startWith, tap } from 'rxjs/operators'
 // import { AuthKeycloakService } from './auth-keycloak.service'
 import { NsInstanceConfig } from './configurations.model'
 import { ConfigurationsService } from './configurations.service'
@@ -9,6 +10,7 @@ import { LoggerService } from './logger.service'
 import { NsContent } from './widget-content.model'
 import { Router, NavigationStart } from '@angular/router'
 import { NPSGridService } from './nps-grid.service'
+import { SearchJourneyService } from './search-journey.service'
 import { $t } from '@project-sunbird/telemetry-sdk'
 
 @Injectable({
@@ -29,6 +31,9 @@ export class TelemetryService {
   private shouldSendEmptyImpressionObject = false
   private isGlobalObejectReset = false
   private globalObjectBackup: any = null
+  private static readonly SYNC_INTERVAL_MS = 2 * 60 * 1000
+  private readonly ngZone = inject(NgZone)
+  private readonly searchJourneySvc = inject(SearchJourneyService)
   constructor(
     private configSvc: ConfigurationsService,
     private eventsSvc: EventService,
@@ -53,6 +58,44 @@ export class TelemetryService {
     this.addCustomListener()
     this.addCustomListenerForGetStart()
     this.addCustomListenerForPlatformRating()
+    this.addSyncTimerListener()
+  }
+
+  /** Sends buffered telemetry 2 minutes after the oldest unsent event, unless the SDK sends first
+   *  (END event or batchsize reached). Runs outside the Angular zone to avoid change detection. */
+  private addSyncTimerListener() {
+    if (typeof document === 'undefined') {
+      return
+    }
+    this.ngZone.runOutsideAngular(() => {
+      const events$ = fromEvent<CustomEvent>(document, 'TelemetryEvent').pipe(share())
+      const isEndEvent = (event: CustomEvent) =>
+        !!(event.detail && event.detail.eid && event.detail.eid.toUpperCase() === 'END')
+
+      events$
+        .pipe(
+          exhaustMap(firstEvent => {
+            const batchSize = ($t.config && $t.config.batchsize) || 20
+            const sentBySdk$ = events$.pipe(
+              startWith(firstEvent),
+              scan((state, event) => ({ count: state.count + 1, isEnd: isEndEvent(event) }), { count: 0, isEnd: false }),
+              first(state => state.isEnd || state.count >= batchSize),
+            )
+            const sentByTimer$ = timer(TelemetryService.SYNC_INTERVAL_MS).pipe(
+              tap(() => {
+                try {
+                  $t.syncEvents()
+                } catch (e) {
+                  // tslint:disable-next-line: no-console
+                  console.log('Error in telemetry sync timer', e)
+                }
+              }),
+            )
+            return race(sentBySdk$, sentByTimer$)
+          }),
+        )
+        .subscribe()
+    })
   }
 
   private navigationStart() {
@@ -174,7 +217,7 @@ export class TelemetryService {
     }
   }
 
-  start(edata: any, data: any, pageContext?: WsEvents.ITelemetryPageContext) {
+  start(edata: any, data: any, pageContext?: WsEvents.ITelemetryPageContext, cdata?: WsEvents.ITelemetryCdata[]) {
     try {
       if (this.telemetryConfig) {
         const isStartDataEmpty = !data || Object.keys(data).length === 0
@@ -201,6 +244,7 @@ export class TelemetryService {
                 id: this.pData.id,
               },
               ...(pageContext && pageContext.module ? { env: pageContext.module } : null),
+              ...this.cdataContext(cdata, data),
             },
             object: {
               ...(shouldClearStartObject ? { id: undefined, ver: undefined } : null),
@@ -222,7 +266,7 @@ export class TelemetryService {
     }
   }
 
-  end(edata: any, data: any, pageContext?: WsEvents.ITelemetryPageContext) {
+  end(edata: any, data: any, pageContext?: WsEvents.ITelemetryPageContext, cdata?: WsEvents.ITelemetryCdata[]) {
     try {
       $t.end(
         {
@@ -239,6 +283,7 @@ export class TelemetryService {
               id: this.pData.id,
             },
             ...(pageContext && pageContext.module ? { env: pageContext.module } : null),
+            ...this.cdataContext(cdata, data),
           },
           object: {
             ...(data) && data,
@@ -251,7 +296,7 @@ export class TelemetryService {
     }
   }
 
-  audit(type: string, props: string, data: any) {
+  audit(type: string, props: string, data: any, cdata?: WsEvents.ITelemetryCdata[]) {
     try {
       $t.audit(
         {
@@ -268,6 +313,7 @@ export class TelemetryService {
               ...this.pData,
               id: this.pData.id,
             },
+            ...this.cdataContext(cdata),
           },
         },
       )
@@ -315,6 +361,7 @@ export class TelemetryService {
               id: this.pData.id,
             },
             env: page.module || (this.telemetryConfig && this.telemetryConfig.env),
+            ...this.cdataContext(data && data.cdata),
           },
           object: {
             id: page.objectId,
@@ -338,6 +385,7 @@ export class TelemetryService {
               id: this.pData && this.pData.id,
             },
             env: page.module || '',
+            ...this.cdataContext(data && data.cdata),
           },
           object: {
             ...(data && data.object),
@@ -363,10 +411,11 @@ export class TelemetryService {
   // silently drops a caller-supplied pageContext override. Used where a call site needs full
   // control over context.env without affecting raiseInteractTelemetry's existing behavior.
   raiseInteractWithEnv(
-    edata: { type: string; subType?: string; id?: string; pageid?: string; target?: string },
+    edata: WsEvents.ITelemetryEdata,
     object: any,
     env: string,
     tags: string[] = [],
+    cdata?: WsEvents.ITelemetryCdata[],
   ) {
     try {
       this.resetCurrentTagsIfNeeded(tags)
@@ -377,6 +426,7 @@ export class TelemetryService {
           id: edata.id || '',
           pageid: edata.pageid,
           ...(edata.target && { target: edata.target }),
+          ...(edata.extra && { extra: edata.extra }),
         },
         {
           context: {
@@ -385,6 +435,7 @@ export class TelemetryService {
               id: this.pData && this.pData.id,
             },
             env,
+            ...this.cdataContext(cdata),
           },
           object: { ...object },
           tags,
@@ -407,6 +458,7 @@ export class TelemetryService {
               ...this.pData,
               id: this.externalApps[impressionData.subApplicationName],
             },
+            ...this.cdataContext(impressionData.cdata),
           },
           object: {
             id: page.objectId,
@@ -417,6 +469,7 @@ export class TelemetryService {
               ...this.pData,
               id: this.externalApps[impressionData.subApplicationName],
             },
+            ...this.cdataContext(impressionData.cdata),
           },
         }
         this.resetCurrentTagsIfNeeded([])
@@ -449,7 +502,8 @@ export class TelemetryService {
               mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
             },
             {},
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (
@@ -460,7 +514,8 @@ export class TelemetryService {
             mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
           },
             event.data.object,
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (
@@ -475,6 +530,7 @@ export class TelemetryService {
                 event.data.edata.id
                 : '',
               pageid: event.pageContext && event.pageContext.pageId || '',
+              ...(event.data.edata.extra && { extra: event.data.edata.extra }),
             },
             {
               context: {
@@ -483,6 +539,7 @@ export class TelemetryService {
                   id: this.pData.id,
                 },
                 ...(event.pageContext && event.pageContext.module ? { env: event.pageContext.module } : null),
+                ...this.cdataContext(event.data.cdata),
               },
               object: {
                 ...event.data.object,
@@ -513,7 +570,8 @@ export class TelemetryService {
               mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
             },
             {},
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (
@@ -524,7 +582,8 @@ export class TelemetryService {
             mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
           },
             event.data.object,
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (
@@ -539,6 +598,7 @@ export class TelemetryService {
                 event.data.edata.id
                 : '',
               pageid: event.pageContext && event.pageContext.pageId || '',
+              ...(event.data.edata.extra && { extra: event.data.edata.extra }),
             },
             {
               context: {
@@ -547,6 +607,7 @@ export class TelemetryService {
                   id: this.pData.id,
                 },
                 ...(event.pageContext && event.pageContext.module ? { env: event.pageContext.module } : null),
+                ...this.cdataContext(event.data.cdata),
               },
               object: {
                 ...event.data.object,
@@ -577,7 +638,8 @@ export class TelemetryService {
               mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
             },
             {},
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (
@@ -588,7 +650,8 @@ export class TelemetryService {
             mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
           },
             {},
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (
@@ -603,6 +666,7 @@ export class TelemetryService {
                 event.data.edata.id
                 : '',
               pageid: event.pageContext && event.pageContext.pageId || '',
+              ...(event.data.edata.extra && { extra: event.data.edata.extra }),
             },
             {
               context: {
@@ -611,6 +675,7 @@ export class TelemetryService {
                   id: this.pData.id,
                 },
                 ...(event.pageContext && event.pageContext.module ? { env: event.pageContext.module } : null),
+                ...this.cdataContext(event.data.cdata),
               },
               object: {
                 ...event.data.object,
@@ -663,7 +728,8 @@ export class TelemetryService {
               mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
             },
             {},
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (event.data.state === WsEvents.EnumTelemetrySubType.Unloaded) {
@@ -672,7 +738,8 @@ export class TelemetryService {
             mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
           },
             {},
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
       })
@@ -699,7 +766,8 @@ export class TelemetryService {
               mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
             },
             event.data.object,
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (
@@ -712,7 +780,8 @@ export class TelemetryService {
               mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
             },
             event.data.object,
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
       })
@@ -744,8 +813,8 @@ export class TelemetryService {
               mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
             },
             event.data.object,
-            event.pageContext
-
+            event.pageContext,
+            event.data.cdata,
           )
         }
         if (
@@ -761,7 +830,8 @@ export class TelemetryService {
               mode: event.data.mode || WsEvents.WsTimeSpentMode.Play,
             },
             event.data.object,
-            event.pageContext
+            event.pageContext,
+            event.data.cdata,
           )
         }
       })
@@ -789,6 +859,7 @@ export class TelemetryService {
                 ...this.pData,
                 id: this.externalApps[event.from],
               },
+              ...this.cdataContext(event.data.cdata),
             },
           }
           try {
@@ -816,7 +887,8 @@ export class TelemetryService {
                     event.data.edata.id
                     : '',
                   pageid: event.data.pageContext && event.data.pageContext.pageId || page.pageid,
-                  ...(event.data.edata.target && { target: event.data.edata.target })
+                  ...(event.data.edata.target && { target: event.data.edata.target }),
+                  ...(event.data.edata.extra && { extra: event.data.edata.extra }),
                 },
                 {
                   context: {
@@ -825,6 +897,7 @@ export class TelemetryService {
                       id: this.pData.id,
                     },
                     ...(event.pageContext && event.pageContext.module ? { env: event.pageContext.module } : null),
+                    ...this.cdataContext(event.data.cdata),
                   },
                   object: {
                     ...event.data.object,
@@ -868,6 +941,7 @@ export class TelemetryService {
                   ...this.pData,
                   id: this.pData.id,
                 },
+                ...this.cdataContext(event.data.cdata),
               },
               object: {
                 id: event.data.object.contentId || event.data.object.id || '',
@@ -902,6 +976,7 @@ export class TelemetryService {
                 ...this.pData,
                 id: this.externalApps[event.from],
               },
+              ...this.cdataContext(event.data.cdata),
             },
           }
           try {
@@ -926,6 +1001,7 @@ export class TelemetryService {
                     ...this.pData,
                     id: this.pData.id,
                   },
+                  ...this.cdataContext(event.data.cdata),
                 },
               })
           } catch (e) {
@@ -961,6 +1037,7 @@ export class TelemetryService {
                   ...this.pData,
                   id: this.pData.id,
                 },
+                ...this.cdataContext(event.data.cdata),
               },
             },
           )
@@ -1007,4 +1084,41 @@ export class TelemetryService {
 
     return null
   }
+
+  
+  /** Returns `{ cdata }` to spread into an event's context, only when cdata is an array.
+   *  Every event must set its context, or the SDK reuses the previous one and leaks its cdata. */
+  private cdataContext(cdata?: WsEvents.ITelemetryCdata[], object?: any) {
+    const journeyCdata = this.getPlayerJourneyCdata(object)
+    if (!journeyCdata) {
+      return Array.isArray(cdata) ? { cdata } : null
+    }
+    const callerCdata = Array.isArray(cdata) ? cdata : []
+    const isTagged = callerCdata.some(item => item && item.id === journeyCdata.id && item.type === journeyCdata.type)
+    return { cdata: isTagged ? callerCdata : [...callerCdata, journeyCdata] }
+  }
+
+  private getPlayerJourneyCdata(object?: any): WsEvents.ITelemetryCdata | null {
+    const candidateIds = [object && object.id, object && object.rollup && object.rollup.l1, ...this.getPlayerPageContentIds()]
+    for (const contentId of candidateIds) {
+      const journeyCdata = contentId ? this.searchJourneySvc.getCdataForContent(contentId) : null
+      if (journeyCdata) {
+        return journeyCdata
+      }
+    }
+    return null
+  }
+
+  private getPlayerPageContentIds(): string[] {
+    if (typeof window === 'undefined') {
+      return []
+    }
+    const urlParts = window.location.pathname.split('/')
+    if (!urlParts.includes('viewer')) {
+      return []
+    }
+    const collectionId = new URLSearchParams(window.location.search).get('collectionId')
+    return [this.extractContentIdFromUrlParts(urlParts), collectionId].filter((id): id is string => !!id)
+  }
+
 }
