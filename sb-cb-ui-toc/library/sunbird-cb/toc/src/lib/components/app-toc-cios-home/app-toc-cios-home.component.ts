@@ -1,8 +1,8 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnInit, Optional, ViewChild } from '@angular/core'
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnInit, Optional, ViewChild, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { TranslateService } from '@ngx-translate/core'
 import { CommonMethodsService } from '@sunbird-cb/consumption'
-import { ConfigurationsService, EventService, MultilingualTranslationsService, WidgetContentService, WsEvents } from '@sunbird-cb/utils-v2'
+import { ConfigurationsService, EventService, MultilingualTranslationsService, SearchJourneyService, WidgetContentService, WsEvents } from '@sunbird-cb/utils-v2'
 import { LoaderService } from '../../services/loader.service'
 import { MatSnackBar as MatSnackBar } from '@angular/material/snack-bar'
 import { MatDialog } from '@angular/material/dialog'
@@ -36,6 +36,7 @@ const ENROL_SUCCESS_MESSAGE = 'Successfully enrolled in the course.'
     standalone: false
 })
 export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
+  private readonly searchJourneySvc = inject(SearchJourneyService)
   commentId?: string = ''
   skeletonLoader = true
   extContentReadData: any = {}
@@ -641,8 +642,14 @@ export class AppTocCiosHomeComponent implements OnInit, AfterViewInit {
       },
       {
         module: 'Home',
-      }
+      },
+      this.getSearchJourneyCdata(contentId)
     )
+  }
+
+  private getSearchJourneyCdata(contentId: string): WsEvents.ITelemetryCdata[] | undefined {
+    const cdata = this.searchJourneySvc.getCdataForContent(contentId)
+    return cdata ? [cdata] : undefined
   }
 
   raiseTelemtryEndEvent() {

@@ -9,7 +9,7 @@ import { MatMenuModule } from '@angular/material/menu'
 import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { provideNoopAnimations } from '@angular/platform-browser/animations'
 import { TranslateModule } from '@ngx-translate/core'
-import { PipeCountTransformModule, PipePublicURLModule, TelemetryService } from '@sunbird-cb/utils-v2'
+import { PipeCountTransformModule, PipePublicURLModule, SearchJourneyService, TelemetryService } from '@sunbird-cb/utils-v2'
 
 import { AppTocHomeV2Component } from './app-toc-home-v2.component'
 
@@ -200,6 +200,66 @@ describe('AppTocHomeV2Component', () => {
     })
   })
 
+  describe('search journey telemetry', () => {
+    const journeyCdata = { id: 'journey-1', type: 'global-search' }
+
+    function createTelemetryComponent(clickedContentId: string): any {
+      return createComponent({
+        content: { identifier: 'do_1', primaryCategory: 'Course' },
+        events: { raiseInteractTelemetry: jest.fn() },
+        searchJourneySvc: {
+          getCdataForContent: jest.fn((contentId: string) => (contentId === clickedContentId ? journeyCdata : null)),
+        },
+      })
+    }
+
+    it('attaches the journey cdata to the enrol event for the content clicked from search', () => {
+      const component = createTelemetryComponent('do_1')
+
+      component.raiseEnrollmentTelemetry('enroll')
+
+      expect(component.events.raiseInteractTelemetry).toHaveBeenCalledWith(
+        { type: 'click', subType: 'enroll', id: 'do_1' },
+        { id: 'do_1', type: 'Course' },
+        expect.objectContaining({ pageIdExt: 'btn-enroll' }),
+        [journeyCdata]
+      )
+    })
+
+    it('sends the enrol event without cdata for content not clicked from search', () => {
+      const component = createTelemetryComponent('do_other')
+
+      component.raiseEnrollmentTelemetry('enroll')
+
+      expect(component.events.raiseInteractTelemetry.mock.calls[0][3]).toBeUndefined()
+    })
+
+    it('attaches the journey cdata to the AI-recommended enrol event', () => {
+      const component = createTelemetryComponent('do_1')
+      component.recommendedCoursesId = 'rec-1'
+
+      component.raiseEnrollTelementryForSakshamAIGenerated()
+
+      expect(component.events.raiseInteractTelemetry.mock.calls[0][3]).toEqual([journeyCdata])
+    })
+
+    it('raises the enrol event when a program is enrolled from the banner', () => {
+      const component = createTelemetryComponent('do_1')
+      component.autoEnrollCuratedProgram = jest.fn()
+      const batchData = { batchId: 'batch-1' }
+
+      component.programEnrollCall(batchData)
+
+      expect(component.events.raiseInteractTelemetry).toHaveBeenCalledWith(
+        expect.objectContaining({ subType: 'enroll' }),
+        expect.anything(),
+        expect.anything(),
+        [journeyCdata]
+      )
+      expect(component.autoEnrollCuratedProgram).toHaveBeenCalledWith('Moderated Program', batchData)
+    })
+  })
+
   describe('TestBed', () => {
     let component: AppTocHomeV2Component
     let fixture: ComponentFixture<AppTocHomeV2Component>
@@ -233,6 +293,7 @@ describe('AppTocHomeV2Component', () => {
           },
           { provide: 'environment', useValue: {} },
           { provide: TelemetryService, useValue: { telemetryConfig: { channel: '' } } },
+          { provide: SearchJourneyService, useValue: { getCdataForContent: jest.fn(() => null) } },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       })
